@@ -18,7 +18,7 @@ toStr <- function(x, max){
 }
 
 #' @export
-#'
+
 which.closest <- function(target, candidates){
   ref <- STRUCTURE[[target]][[1]]
   which.max(
@@ -28,9 +28,10 @@ which.closest <- function(target, candidates){
 }
 
 #' @export
-same <- function(a,b){
-  if (class(a) != "numeric") return(identical(a,b))
-  else return(max(abs(a-b)) < 1e-10)
+compat <- function(val,tel){
+  if (class(tel) == "min") return(all(tel <= val))
+  if (class(tel) == "numeric") return(max(abs(val-tel)) < 1e-10)
+  else return(identical(val,tel))
 }
 
 #===========+
@@ -472,6 +473,8 @@ assemble.structure <- function(){
   }
   genPoks <- function(items, minTrees, maxTrees, minDepth, maxDepth,
                       density, minItemPerTree, maxItemPerTree) {
+    print("here")
+    print(c(minDepth, maxDepth, maxItemPerTree))
     treeSizes <- NULL
     treeDepths <- NULL
     #-------------CISAC------------------------------------------------------
@@ -1049,6 +1052,11 @@ assemble.structure <- function(){
   mean.length <- function(x){list(mean(x),length(x))}
   mean.length.var <- function(x){list(mean(x),length(x),var(x))}
   n.row.col.cvar.rmean <- function(x){list(nrow(x),ncol(x),var(colMeans(x)),rowMeans(x))}
+  con.min <- function(x){
+    r <- ceiling(log(x,2))
+    class(r) <- "min"
+    list(r)
+  }
 
   #===================================================================================
   # Definition of node.i has the following syntax:
@@ -1142,7 +1150,7 @@ assemble.structure <- function(){
   skill.space. <- list(c("concepts","skill.space.size"), list(c("concepts","skill.space.size")),
                        n.row.col, list(con.size.2.skspace))
 
-  skill.space.size. <- list(NULL, list(c("concepts")), NULL,
+  skill.space.size. <- list(c("concepts"), list(c("concepts")), con.min,
                             list(function(x){2^x[[1]]}))
   skill.dist. <- list(c("skill.space.size"),list(c("skill.space.size")),
                       length.l, list(function(x){rep(1/x[[1]],x[[1]])}))
@@ -1318,7 +1326,7 @@ down.stream <- function(pars){
       for (j in 1:length(child.names)){
         child.j.val <- pars[[child.names[j]]]
         if (!is.null(child.j.val) & (child.names[j] %in% DEFINITE)){
-          if (!same(child.j.val,child.val[[j]]))
+          if (!compat(child.j.val,child.val[[j]]))
             stop(paste0("Conflict at '", child.names[j],"'"))
         }
         else pars[[child.names[j]]] <- child.val[[j]]

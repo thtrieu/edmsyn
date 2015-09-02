@@ -1,0 +1,17 @@
+{
+    "contents" : "Package: edmsyn\nType: Package\nTitle: What the Package Does (Title Case)\nVersion: 0.1\nDate: 2015-08-30\nAuthor: Hoang-Trieu Trinh\nMaintainer: Hoang-Trieu Trinh <thtrieu@apcs.vn>\nDescription: More about what it does (maybe more than one line)\nLicense: What license is it under?\nLazyData: TRUE\nImports: MASS, diagram, HMM, CDM, stats\n",
+    "created" : 1441205880122.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2901544636",
+    "id" : "5356BC93",
+    "lastKnownWriteTime" : 1441205909,
+    "path" : "D:/github/edmsyn/DESCRIPTION",
+    "project_path" : "DESCRIPTION",
+    "properties" : {
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "type" : "dcf"
+}

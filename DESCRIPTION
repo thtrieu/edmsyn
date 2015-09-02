@@ -3,8 +3,8 @@ Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.1
 Date: 2015-08-30
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
+Author: Hoang-Trieu Trinh
+Maintainer: Hoang-Trieu Trinh <thtrieu@apcs.vn>
 Description: More about what it does (maybe more than one line)
 License: What license is it under?
 LazyData: TRUE
