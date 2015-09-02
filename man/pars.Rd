@@ -4,11 +4,7 @@
 \alias{pars}
 \title{Create or update a context}
 \usage{
-pars(old.pars = NULL, init.vals = list(student.var = 1/12, avg.success =
-  0.5, time = 50, S.st.var = 1/12, L.st.var = 1/12, bkt.slip.st.var = 1/12,
-  bkt.guess.st.var = 1/12, min.ntree = 1, min.depth = 1, min.it.per.tree = 1,
-  per.item = FALSE, bkt.mod = "dina", density = 0.5, alpha.c = 0.25, alpha.p =
-  0.25, p.min = 0.5, abi.mean = 0, abi.sd = 1), dis = NULL, dif = NULL,
+pars(old.pars = NULL, init.vals = init(), dis = NULL, dif = NULL,
   abi = NULL, abi.mean = NULL, abi.sd = NULL, st.exp = NULL,
   it.exp = NULL, items = NULL, concepts = NULL, students = NULL,
   state = NULL, po = NULL, or.t = NULL, or.f = NULL,

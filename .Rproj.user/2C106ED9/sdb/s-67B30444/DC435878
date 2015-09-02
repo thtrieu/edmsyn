@@ -1,0 +1,18 @@
+{
+    "contents" : "min.ntree. <- list(NULL, list(c(\"init.vals\")), \n                   NULL, list(function(x){x[[1]][[\"min.ntree\"]]}))\nmin.depth. <- list(NULL, list(c(\"init.vals\")), NULL, \n                   list(function(x){x[[1]][[\"min.depth\"]]}))\nmin.it.per.tree. <- list(NULL, list(c(\"init.vals\")), NULL, \n                         list(function(x){x[[1]][[\"min.it.per.tree\"]]}))\nn.tree. <- list(NULL)\ntree.sizes <-\n  ",
+    "created" : 1441207801385.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "2469185021",
+    "id" : "DC435878",
+    "lastKnownWriteTime" : 7011605692497750387,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled2"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

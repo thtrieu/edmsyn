@@ -30,6 +30,7 @@ which.closest <- function(target, candidates){
 #' @export
 compat <- function(val,tel){
   if (class(tel) == "min") return(all(tel <= val))
+  if (class(tel) == "max") return(all(tel >= val))
   if (class(tel) == "numeric") return(max(abs(val-tel)) < 1e-10)
   else return(identical(val,tel))
 }
@@ -1052,7 +1053,7 @@ assemble.structure <- function(){
   mean.length <- function(x){list(mean(x),length(x))}
   mean.length.var <- function(x){list(mean(x),length(x),var(x))}
   n.row.col.cvar.rmean <- function(x){list(nrow(x),ncol(x),var(colMeans(x)),rowMeans(x))}
-  con.min <- function(x){
+  skspsize.min.con <- function(x){
     r <- ceiling(log(x,2))
     class(r) <- "min"
     list(r)
@@ -1150,7 +1151,7 @@ assemble.structure <- function(){
   skill.space. <- list(c("concepts","skill.space.size"), list(c("concepts","skill.space.size")),
                        n.row.col, list(con.size.2.skspace))
 
-  skill.space.size. <- list(c("concepts"), list(c("concepts")), con.min,
+  skill.space.size. <- list(c("concepts"), list(c("concepts")), skspsize.min.con,
                             list(function(x){2^x[[1]]}))
   skill.dist. <- list(c("skill.space.size"),list(c("skill.space.size")),
                       length.l, list(function(x){rep(1/x[[1]],x[[1]])}))
@@ -1236,7 +1237,7 @@ assemble.structure <- function(){
        max.depth = max.depth., min.it.per.tree = min.it.per.tree.,
        max.it.per.tree = max.it.per.tree., density = density.,
        init.vals = init.vals.)
-  sapply(1:length(r), function(x){names(r[[x]]) <<- c("learn","gen","f.learn","f.gen")})
+  sapply(1:length(r), function(x){names(r[[x]]) <<- c("tell","gen","f.tell","f.gen")})
   return(r)
 }
 
@@ -1272,6 +1273,9 @@ INTEGER <- c("items","students","concepts","time","skill.space.size")
 
 #' @export
 DEFINITE <- c(INTEGER, "avg.success")
+
+#' @export
+BOUND.CLASSES <- c("min", "max")
 
 #=====================+
 # OPERATING FUNCTIONS |
@@ -1329,7 +1333,9 @@ down.stream <- function(pars){
           if (!compat(child.j.val,child.val[[j]]))
             stop(paste0("Conflict at '", child.names[j],"'"))
         }
-        else pars[[child.names[j]]] <- child.val[[j]]
+        else
+          if (all(class(child.val[[j]]) != BOUND.CLASSES))
+            pars[[child.names[j]]] <- child.val[[j]]
       }
       new <- c(new, child.names)
     }
@@ -1418,6 +1424,10 @@ up.stream <- function(target, pars, progress = FALSE){
   }
 }
 
+#-------------------------------+
+# User Interface's sub-routines |
+#-------------------------------+
+
 #' @export
 keep <- function(model){
   KEEP[[model]]
@@ -1450,6 +1460,18 @@ viz <- function(po){
   }
 }
 
+#' @export
+
+init <- function(student.var = 1/12, avg.success = 0.5, time = 50,
+                 S.st.var = 1/12, L.st.var = 1/12,
+                 bkt.slip.st.var = 1/12, bkt.guess.st.var = 1/12,
+                 min.ntree = 1, min.depth = 0, min.it.per.tree = 1,
+                 per.item = FALSE, bkt.mod = "dina", density = 0.5,
+                 alpha.c = 0.25, alpha.p = 0.25, p.min = 0.5,
+                 abi.mean = 0, abi.sd = 1){
+  as.list(environment())
+}
+
 #==========================+
 # USER INTERFACE FUNCTIONS |
 #==========================+
@@ -1469,13 +1491,7 @@ viz <- function(po){
 #' @export
 
 pars <- function(old.pars = NULL,
-                 init.vals = list(student.var = 1/12, avg.success = 0.5, time = 50,
-                                  S.st.var = 1/12, L.st.var = 1/12,
-                                  bkt.slip.st.var = 1/12, bkt.guess.st.var = 1/12,
-                                  min.ntree = 1, min.depth = 1, min.it.per.tree = 1,
-                                  per.item = FALSE, bkt.mod = "dina", density = 0.5,
-                                  alpha.c = 0.25, alpha.p = 0.25, p.min = 0.5,
-                                  abi.mean = 0, abi.sd = 1),
+                 init.vals = init(),
                  dis = NULL, dif = NULL, abi = NULL,
                  abi.mean = NULL, abi.sd = NULL,
                  st.exp = NULL, it.exp = NULL,
@@ -1503,16 +1519,16 @@ pars <- function(old.pars = NULL,
     if (!identical(class(old.pars),c("context","list")))
       stop("'old.pars' is not an object of the 'context' class")
     new.pars <- old.pars
-    update <- c(as.list(environment()))
+    update <- as.list(environment())
     update <- update[3:length(update)]
     update <- update[which(sapply(update,is.null) == 0)]
     new.pars[names(update)] <- update
   }
   else {
-    new.pars <- c(as.list(environment()))
+    new.pars <- as.list(environment())
     sapply(INTEGER, function(x){
       if (!is.null(new.pars[[x]]))
-        new.pars[[x]] <- as.integer(new.pars[[x]])
+        new.pars[[x]] <<- as.integer(new.pars[[x]])
     })
     new.pars <- new.pars[3:length(new.pars)]
     class(new.pars) <- c("context",class(new.pars))
