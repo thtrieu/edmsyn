@@ -177,7 +177,7 @@ get.par("skill.dist", dina.context)$value
 
 The set of directly learnable parameters from DINA model is:
 ```{r dina_learnable}
-STRUCTURE$dina$learn
+STRUCTURE$dina$tell
 ```
 
 Different ways to generate `M` are:
@@ -191,7 +191,7 @@ This criterion can be interpreted as: *pick the method whose parameters are most
 
 Looking back at `get.par("M", p)`, the set of parameters that is directly learnable from `M` is 
 ```{r M_learnable}
-STRUCTURE$M$learn
+STRUCTURE$M$tell
 ```
 
 It is now clear why `M` chooses `concept.exp` and `students` over `S` when the target is `M` itself.
@@ -202,7 +202,7 @@ Another example when the package automatically choose the method by *overlap* cr
 ```{r criterion_eg}
 dummy <- get.par("S", pars(concepts = 5, students = 20), progress = TRUE)
 # Learnable parameters from S
-STRUCTURE$S$learn
+STRUCTURE$S$tell
 # Generating methods available for S 
 STRUCTURE$S$gen
 ```

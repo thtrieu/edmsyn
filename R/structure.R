@@ -18,7 +18,6 @@ toStr <- function(x, max){
 }
 
 #' @export
-
 which.closest <- function(target, candidates){
   ref <- STRUCTURE[[target]][[1]]
   which.max(
@@ -474,8 +473,6 @@ assemble.structure <- function(){
   }
   genPoks <- function(items, minTrees, maxTrees, minDepth, maxDepth,
                       density, minItemPerTree, maxItemPerTree) {
-    print("here")
-    print(c(minDepth, maxDepth, maxItemPerTree))
     treeSizes <- NULL
     treeDepths <- NULL
     #-------------CISAC------------------------------------------------------
@@ -947,7 +944,6 @@ assemble.structure <- function(){
     else return(bktPerTestLearn(R))
   }
 
-
   #======================+
   # Channeling functions |
   #======================+
@@ -1030,6 +1026,9 @@ assemble.structure <- function(){
       })
     })
   }
+  min.max.ntree.depth.ipt.2.ntree <- function(x){}
+  ntree.depth.ipt.2.tree.sizes <- function(x){}
+  tree.sizes.depth.2.tree.depths <- function(x){}
 
   #------------+
   # Downstream |
@@ -1057,6 +1056,24 @@ assemble.structure <- function(){
     r <- ceiling(log(x,2))
     class(r) <- "min"
     list(r)
+  }
+  max.bound.min <- function(x){
+    r <- x
+    class(r) <- "max"
+    list(r)
+  }
+  vec.bound.min.max <- function(x){
+    minx <- min(x)
+    class(minx) <- c("max")
+    maxx <- max(x)
+    class(maxx) <- c("min")
+    list(minx, maxx)
+  }
+  vec.bound.min.max.length <- function(x){
+    append(vec.bound.min.max(x), list(length(x)))
+  }
+  vec.bound.min.max.length.sum <- function(x){
+    append(vec.bound.min.max.length(x), list(sum(x)))
   }
 
   #===================================================================================
@@ -1139,7 +1156,7 @@ assemble.structure <- function(){
                                    S.L.slip.guess.time.order.peritem.Q.mod.2.bkt))
 
   #--------------------+
-  # Intermidiate nodes |
+  # Intermediate nodes |
   #--------------------+
 
   bkt.slip.it.exp. <- list(c("items"), list(c("items")),
@@ -1161,19 +1178,29 @@ assemble.structure <- function(){
                   mean.length.var, list(mean.n.var.2.vec))
   it.exp. <- list(c("avg.success","items"), list(c("avg.success","items")),
                   mean.length, list(mean.n.2.vec))
-  max.ntree. <- list(NULL, list(c("items")),
-                     NULL, list(function(x){x[[1]]}))
-  max.depth. <- list(NULL, list(c("items")),
-                     NULL, list(function(x) {x[[1]]-1}))
-  max.it.per.tree. <- list(NULL, list(c("items")),
-                           NULL, list(function(x) {x[[1]]}))
+  max.ntree. <- list(c("min.ntree"), list(c("items")),
+                     max.bound.min, list(function(x){x[[1]]}))
+  max.depth. <- list(c("min.depth"), list(c("items")),
+                     max.bound.min, list(function(x) {x[[1]]-1}))
+  max.it.per.tree. <- list(c("min.it.per.tree"), list(c("items")),
+                           max.bound.min, list(function(x) {x[[1]]}))
+  ntree <- list(c("min.ntree, max.ntree"),list(c("min.ntree", "max.ntree",
+                                                 "min.depth", "max.depth",
+                                                 "min.it.per.tree","max.it.per.tree")),
+                vec.bound.min.max,list(min.max.ntree.depth.ipt.2.ntree))
+  tree.sizes <- list(c("min.it.per.tree","max.it.per.tree","ntree","items"),
+                     list(c("ntree", "min.depth", "max.depth",
+                            "min.it.per.tree", "max.it.per.tree")),
+                     vec.bound.min.max.length.sum, list(ntree.depth.ipt.2.tree.sizes))
+  tree.depths <- list(c("min.depth","max.depth","ntree"), list(c("tree.sizes","min.depth","max.depth")),
+                      vec.bound.min.max.length, list(tree.sizes.depth.2.tree.depths))
   dis. <- list(c("items"), list(c("items")),
                length.l, list(rn))
   dif. <- list(c("items"), list(c("items")),
                length.l, list(rn))
   abi. <- list(c("students","abi.mean","abi.sd"),
                list(c("students"),c("students","abi.mean","abi.sd")),
-               function(x){list(students = length(x), abi.mean = mean(x), abi.sd = sd(x))},
+               function(x){list(length(x), mean(x), sd(x))},
                list(rn,function(x){rnorm(x[[1]],mean=x[[2]],sd=x[[3]])}))
   state. <- list(c("items"), list(c("po")),
                  length.l, list(po.2.state))
@@ -1184,7 +1211,8 @@ assemble.structure <- function(){
   po. <- list(c("items","items"), list(c("items","min.ntree","max.ntree",
                                          "min.depth","max.depth","density",
                                          "min.it.per.tree","max.it.per.tree")),
-              function(x){list(nrow(x$ks),ncol(x$ks))}, list(items.tree.depth.dens.per.2.po))
+              function(x){list(nrow(x$ks),ncol(x$ks))},
+              list(items.tree.depth.dens.per.2.po))
   slip. <- list(c("items"), list(c("items")),
                 length, list(rn))
   guess. <- list(c("items"), list(c("items")),
@@ -1309,7 +1337,6 @@ BOUND.CLASSES <- c("min", "max")
 #' of each node inside STRUCTURE to learn the corresponding values of
 #' nodes indicated in the 1st element
 #' @export
-
 down.stream <- function(pars){
   curr <- names(pars)[which(sapply(pars,is.null) == 0)]
 
@@ -1329,7 +1356,9 @@ down.stream <- function(pars){
 
       for (j in 1:length(child.names)){
         child.j.val <- pars[[child.names[j]]]
-        if (!is.null(child.j.val) & (child.names[j] %in% DEFINITE)){
+        if (!is.null(child.j.val) &
+            ((child.names[j] %in% DEFINITE) |
+             (class(child.val[[j]]) %in% BOUND.CLASSES))){
           if (!compat(child.j.val,child.val[[j]]))
             stop(paste0("Conflict at '", child.names[j],"'"))
         }
@@ -1363,25 +1392,25 @@ down.stream <- function(pars){
 #' requires inputs that is more likely to be learned directly from the target.
 #' @seealso \code{which.closest}
 #' @export
-
-
 up.stream <- function(target, pars, progress = FALSE){
 
   miss <- NULL
   new.pars <- pars
   trace <- list(NULL)
+  track <- list(NULL)
+  fill <- FALSE
 
-  fill <- function(node.name){#recursive filling
+  check.track <- function(node.name){
 
     if (!is.null(new.pars[[node.name]])) return(TRUE)
-    gen.methods <- STRUCTURE[[node.name]][[2]]
+    gen.methods <- STRUCTURE[[node.name]]$gen
     if (is.null(unlist(gen.methods))) {
       if (is.null(miss)) miss <<- node.name
       return(FALSE)
     }
 
     or. <- sapply(gen.methods, function(x){
-      prod(sapply(x,fill)) # products are equivalent to AND-gate.
+      prod(sapply(x,check.track)) # products are equivalent to AND-gate.
     })
 
     avail <- which(or. == 1)
@@ -1389,21 +1418,39 @@ up.stream <- function(target, pars, progress = FALSE){
       if (is.null(miss)) miss <<- node.name
       return(FALSE)
     }
-    if (length(avail) == 1) suff <- avail
-    else suff <- avail[which.closest(target, gen.methods[avail])]
+    if (length(avail) == 1) pick <- avail
+    else pick <- avail[which.closest(target, gen.methods[avail])]
 
-    struct <- STRUCTURE[[node.name]]
-    if (progress == TRUE)
-      trace[[node.name]] <<- struct[[2]][[suff]]
-    new.pars[[node.name]] <<- struct[[4]][[suff]](
-      new.pars[struct[[2]][[suff]]]
-    )
-
+    track[[node.name]] <<- pick
+    trace[[node.name]] <<- gen.methods[[pick]]
     return(TRUE)
   }
-  success <- fill(target)
+  follow <- function(node.name){
+    node <- STRUCTURE[[node.name]]
+    pick <- track[[node.name]]
+    if (!is.null(pick)){ #which means, node already has a value
+      gen.method <- node$gen[[pick]]
+      if (identical(gen.method,"init.vals"))
+        new.pars[[node.name]] <<- node$f.gen[[1]](list(new.pars$init.vals))
+      else {
+        dummy <- sapply(gen.method, follow)
+        if (fill == TRUE)
+          new.pars[[node.name]] <<- node$f.gen[[pick]](new.pars[gen.method])
+      }
+    }
+    return(NULL)
+  }
 
-  if (success == TRUE) {
+  success <- check.track(target)
+  if (success == FALSE){
+    message(paste0("Cannot reach '", target,"' since '", miss, "' is missing"))
+    return(pars)
+  }
+  else{
+    dummy <- follow(target)
+    new.pars <- down.stream(new.pars)
+    fill <- TRUE
+    dummy <- follow(target)
     if (progress == TRUE & length(trace) > 1){
       print.trace <- function(node){
         if (is.null(trace[[names(node)]])) return(NULL)
@@ -1417,10 +1464,6 @@ up.stream <- function(target, pars, progress = FALSE){
       print.trace(trace[target])
     }
     return(new.pars)
-  }
-  else {
-    message(paste0("Cannot reach '", target,"' since '", miss, "' is missing"))
-    return(pars)
   }
 }
 
@@ -1437,8 +1480,6 @@ keep <- function(model){
 #'
 #' @importFrom diagram plotmat
 #' @export
-#'
-#'
 viz <- function(po){
   n <- length(po$comp)
   n.row <- floor(sqrt(n))
@@ -1461,7 +1502,6 @@ viz <- function(po){
 }
 
 #' @export
-
 init <- function(student.var = 1/12, avg.success = 0.5, time = 50,
                  S.st.var = 1/12, L.st.var = 1/12,
                  bkt.slip.st.var = 1/12, bkt.guess.st.var = 1/12,
@@ -1554,7 +1594,6 @@ pars <- function(old.pars = NULL,
 #' This function uses \code{up.stream} function to obtain target's value and context
 #' @seealso \code{up.stream}
 #' @export
-
 get.par <- function(target, pars, progress = FALSE){
   g <- up.stream(target, pars, progress)
   if (!is.null(g)) {
@@ -1578,7 +1617,6 @@ get.par <- function(target, pars, progress = FALSE){
 #' @details more detail huh?
 #' @seealso what?
 #' @export
-
 gen <- function(model, pars, n = 1, progress = FALSE){
 
   if (!(model %in% ALL.MODELS))
@@ -1588,6 +1626,7 @@ gen <- function(model, pars, n = 1, progress = FALSE){
 
   r <-
     sapply(1:n,function(x){
+      if (x > 1) progress <- FALSE
       trial <- up.stream(model, pars, progress)
       if (is.null(trial))
         stop(paste0("Insufficient information to generate '",model,"'"))
@@ -1610,7 +1649,6 @@ gen <- function(model, pars, n = 1, progress = FALSE){
 #' @details more detail huh?
 #' @seealso what?
 #' @export
-#'
 gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
 
   result <- NULL #return this
@@ -1670,7 +1708,6 @@ gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
 #' @details more detail huh?
 #' @seealso what?
 #' @export
-#'
 learn <- function(model, data){
 
   if (!(model %in% ALL.MODELS))
@@ -1695,7 +1732,6 @@ learn <- function(model, data){
 #' @details more detail huh?
 #' @seealso what?
 #' @export
-#'
 syn <- function(model, data, keep.pars = keep(model),
                 students = ncol(data$R), n = 1, progress = FALSE){
   learned.pars <- learn(model,data)
