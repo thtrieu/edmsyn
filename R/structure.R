@@ -88,12 +88,13 @@ assemble.structure <- function(){
   }
   maxCombn <- function(n){cbind(rep(0,n),t(genQMax(n,n)))}
   randGen <- function(P) {
-    matrix(sapply(P,
+    r <- matrix(sapply(P,
                   function(i) {
-                    sample(0:1, 1, prob = c(1 - i,i))
+                    sample(0:1, 1, prob = c(max(1 - i,0),min(i,1)))
                   }),
            nrow(P),
            ncol(P))
+    return(r)
   }
   depth <- function(root, poks) {
     level <- 1
@@ -1408,7 +1409,6 @@ up.stream <- function(target, pars, progress = FALSE){
     else pick <- avail[which.closest(target, gen.methods[avail])]
 
     track[[node.name]] <<- pick
-    trace[[node.name]] <<- gen.methods[[pick]]
     return(TRUE)
   }
   follow <- function(node.name){
@@ -1423,6 +1423,7 @@ up.stream <- function(target, pars, progress = FALSE){
         if (fill == TRUE)
           new.pars[[node.name]] <<- node$f.gen[[pick]](new.pars[gen.method])
       }
+      if (fill == TRUE) trace[[node.name]] <<- gen.method
     }
     return(NULL)
   }
