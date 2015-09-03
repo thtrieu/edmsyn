@@ -473,33 +473,28 @@ assemble.structure <- function(){
   }
   genPoks <- function(items, minTrees, maxTrees, minDepth, maxDepth,
                       density, minItemPerTree, maxItemPerTree) {
+    #-------------CISAC------------------------------------------------------
     treeSizes <- NULL
     treeDepths <- NULL
-    #-------------CISAC------------------------------------------------------
-    if (!is.null(treeSizes) &
-        !is.null(treeDepths) &
-        length(treeSizes) != length(treeDepths))
-      stop("Input Conflict")
+
     if (minDepth + 1 > maxItemPerTree)
-      stop("Requirements cannot be satisfied")
+      stop("Cannot reach 'po': 'min.depth' violates bound suggested by 'max.it.per.tree'")
     if (items < minTrees * minItemPerTree |
         items > maxTrees * maxItemPerTree)
-      stop("Requirements cannot be satisfied")
+      stop("Cannot reach 'po': items violates bound suggested by 'po's parameters")
 
     #-------------GENERATING-------------------------------------------------
 
-    trees <- length(treeSizes)
     if (is.null(treeSizes)) {
       # pick a number of trees
       lowerTrees <- max(minTrees,ceiling(items / maxItemPerTree))
-      upperTrees <-
-        min(maxTrees,floor(items / max(minDepth + 1,minItemPerTree)))
+      upperTrees <- min(maxTrees,floor(items / max(minDepth + 1,minItemPerTree)))
       if (lowerTrees > upperTrees)
-        stop("Requirements cannot be satisfied")
+        stop("Cannot reach 'po': 'items' violates bound suggested by 'po's parameters")
       if (!is.null(treeDepths)) {
         if (length(treeDepths) < lowerTrees |
             length(treeDepths) > upperTrees)
-          stop("Requirements cannot be satisfied")
+          stop("Cannot reach 'po': 'items' violates bound suggested by 'po's parameters")
         else
           trees <- length(treeDepths)
       }
@@ -519,20 +514,20 @@ assemble.structure <- function(){
         upper <-
           itemsLeft - max(minDepth + 1,minItemPerTree) * (x - 1)
         if (lower > maxItemPerTree)
-          stop("Requirements cannot be satisfied")
+          stop("Cannot reach 'po': 'items' violates bound suggested by 'po's parameters")
         if (upper < minItemPerTree)
-          stop("Requirements cannot be satisfied")
+          stop("Cannot reach 'po': 'items' violates bound suggested by 'po's parameters")
 
         upper <- min(upper,maxItemPerTree)
         if (upper < minDepth)
-          stop("Requirements cannot be satisfied")
+          stop("Cannot reach 'po': 'items' violates bound suggested by 'po's parameters")
         lower <- max(lower,minItemPerTree,minDepth + 1)
         if (!is.null(treeDepths))
           lower <- max(lower, treeDepths[trees - x + 1] + 1)
 
 
         if (lower > upper)
-          stop("Requirements cannot be satisfied")
+          stop("Cannot reach 'po': 'items' violates bound suggested by 'po's parameters")
         if (lower == upper)
           sampleResult <- lower
         else
@@ -550,7 +545,7 @@ assemble.structure <- function(){
 
     if (!is.null(treeDepths)) {
       if (sum((treeDepths + 1) > treeSizes) > 0)
-        stop("Requirements cannot be satisfied")
+        stop("Cannot reach 'po': 'items' violates bound suggested by 'po's parameters")
     }
     else{
       treeDepths <- numeric(trees)
@@ -562,9 +557,11 @@ assemble.structure <- function(){
           if (treeSizes[i] == 1)
             treeDepths[i] <- 0
           else
-            treeDepths[i] <- sample(1:upperDepth,1)
+            treeDepths[i] <- sample(minDepth:upperDepth,1)
       }
     }
+
+    print(treeDepths)
 
     #permute to remove bias from ordered samling
     perm <- sample(items)
@@ -624,23 +621,24 @@ assemble.structure <- function(){
         poks[perm[min(begin,end)],perm[max(begin,end)]] <- 1
       }
 
-      if (size.i == 1) next
+      if (size.i != 1) {
 
-      groundLvl <- c(0,accumLvl)
-      pNow <- (size.i-1)/sum((c(1,levelSizes)*c(levelSizes,1))[2:levels])
-      if (pNow < 1){
-        p <- (density - pNow)/(1-pNow)
-        if (p < 0) densFail <- TRUE
-        else{
-          # Add random arc
-          for (j in 1:(levels-1))
-            for (k in 1:levelSizes[j])
-              for (m in 1:levelSizes[j+1]){
-                begin <- perm[groundLvl[j]+k]
-                end <- perm[groundLvl[j+1]+m]
-                if (poks[begin,end] == 0)
-                  poks[begin,end] <- sample(0:1,1,prob = c(1-p,p))
-              }
+        groundLvl <- c(0,accumLvl)
+        pNow <- (size.i-1)/sum((c(1,levelSizes)*c(levelSizes,1))[2:levels])
+        if (pNow < 1){
+          p <- (density - pNow)/(1-pNow)
+          if (p < 0) densFail <- TRUE
+          else{
+            # Add random arc
+            for (j in 1:(levels-1))
+              for (k in 1:levelSizes[j])
+                for (m in 1:levelSizes[j+1]){
+                  begin <- perm[groundLvl[j]+k]
+                  end <- perm[groundLvl[j+1]+m]
+                  if (poks[begin,end] == 0)
+                    poks[begin,end] <- sample(0:1,1,prob = c(1-p,p))
+                }
+          }
         }
       }
       # ###############
@@ -975,7 +973,7 @@ assemble.structure <- function(){
   items.tree.depth.dens.per.2.po <- function(x){
     genPoks(x[[1]],x[[2]],x[[3]],x[[4]],x[[5]],x[[6]],x[[7]],x[[8]])}
   items.concepts.2.Q <- function(x){genQRand(x[[1]],x[[2]])}
-  rn <- function(x) {runif(x[[1]],0,1)}
+  rn <- function(x) {runif(x[b[1]],0,1)}
   rmn <- function(x) {
     matrix(runif(x[[1]]*x[[2]],0,1),x[[1]],x[[2]])
   }
@@ -1026,9 +1024,6 @@ assemble.structure <- function(){
       })
     })
   }
-  min.max.ntree.depth.ipt.2.ntree <- function(x){}
-  ntree.depth.ipt.2.tree.sizes <- function(x){}
-  tree.sizes.depth.2.tree.depths <- function(x){}
 
   #------------+
   # Downstream |
@@ -1061,19 +1056,6 @@ assemble.structure <- function(){
     r <- x
     class(r) <- "max"
     list(r)
-  }
-  vec.bound.min.max <- function(x){
-    minx <- min(x)
-    class(minx) <- c("max")
-    maxx <- max(x)
-    class(maxx) <- c("min")
-    list(minx, maxx)
-  }
-  vec.bound.min.max.length <- function(x){
-    append(vec.bound.min.max(x), list(length(x)))
-  }
-  vec.bound.min.max.length.sum <- function(x){
-    append(vec.bound.min.max.length(x), list(sum(x)))
   }
 
   #===================================================================================
@@ -1184,16 +1166,7 @@ assemble.structure <- function(){
                      max.bound.min, list(function(x) {x[[1]]-1}))
   max.it.per.tree. <- list(c("min.it.per.tree"), list(c("items")),
                            max.bound.min, list(function(x) {x[[1]]}))
-  ntree <- list(c("min.ntree, max.ntree"),list(c("min.ntree", "max.ntree",
-                                                 "min.depth", "max.depth",
-                                                 "min.it.per.tree","max.it.per.tree")),
-                vec.bound.min.max,list(min.max.ntree.depth.ipt.2.ntree))
-  tree.sizes <- list(c("min.it.per.tree","max.it.per.tree","ntree","items"),
-                     list(c("ntree", "min.depth", "max.depth",
-                            "min.it.per.tree", "max.it.per.tree")),
-                     vec.bound.min.max.length.sum, list(ntree.depth.ipt.2.tree.sizes))
-  tree.depths <- list(c("min.depth","max.depth","ntree"), list(c("tree.sizes","min.depth","max.depth")),
-                      vec.bound.min.max.length, list(tree.sizes.depth.2.tree.depths))
+
   dis. <- list(c("items"), list(c("items")),
                length.l, list(rn))
   dif. <- list(c("items"), list(c("items")),
@@ -1297,10 +1270,13 @@ KEEP <- list(exp = c("avg.success","it.exp","student.var"),
                      "time","order","per.item","Q"))
 
 #' @export
-INTEGER <- c("items","students","concepts","time","skill.space.size")
+INTEGER <- c("items","students","concepts","time","skill.space.size",
+             "tree.sizes","tree.depths","ntree","min.ntree","max.ntree",
+             "min.depth","max.depth","min.it.per.tree","max.it.per.tree")
 
 #' @export
-DEFINITE <- c(INTEGER, "avg.success")
+DEFINITE <- c("items","students","concepts","time",
+              "skill.space.size", "ntree", "avg.success")
 
 #' @export
 BOUND.CLASSES <- c("min", "max")
@@ -1341,7 +1317,9 @@ down.stream <- function(pars){
   curr <- names(pars)[which(sapply(pars,is.null) == 0)]
 
   # breadth-first propagating
-  while(!is.null(curr)){
+  while(length(curr) > 0){
+    #print("**")
+    #print(curr)
     new <- NULL
     for (i in 1:length(curr)){
       var.name <- curr[i]
@@ -1359,14 +1337,21 @@ down.stream <- function(pars){
         if (!is.null(child.j.val) &
             ((child.names[j] %in% DEFINITE) |
              (class(child.val[[j]]) %in% BOUND.CLASSES))){
-          if (!compat(child.j.val,child.val[[j]]))
-            stop(paste0("Conflict at '", child.names[j],"'"))
+          if (!suppressWarnings(compat(child.j.val,child.val[[j]]))){
+            if (class(child.val[[j]]) %in% BOUND.CLASSES)
+              stop(paste0("'", child.names[j],"' violates bound suggested by '",var.name,"'"))
+            else
+              stop(paste0("'", child.names[j],"' receives different values at once"))
+          }
         }
         else
           if (all(class(child.val[[j]]) != BOUND.CLASSES))
             pars[[child.names[j]]] <- child.val[[j]]
       }
-      new <- c(new, child.names)
+      child.not.bound <-
+        which(sapply(child.val,
+                     function(x){class(x) %in% BOUND.CLASSES}) == 0)
+      new <- c(new, child.names[child.not.bound])
     }
     curr <- unique(new)
   }
