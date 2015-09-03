@@ -78,7 +78,7 @@ assemble.structure <- function(){
       if (!is.null(concepts) & concepts != ncol(sampleFrom))
         stop("Input Conflict")
     }
-    
+
     #------------GENERATING---------------------------------
     Q <- as.matrix(sampleFrom[sample(x = 1:nrow(sampleFrom),
                                      size = items,
@@ -111,7 +111,7 @@ assemble.structure <- function(){
   binaryHMMLearn <- function(R){
     time <- length(R)
     observe <- as.character(R)
-    
+
     learn <- NULL
     while(class(learn) != "list"){
       # Initizalizing
@@ -135,11 +135,11 @@ assemble.structure <- function(){
   nmfLearn <- function(R, concepts, func){
     Q <- genQRand(nrow(R), concepts)
     S <- matrix(0,concepts, ncol(R))
-    
+
     space <- genQMax(concepts,concepts)
     space <- space[sample(1:nrow(space)),]
     space0 <- cbind( t(space), rep(0,concepts) )
-    
+
     learnS <- function(){
       ref <- R[,iS]
       predict <- func(Q = Q, S = space0)
@@ -147,7 +147,7 @@ assemble.structure <- function(){
       best <- which.min(distance)[1]
       space0[,best]
     }
-    
+
     learnQ <- function(){
       ref <- R[iQ,]
       predict <- func(Q = space, S = S)
@@ -155,13 +155,13 @@ assemble.structure <- function(){
       best <- which.min(distance)[1]
       t(space[best,])
     }
-    
-    
+
+
     hault <- 0
     threshold <- max(nrow(Q), ncol(S))
     permS <- sample(ncol(S))
     permQ <- sample(nrow(Q))
-    
+
     for (i in 1:1000){
       idS <- (i-1) %% ncol(S) + 1
       idQ <- (i-1) %% nrow(Q) + 1
@@ -169,19 +169,19 @@ assemble.structure <- function(){
       if (idQ == 1) permQ <- sample(nrow(Q))
       iS <- permS[idS]
       iQ <- permQ[idQ]
-      
+
       lS <- learnS()
       lQ <- learnQ()
-      
+
       progress = any(S[,iS]!=lS) | any(Q[iQ,]!=lQ)
       if (progress == TRUE) hault <- 0
       else hault <- hault + 1
       if (hault == threshold) break
-      
+
       S[,iS] <- learnS()
       Q[iQ,] <- learnQ()
     }
-    
+
     returns <- list(Q, S)
     names(returns) <- c("Q","S")
     return(returns)
@@ -189,7 +189,7 @@ assemble.structure <- function(){
   QSAvgGenR2 <- function(Q, S){
     (Q/rowSums(Q))%*%(S^2)
   }
-  
+
   expGen <- function(st.exp, it.exp) {
     dif <- it.exp
     abi <- st.exp
@@ -270,7 +270,7 @@ assemble.structure <- function(){
         }
       }
     }
-    
+
     list(R=t(R), alpha.c = alpha.c, alpha.p = alpha.p, p.min = p.min)
   }
   poksGen <- function(students, poks, successRate, alpha.c, alpha.p, p.min){
@@ -278,13 +278,13 @@ assemble.structure <- function(){
     items <- nrow(poks)
     poks_ <- poks
     R <- matrix(-1,items,students)
-    
+
     #Initiate result for root nodes and their children
     while (any(poks_ == 1)) {
       root <- intersect(which(rowSums(poks_) != 0),
                         which(colSums(poks_) == 0))[1]
       # Root: at least one child and no parents
-      
+
       difficulty = depth(root, poks)
       R[root,which(R[root,] < 0)] <-
         sample(
@@ -295,7 +295,7 @@ assemble.structure <- function(){
       R[which(poks_[root,] == 1),which(R[root,] == 1)] <- 1
       poks_[root,] <- 0
     }
-    
+
     # Initiate the rest
     while (any(R < 0)) {
       root = which(rowSums(R < 0) > 0)[1]
@@ -304,7 +304,7 @@ assemble.structure <- function(){
                prob = c(1 - successRate, successRate),
                replace = TRUE)
     }
-    
+
     # 2-generation Incremental fitting the successRate param
     tol <- 0.01
     twoSteps <- poks %*% poks
@@ -320,7 +320,7 @@ assemble.structure <- function(){
       follows <- which(copy[item,] > 0)
       R[follows,student] <- flip
     }
-    
+
     list(R=R, alpha.c = alpha.c, alpha.p = alpha.p, p.min = p.min)
   }
   skillBktGen <- function(initS, L, slip, guess, time, order, perItem){
@@ -329,22 +329,22 @@ assemble.structure <- function(){
     students <- ncol(L)
     Q <- diag(items)
     model = "dina"
-    
+
     learn <- function(state, trans) {
       newState <- randGen(P = trans)
       newState[state == 1] <- 1
       return(newState)
     }
-    
+
     R <- array(0,dim = c(items,students,time))
     RPerItem <- matrix(0,time,students)
     M <- array(0,dim = c(concepts,students,time))
     M[,,1] <- initS
-    
+
     Q.ori <- Q
     slip.ori <- slip
     guess.ori <- guess
-    
+
     for (i in 1:time) {
       if (perItem == TRUE) {
         Q <- t(as.matrix(Q.ori[order[i],]))
@@ -376,7 +376,7 @@ assemble.structure <- function(){
       if (i < time)
         M[,,(i + 1)] <- learn(state = M[,,i], trans = L)
     }
-    
+
     if (perItem == TRUE)
       R <- RPerItem
     if (perItem == FALSE)
@@ -387,22 +387,22 @@ assemble.structure <- function(){
     items <- nrow(Q)
     concepts <- ncol(Q)
     students <- ncol(initS)
-    
+
     learn <- function(state, trans) {
       newState <- randGen(P = trans)
       newState[state == 1] <- 1
       return(newState)
     }
-    
+
     R <- array(0,dim = c(items,students,time))
     RPerItem <- matrix(0,time,students)
     M <- array(0,dim = c(concepts,students,time))
     M[,,1] <- initS
-    
+
     Q.ori <- Q
     slip.ori <- slip
     guess.ori <- guess
-    
+
     for (i in 1:time) {
       if (perItem == TRUE) {
         Q <- t(as.matrix(Q.ori[order[i],]))
@@ -434,7 +434,7 @@ assemble.structure <- function(){
       if (i < time)
         M[,,(i + 1)] <- learn(state = M[,,i], trans = L)
     }
-    
+
     if (perItem == TRUE)
       R <- RPerItem
     if (perItem == FALSE)
@@ -473,28 +473,33 @@ assemble.structure <- function(){
   }
   genPoks <- function(items, minTrees, maxTrees, minDepth, maxDepth,
                       density, minItemPerTree, maxItemPerTree) {
-    #-------------CISAC------------------------------------------------------
     treeSizes <- NULL
     treeDepths <- NULL
-    
+    #-------------CISAC------------------------------------------------------
+    if (!is.null(treeSizes) &
+        !is.null(treeDepths) &
+        length(treeSizes) != length(treeDepths))
+      stop("Input Conflict")
     if (minDepth + 1 > maxItemPerTree)
-      stop("Cannot reach 'po': 'min.depth' violates bound suggested by 'max.it.per.tree'")
+      stop("Requirements cannot be satisfied")
     if (items < minTrees * minItemPerTree |
         items > maxTrees * maxItemPerTree)
-      stop("Cannot reach 'po': items violates bound suggested by 'po's parameters")
-    
+      stop("Requirements cannot be satisfied")
+
     #-------------GENERATING-------------------------------------------------
-    
+
+    trees <- length(treeSizes)
     if (is.null(treeSizes)) {
       # pick a number of trees
       lowerTrees <- max(minTrees,ceiling(items / maxItemPerTree))
-      upperTrees <- min(maxTrees,floor(items / max(minDepth + 1,minItemPerTree)))
+      upperTrees <-
+        min(maxTrees,floor(items / max(minDepth + 1,minItemPerTree)))
       if (lowerTrees > upperTrees)
-        stop("Cannot reach 'po': 'items' violates bound suggested by 'po's parameters")
+        stop("Requirements cannot be satisfied")
       if (!is.null(treeDepths)) {
         if (length(treeDepths) < lowerTrees |
             length(treeDepths) > upperTrees)
-          stop("Cannot reach 'po': 'items' violates bound suggested by 'po's parameters")
+          stop("Requirements cannot be satisfied")
         else
           trees <- length(treeDepths)
       }
@@ -504,48 +509,48 @@ assemble.structure <- function(){
         else
           trees <- sample(lowerTrees:upperTrees,1)
       }
-      
+
       # get the numbers of item on each tree
       sampleTree <- function(itemsLeft, x) {
         if (x == 1)
           return(itemsLeft)
-        
+
         lower <- itemsLeft - maxItemPerTree * (x - 1)
         upper <-
           itemsLeft - max(minDepth + 1,minItemPerTree) * (x - 1)
         if (lower > maxItemPerTree)
-          stop("Cannot reach 'po': 'items' violates bound suggested by 'po's parameters")
+          stop("Requirements cannot be satisfied")
         if (upper < minItemPerTree)
-          stop("Cannot reach 'po': 'items' violates bound suggested by 'po's parameters")
-        
+          stop("Requirements cannot be satisfied")
+
         upper <- min(upper,maxItemPerTree)
         if (upper < minDepth)
-          stop("Cannot reach 'po': 'items' violates bound suggested by 'po's parameters")
+          stop("Requirements cannot be satisfied")
         lower <- max(lower,minItemPerTree,minDepth + 1)
         if (!is.null(treeDepths))
           lower <- max(lower, treeDepths[trees - x + 1] + 1)
-        
-        
+
+
         if (lower > upper)
-          stop("Cannot reach 'po': 'items' violates bound suggested by 'po's parameters")
+          stop("Requirements cannot be satisfied")
         if (lower == upper)
           sampleResult <- lower
         else
           sampleResult <- sample(x = lower:upper,1)
-        
+
         c(sampleResult,c(sampleTree(itemsLeft - sampleResult,x - 1)))
       }
-      
+
       #permute to remove bias from ordered sampling
       perm <- sample(trees)
       treeSizes <- sampleTree(items,trees)[perm]
       if (!is.null(treeDepths))
         treeDepths <- treeDepths[perm]
     }
-    
+
     if (!is.null(treeDepths)) {
       if (sum((treeDepths + 1) > treeSizes) > 0)
-        stop("Cannot reach 'po': 'items' violates bound suggested by 'po's parameters")
+        stop("Requirements cannot be satisfied")
     }
     else{
       treeDepths <- numeric(trees)
@@ -557,18 +562,16 @@ assemble.structure <- function(){
           if (treeSizes[i] == 1)
             treeDepths[i] <- 0
           else
-            treeDepths[i] <- sample(minDepth:upperDepth,1)
+            treeDepths[i] <- sample(max(minDepth,1):upperDepth,1)
       }
     }
-    
-    print(treeDepths)
-    
+
     #permute to remove bias from ordered samling
     perm <- sample(items)
     poks <- matrix(0,items,items)
     subtrees <- list()
     densFail <- FALSE
-    
+
     sampleLevel <- function(itemsLeft,x) {
       if (x == 1)
         return(itemsLeft)
@@ -580,16 +583,16 @@ assemble.structure <- function(){
         sampleResult <- sample(lower:upper,1)
       c(sampleResult,c(sampleLevel(itemsLeft - sampleResult,x - 1)))
     }
-    
+
     for (i in 1:trees) {
       size.i <- treeSizes[i]
       levels <- treeDepths[i] + 1
       levelSizes <-
         sampleLevel(size.i,levels)[sample(levels)]
-      
+
       # Skeleton
       accumLvl <- cumsum(levelSizes)
-      
+
       up_down <- function(node) {
         atLevel <- sum(accumLvl < node) + 1
         result <- sapply(1:size.i, function(x) {
@@ -600,10 +603,10 @@ assemble.structure <- function(){
             return(FALSE)
         })
       }
-      
+
       mark <- rep(TRUE, size.i)
       mark[sample(size.i,1)] <- FALSE
-      
+
       while (sum(mark) != 0) {
         pickFrom <- c(1:size.i)[!mark]
         if (length(pickFrom) == 1)
@@ -620,9 +623,8 @@ assemble.structure <- function(){
         mark[end] <- FALSE
         poks[perm[min(begin,end)],perm[max(begin,end)]] <- 1
       }
-      
-      if (size.i != 1) {
-        
+
+      if (size.i != 1){
         groundLvl <- c(0,accumLvl)
         pNow <- (size.i-1)/sum((c(1,levelSizes)*c(levelSizes,1))[2:levels])
         if (pNow < 1){
@@ -649,15 +651,16 @@ assemble.structure <- function(){
       tree.i <- list(tree.i, levelSizes)
       names(tree.i) <- c("matrix","level.sizes")
       subtrees <- append(subtrees,list(tree.i))
-      
+
       perm <- perm[(size.i + 1):length(perm)]
     }
-    
+
     colnames(poks) <- as.character(1:items)
     rownames(poks) <- colnames(poks)
-    
+
     list(ks = poks, comp = subtrees)
   }
+
   nmfComLearn <- function(R, concepts){
     QSComGen <- function(Q, S){
       R <- (Q/rowSums(Q)) %*% S
@@ -678,7 +681,7 @@ assemble.structure <- function(){
     learn <- nmfLearn(R, concepts = concepts, func = QSConGen)
     Q <- learn$Q
     S <- learn$S
-    
+
     conceptsDiff <- sapply(1:concepts,function(x){1-mean(S[x,])})
     list(Q = Q, M = S, concept.exp = conceptsDiff)
   }
@@ -689,7 +692,7 @@ assemble.structure <- function(){
     learn <- nmfLearn(R, concepts = concepts, func = QSDisGen)
     Q <- learn$Q
     S <- learn$S
-    
+
     conceptsDiff <- sapply(1:concepts,function(x){1-mean(S[x,])})
     list(Q = Q, M = S, concept.exp = conceptsDiff)
   }
@@ -698,7 +701,7 @@ assemble.structure <- function(){
     S <- matrix(0,concepts, ncol(R))
     space <- genQMax(concepts,concepts)
     space <- space[sample(1:nrow(space)),]
-    
+
     learnQ <- function(){
       ref <- R[iQ,]
       predict <- QSAvgGenR2(Q = space, S = S)
@@ -706,7 +709,7 @@ assemble.structure <- function(){
       best <- which.min(distance)[1]
       t(space[best,])
     }
-    
+
     learnS <- function(){
       ref <- R[,iS]
       Qn <- Q/rowSums(Q)
@@ -718,12 +721,12 @@ assemble.structure <- function(){
       S2[S2 < 0] <- 0
       return(sqrt(S2))
     }
-    
+
     hault <- 0
     threshold <- max(nrow(Q), ncol(S))
     permS <- sample(ncol(S))
     permQ <- sample(nrow(Q))
-    
+
     for (i in 1:1000){
       idS <- (i-1) %% ncol(S) + 1
       idQ <- (i-1) %% nrow(Q) + 1
@@ -731,25 +734,25 @@ assemble.structure <- function(){
       if (idQ == 1) permQ <- sample(nrow(Q))
       iS <- permS[idS]
       iQ <- permQ[idQ]
-      
+
       lS <- learnS()
       lQ <- learnQ()
-      
+
       progress = any(S[,iS]!=lS) | any(Q[iQ,]!=lQ)
       if (progress == TRUE) hault <- 0
       else hault <- hault + 1
       if (hault == threshold) break
-      
+
       S[,iS] <- learnS()
       Q[iQ,] <- learnQ()
     }
-    
+
     list(Q = Q, S = S)
   }
   dinaLearn <- function(R, Q){
     learn <- din(data = t(R), q.matrix = Q, rule = "DINA", progress = FALSE)
     concepts <- ncol(Q)
-    
+
     s <- learn$pattern$mle.est
     S <- sapply(s, function(x){
       sapply(1:concepts, function(y){
@@ -760,13 +763,13 @@ assemble.structure <- function(){
     guess <- learn$guess$est
     skillSpace <- t(learn$attribute.patt.splitted)
     skillDist <- learn$attribute.patt$class.prob
-    
+
     list(Q = Q, M = S, skill.space = skillSpace, skill.dist = skillDist, slip = slip, guess = guess)
   }
   dinoLearn <- function(R, Q){
     learn <- din(data = t(R), q.matrix = Q, rule = "DINO", progress = FALSE)
     concepts <- ncol(Q)
-    
+
     s <- learn$pattern$mle.est
     S <- sapply(s, function(x){
       sapply(1:concepts, function(y){
@@ -777,7 +780,7 @@ assemble.structure <- function(){
     guess <- learn$guess$est
     skillSpace <- t(learn$attribute.patt.splitted)
     skillDist <- learn$attribute.patt$class.prob
-    
+
     list(Q = Q, M = S, skill.space = skillSpace, skill.dist = skillDist, slip = slip, guess = guess)
   }
   ks.init <- function(raw, alpha.c, alpha.p, p.min) {
@@ -848,12 +851,12 @@ assemble.structure <- function(){
          alpha.c = alpha.c, alpha.p = alpha.p, p.min = p.min)
   }
   irt2plLearn <- function(R){
-    
+
     t <- rnorm(ncol(R))
     a <- rnorm(nrow(R)) # a = -discrimination
     b <- rnorm(nrow(R)) # b = discrimination * difficulty
     p <- c(t,a,b) # collective parameter
-    
+
     sigmoid <- function(param){
       t <- param[1:ncol(R)]
       a <- param[(ncol(R)+1):(ncol(R)+nrow(R))]
@@ -861,14 +864,14 @@ assemble.structure <- function(){
       linear <- a%*%t(t) + b%*%t(rep(1,ncol(R)))
       return(1/(1+exp(linear)))
     }
-    
+
     cost <- function(param){
       s <- sigmoid(param = param)
       y1 <- log(s)
       y0 <- log(1-s)
       return(-sum(R*y1+(1-R)*y0))
     }
-    
+
     grad <- function(param){
       s <- sigmoid(param = param)
       ga <- colSums(t(s - R)*t)
@@ -876,17 +879,17 @@ assemble.structure <- function(){
       gt <- colSums((s-R)*a)
       return(c(gt,ga,gb))
     }
-    
+
     learn <- optim(p, cost, grad)
-    
+
     t <- learn$par[1:ncol(R)]
     a <- learn$par[(ncol(R)+1):(ncol(R)+nrow(R))]
     b <- learn$par[(ncol(R)+nrow(R)+1):length(learn$par)]
-    
+
     abi <- t
     dis <- -a
     dif <- b / dis
-    
+
     list(dis = dis, dif = dif, abi = abi)
   }
   expLearn <- function(R){
@@ -902,7 +905,7 @@ assemble.structure <- function(){
     L <- matrix(0,items, students)
     slip <- matrix(0,items, students)
     guess <- matrix(0,items, students)
-    
+
     for (i in 1:items){
       Ri <- R[which(order == i),]
       for (j in 1:students){
@@ -941,15 +944,15 @@ assemble.structure <- function(){
     if (length(dim(R)) == 2) return(bktPerItemLearn(R, order))
     else return(bktPerTestLearn(R))
   }
-  
+
   #======================+
   # Channeling functions |
   #======================+
-  
+
   #----------+
   # Upstream |
   #----------+
-  
+
   stexp.itexp.2.exp <- function(x){expGen(x[[1]], x[[2]])}
   dis.dif.abi.2.irt <- function(x){logitGen(x[[1]],x[[2]],x[[3]])}
   Q.M.slip.guess.2.dina <- function(x){dinaGen(x[[1]],x[[2]],x[[3]],x[[4]])}
@@ -1024,11 +1027,11 @@ assemble.structure <- function(){
       })
     })
   }
-  
+
   #------------+
   # Downstream |
   #------------+
-  
+
   exp.2.stexp.itexp <- function(x){expLearn(x[[1]])}
   irt.2.dis.dif.abi <- function(x){irt2plLearn(x[[1]])}
   dina.2.Q.M.space.slip.guess <- function(x){dinaLearn(x[[1]],x[[2]])}
@@ -1039,7 +1042,7 @@ assemble.structure <- function(){
   lin.avg.2.Q.S <- function(x){linAvgLearn(x[[1]],x[[2]])}
   poks.learn <- function(x){ks.init(x[[1]],x[[2]],x[[3]],x[[4]])}
   bkt.bin.learn <- function(x){bktBinLearn(x[[1]],x[[2]])}
-  
+
   order.2.time.items <- function(x){list(length(x),max(x))}
   n.row.col <- function(x){list(nrow(x),ncol(x))}
   n.row.col.rmean <- function(x){list(nrow(x),ncol(x),rowMeans(x))}
@@ -1057,7 +1060,7 @@ assemble.structure <- function(){
     class(r) <- "max"
     list(r)
   }
-  
+
   #===================================================================================
   # Definition of node.i has the following syntax:
   # node.i <- list(S, L, fs, fl)
@@ -1072,18 +1075,18 @@ assemble.structure <- function(){
   # then node state can be generated from po and items by fs
   # and items can be infered from state by fl
   #===================================================================================
-  
+
   #------------+
   # root nodes |
   #------------+
-  
+
   # root nodes to prevent conflicts and detect insufficiency
   root. <- list(NULL, list(NULL), NULL, list(NULL))
   items. <- root.
   students. <- root.
   concepts. <- root.
   init.vals. <- root.
-  
+
   # root nodes with predefined default values initialized only when needed
   bkt.guess.st.var. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["bkt.guess.st.var"]]}))
   bkt.slip.st.var. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["bkt.slip.st.var"]]}))
@@ -1103,12 +1106,12 @@ assemble.structure <- function(){
   avg.success. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["avg.success"]]}))
   student.var. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["student.var"]]}))
   time. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["time"]]}))
-  
+
   #--------------------------------------------------------------------------+
   # leaf nodes, correspond to a dataset in regard of the respective model    |
   # Third entries in the below leaf nodes are supposed to be learn functions |
   #--------------------------------------------------------------------------+
-  
+
   exp. <- list(c("st.exp","it.exp"), list(c("st.exp","it.exp")),
                exp.2.stexp.itexp, list(stexp.itexp.2.exp))
   irt. <- list(c("dis","dif","abi"), list(c("dis","dif","abi")),
@@ -1136,11 +1139,11 @@ assemble.structure <- function(){
                     c("S","L","bkt.slip","bkt.guess","time","order","per.item","Q","bkt.mod")),
                bkt.bin.learn, list(S.L.slip.guess.time.order.peritem.2.bkt,
                                    S.L.slip.guess.time.order.peritem.Q.mod.2.bkt))
-  
+
   #--------------------+
   # Intermediate nodes |
   #--------------------+
-  
+
   bkt.slip.it.exp. <- list(c("items"), list(c("items")),
                            length.l, list(rn))
   bkt.guess.it.exp. <- list(c("items"), list(c("items")),
@@ -1149,7 +1152,7 @@ assemble.structure <- function(){
   L.con.exp. <- list(c("concepts"), list(c("concepts")), length.l, list(rn))
   skill.space. <- list(c("concepts","skill.space.size"), list(c("concepts","skill.space.size")),
                        n.row.col, list(con.size.2.skspace))
-  
+
   skill.space.size. <- list(c("concepts"), list(c("concepts")), skspsize.min.con,
                             list(function(x){2^x[[1]]}))
   skill.dist. <- list(c("skill.space.size"),list(c("skill.space.size")),
@@ -1166,7 +1169,7 @@ assemble.structure <- function(){
                      max.bound.min, list(function(x) {x[[1]]-1}))
   max.it.per.tree. <- list(c("min.it.per.tree"), list(c("items")),
                            max.bound.min, list(function(x) {x[[1]]}))
-  
+
   dis. <- list(c("items"), list(c("items")),
                length.l, list(rn))
   dif. <- list(c("items"), list(c("items")),
@@ -1315,11 +1318,9 @@ BOUND.CLASSES <- c("min", "max")
 #' @export
 down.stream <- function(pars){
   curr <- names(pars)[which(sapply(pars,is.null) == 0)]
-  
+
   # breadth-first propagating
   while(length(curr) > 0){
-    #print("**")
-    #print(curr)
     new <- NULL
     for (i in 1:length(curr)){
       var.name <- curr[i]
@@ -1327,11 +1328,11 @@ down.stream <- function(pars){
       child.names <- STRUCTURE[[var.name]][[1]]
       if (is.null(child.names)) next
       child.val <- STRUCTURE[[var.name]][[3]](var.val)
-      
+
       child.not.null <- which(sapply(child.val, function(x){is.null(x)})==0)
       child.names <- child.names[child.not.null]
       child.val <- child.val[child.not.null]
-      
+
       for (j in 1:length(child.names)){
         child.j.val <- pars[[child.names[j]]]
         if (!is.null(child.j.val) &
@@ -1378,26 +1379,26 @@ down.stream <- function(pars){
 #' @seealso \code{which.closest}
 #' @export
 up.stream <- function(target, pars, progress = FALSE){
-  
+
   miss <- NULL
   new.pars <- pars
   trace <- list(NULL)
   track <- list(NULL)
   fill <- FALSE
-  
+
   check.track <- function(node.name){
-    
+
     if (!is.null(new.pars[[node.name]])) return(TRUE)
     gen.methods <- STRUCTURE[[node.name]]$gen
     if (is.null(unlist(gen.methods))) {
       if (is.null(miss)) miss <<- node.name
       return(FALSE)
     }
-    
+
     or. <- sapply(gen.methods, function(x){
       prod(sapply(x,check.track)) # products are equivalent to AND-gate.
     })
-    
+
     avail <- which(or. == 1)
     if (length(avail) == 0) {
       if (is.null(miss)) miss <<- node.name
@@ -1405,7 +1406,7 @@ up.stream <- function(target, pars, progress = FALSE){
     }
     if (length(avail) == 1) pick <- avail
     else pick <- avail[which.closest(target, gen.methods[avail])]
-    
+
     track[[node.name]] <<- pick
     trace[[node.name]] <<- gen.methods[[pick]]
     return(TRUE)
@@ -1425,7 +1426,7 @@ up.stream <- function(target, pars, progress = FALSE){
     }
     return(NULL)
   }
-  
+
   success <- check.track(target)
   if (success == FALSE){
     message(paste0("Cannot reach '", target,"' since '", miss, "' is missing"))
@@ -1603,12 +1604,12 @@ get.par <- function(target, pars, progress = FALSE){
 #' @seealso what?
 #' @export
 gen <- function(model, pars, n = 1, progress = FALSE){
-  
+
   if (!(model %in% ALL.MODELS))
     stop(paste0("Model '",model,"' is not available"))
   if (!identical(class(pars),c("context","list")))
     stop(paste0("'pars' is of an invalid class"))
-  
+
   r <-
     sapply(1:n,function(x){
       if (x > 1) progress <- FALSE
@@ -1617,7 +1618,7 @@ gen <- function(model, pars, n = 1, progress = FALSE){
         stop(paste0("Insufficient information to generate '",model,"'"))
       list(trial)
     })
-  
+
   if (n > 1) return(r) else return(r[[1]])
 }
 
@@ -1635,11 +1636,11 @@ gen <- function(model, pars, n = 1, progress = FALSE){
 #' @seealso what?
 #' @export
 gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
-  
+
   result <- NULL #return this
   if (identical(class(pars),c("context","list"))) pars <- list(pars)
   else if (class(pars) != "list") stop(paste0("'pars' is of an invalid class"))
-  
+
   # name all the contexts
   if (is.null(names(pars)))
     names(pars) <- sapply(1:length(pars), function(x){
@@ -1652,7 +1653,7 @@ gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
       paste0("p",toStr(x,num.ac))
     })
   }
-  
+
   if (multiply == FALSE){
     suppressWarnings(
       result <- as.matrix(mapply(function(x,y){
@@ -1676,7 +1677,7 @@ gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
     colnames(result) <- models
     rownames(result) <- names(pars)
   }
-  
+
   t(result)
 }
 
@@ -1694,12 +1695,12 @@ gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
 #' @seealso what?
 #' @export
 learn <- function(model, data){
-  
+
   if (!(model %in% ALL.MODELS))
     stop(paste0("Model '",model,"' is not available"))
-  
+
   cat(paste0("Learning by '",model,"' ...\n"))
-  
+
   learned.p <- pars()
   learned.p[[model]] <- data
   down.stream(learned.p)
