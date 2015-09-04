@@ -6,6 +6,6 @@ Date: 2015-08-30
 Author: Hoang-Trieu Trinh
 Maintainer: Hoang-Trieu Trinh <thtrieu@apcs.vn>
 Description: More about what it does (maybe more than one line)
-License: What license is it under?
+License: GPL-3
 LazyData: TRUE
 Imports: MASS, diagram, HMM, CDM, stats

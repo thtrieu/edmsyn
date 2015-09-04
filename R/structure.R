@@ -480,12 +480,12 @@ assemble.structure <- function(){
     if (!is.null(treeSizes) &
         !is.null(treeDepths) &
         length(treeSizes) != length(treeDepths))
-      stop("Input Conflict")
+      stop("Cannot reach 'po' due to conflict at lower level parameters")
     if (minDepth + 1 > maxItemPerTree)
-      stop("Requirements cannot be satisfied")
+      stop("Cannot reach 'po' due to conflict at lower level parameters")
     if (items < minTrees * minItemPerTree |
         items > maxTrees * maxItemPerTree)
-      stop("Requirements cannot be satisfied")
+      stop("Cannot reach 'po' due to conflict at lower level parameters")
 
     #-------------GENERATING-------------------------------------------------
 
@@ -496,11 +496,11 @@ assemble.structure <- function(){
       upperTrees <-
         min(maxTrees,floor(items / max(minDepth + 1,minItemPerTree)))
       if (lowerTrees > upperTrees)
-        stop("Requirements cannot be satisfied")
+        stop("Cannot reach 'po' due to conflict at lower level parameters")
       if (!is.null(treeDepths)) {
         if (length(treeDepths) < lowerTrees |
             length(treeDepths) > upperTrees)
-          stop("Requirements cannot be satisfied")
+          stop("Cannot reach 'po' due to conflict at lower level parameters")
         else
           trees <- length(treeDepths)
       }
@@ -520,20 +520,20 @@ assemble.structure <- function(){
         upper <-
           itemsLeft - max(minDepth + 1,minItemPerTree) * (x - 1)
         if (lower > maxItemPerTree)
-          stop("Requirements cannot be satisfied")
+          stop("Cannot reach 'po' due to conflict at lower level parameters")
         if (upper < minItemPerTree)
-          stop("Requirements cannot be satisfied")
+          stop("Cannot reach 'po' due to conflict at lower level parameters")
 
         upper <- min(upper,maxItemPerTree)
         if (upper < minDepth)
-          stop("Requirements cannot be satisfied")
+          stop("Cannot reach 'po' due to conflict at lower level parameters")
         lower <- max(lower,minItemPerTree,minDepth + 1)
         if (!is.null(treeDepths))
           lower <- max(lower, treeDepths[trees - x + 1] + 1)
 
 
         if (lower > upper)
-          stop("Requirements cannot be satisfied")
+          stop("Cannot reach 'po' due to conflict at lower level parameters")
         if (lower == upper)
           sampleResult <- lower
         else
@@ -551,7 +551,7 @@ assemble.structure <- function(){
 
     if (!is.null(treeDepths)) {
       if (sum((treeDepths + 1) > treeSizes) > 0)
-        stop("Requirements cannot be satisfied")
+        stop("Cannot reach 'po' due to conflict at lower level parameters")
     }
     else{
       treeDepths <- numeric(trees)
@@ -1684,9 +1684,8 @@ gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
 
 #' Learn the most probable context for a given data
 #'
-#' This function does something
 #'
-#' @param model a param
+#' @param model a character string indicates 
 #' @param pars another param
 #' @param n another param
 #' @param progress another one
