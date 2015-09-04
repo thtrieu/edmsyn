@@ -108,7 +108,7 @@ assemble.structure <- function(){
     return(level)
   }
   PToOdds <- function(p) p/(1-p)
-  OddsToP <- function(o) o/(1+o)
+  OddsToP <- function(o) {if (is.infinite(o)) return(1) else return(o/(1+o))}
   binaryHMMLearn <- function(R){
     time <- length(R)
     observe <- as.character(R)
@@ -251,11 +251,13 @@ assemble.structure <- function(){
     Items <- length(State)
     if(St.Var>0.3) stVar <- 0.3
     if(St.Var<0) stVar <- 0
+    State_ <- State
     R = matrix(-1,Students,Items)
     for(i in 1:Students)
     {
+      State <- State_
       #Create Samples
-      for(it in 1:ncol(R))
+      for(it in sample(Items))
       {
         R[i,it] <- sample(0:1,size = 1,prob = c(1- OddsToP(State[it]),OddsToP(State[it])))
         #Odds.temp.state[k] <- ks.update(i,RG[j,i],ks$state,ks)[k]
@@ -1685,7 +1687,7 @@ gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
 #' Learn the most probable context for a given data
 #'
 #'
-#' @param model a character string indicates 
+#' @param model a character string indicates
 #' @param pars another param
 #' @param n another param
 #' @param progress another one
