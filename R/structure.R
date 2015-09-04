@@ -108,7 +108,11 @@ assemble.structure <- function(){
     return(level)
   }
   PToOdds <- function(p) p/(1-p)
-  OddsToP <- function(o) {if (is.infinite(o)) return(1) else return(o/(1+o))}
+  OddsToP <- function(o) {
+    r <- o/(1+o)
+    r[is.na(r)] <- 1
+    return(r)
+  }
   binaryHMMLearn <- function(R){
     time <- length(R)
     observe <- as.character(R)
