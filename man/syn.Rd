@@ -2,27 +2,29 @@
 % Please edit documentation in R/structure.R
 \name{syn}
 \alias{syn}
-\title{Generate synthetic data from a given data
-This function does something}
+\title{Generate synthetic data}
 \usage{
 syn(model, data, keep.pars = keep(model), students = ncol(data$R), n = 1,
   progress = FALSE)
 }
 \arguments{
-\item{model}{a param}
+\item{model}{a character string indicates which model governs the synthesize process, \code{ALL.MODELS} is a vector of available models in the package.}
 
-\item{n}{another param}
+\item{data}{a list contains data that needs to be synthesized, first component is the response matrix, the other components are additional information that the specified model requires.}
 
-\item{progress}{another one}
+\item{keep.pars}{a character string vector contains names of the parameters to kept after learning the most probable context from \code{data}}
 
-\item{pars}{another param}
+\item{students}{number of students in the synthetic data.}
+
+\item{n}{number of synthetic dataset to generate.}
+
+\item{progress}{a boolean value indicates if the generating steps should be printed or not}
 }
 \value{
-whatever it is
+a list
 }
 \description{
-Generate synthetic data from a given data
-This function does something
+Generate synthetic data
 }
 \details{
 more detail huh?

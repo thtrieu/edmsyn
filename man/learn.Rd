@@ -7,7 +7,7 @@
 learn(model, data)
 }
 \arguments{
-\item{model}{a param}
+\item{model}{a character string indicates}
 
 \item{pars}{another param}
 
@@ -19,7 +19,7 @@ learn(model, data)
 whatever it is
 }
 \description{
-This function does something
+Learn the most probable context for a given data
 }
 \details{
 more detail huh?

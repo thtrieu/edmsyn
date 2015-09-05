@@ -1549,7 +1549,7 @@ pars <- function(old.pars = NULL,
                  lin.pes = NULL, lin.avg = NULL, poks = NULL, bkt = NULL){
   new.pars <- NULL #return this.
   if (!is.null(old.pars)) {
-    if (!identical(class(old.pars),c("context","list")))
+    if (!identical(class(old.pars),c("context")))
       stop("'old.pars' is not an object of the 'context' class")
     new.pars <- old.pars
     update <- as.list(environment())
@@ -1564,7 +1564,7 @@ pars <- function(old.pars = NULL,
         new.pars[[x]] <<- as.integer(new.pars[[x]])
     })
     new.pars <- new.pars[3:length(new.pars)]
-    class(new.pars) <- c("context",class(new.pars))
+    class(new.pars) <- c("context")
   }
   if (class(new.pars$po) == "matrix")
     new.pars$po <- list(ks = new.pars$po, comp = NULL)
@@ -1614,7 +1614,7 @@ gen <- function(model, pars, n = 1, progress = FALSE){
 
   if (!(model %in% ALL.MODELS))
     stop(paste0("Model '",model,"' is not available"))
-  if (!identical(class(pars),c("context","list")))
+  if (!identical(class(pars),c("context")))
     stop(paste0("'pars' is of an invalid class"))
 
   r <-
@@ -1645,8 +1645,8 @@ gen <- function(model, pars, n = 1, progress = FALSE){
 gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
 
   result <- NULL #return this
-  if (identical(class(pars),c("context","list"))) pars <- list(pars)
-  else if (class(pars) != "list") stop(paste0("'pars' is of an invalid class"))
+  if (identical(class(pars),c("context"))) pars <- list(pars)
+  else if (class(pars) != "list") stop(paste0("Invalid context"))
 
   # name all the contexts
   if (is.null(names(pars)))
@@ -1712,14 +1712,15 @@ learn <- function(model, data){
   down.stream(learned.p)
 }
 
-#' Generate synthetic data from a given data
-#' This function does something
+#' Generate synthetic data
 #'
-#' @param model a param
-#' @param pars another param
-#' @param n another param
-#' @param progress another one
-#' @return whatever it is
+#' @param model a character string indicates which model governs the synthesize process, \code{ALL.MODELS} is a vector of available models in the package.
+#' @param data a list contains data that needs to be synthesized, first component is the response matrix, the other components are additional information that the specified model requires.
+#' @param keep.pars a character string vector contains names of the parameters to kept after learning the most probable context from \code{data}
+#' @param students number of students in the synthetic data.
+#' @param n number of synthetic dataset to generate.
+#' @param progress a boolean value indicates if the generating steps should be printed or not
+#' @return a list
 #' @author Hoang-Trieu Trinh
 #' @details more detail huh?
 #' @seealso what?

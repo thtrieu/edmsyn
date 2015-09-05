@@ -1,46 +1,3 @@
-ALL.MODELS.
-g <- gen.apply(ALL.MODELS., p, n = 10)
-g
-lin.avg.8 <- g["lin.avg",][[8]]
-lin.avg.8 <- g["lin.avg",1][[8]]
-lin.avg.8 <- g["lin.avg",1]
-lin.avg.8 <- g["lin.avg",1][[1]][[8]]
-lin.avg.8
-lin.avg.8$lin.avg
-?down.stream
-STRUCTURE
-?up.stream
-?viz
-p <- pars(students=  15, items = 5)
-d <- gen("poks", p, progress = TRUE)
-d
-d$poks
-library(edmsyb)
-library(edmsyn)
-what?
-??
-)
-?edmsyn
-??edmsyn
-edmsyn::toStr()
-edmsyn::toStr
-edmsyn::INTEGER
-edmsyn::DEFINITE
-?syn
-simdin
-sim.din
-library(CDM)
-?sim.din
-library(edmsyn)
-p <- pars(items = 20)
-set.seed(30)
-viz(get.par("po",p)$value)
-set.seed(30)
-viz(get.par("po",p)$value)
-viz(get.par("po",p)$value)
-viz(get.par("po",p)$value)
-viz(get.par("po",p)$value)
-viz(get.par("po",p)$value)
 viz(get.par("po",p)$value)
 viz(get.par("po",p)$value)
 viz(get.par("po",p)$value)
@@ -510,3 +467,46 @@ get.par("po", pars(max.it.per.tree = 0, items = 20))
 get.par("min.it.per.tree", pars(max.it.per.tree = 0, items = 20))
 get.par("min.it.per.tree", pars(max.it.per.tree = 0, items = 20))
 pars(max.it.per.tree = 0, items = 20)
+library(edmsyn)
+data <- gen.apply(ALL.MODELS, pars(students = 7, concepts = 2, items = 5))
+data
+class(data)
+data["poks",1]
+a <- data["poks",1][[1]]
+a
+class(a) <- "trieu"
+a
+a$dis
+a$dif
+a$concepts
+list(a)
+b <- list(a)
+b
+length(b)
+b <- list(a,a)
+b
+b <- as.matrix(b)
+b
+b[1,1]
+b
+library(edmsyn)
+pars(2,3)
+pars(students = 2, concepts = 3)
+-Inf < 3
+-Inf > Inf
+-Inf < -Inf
+Inf == Inf
+-Inf == -Inf
+Inf/Inf
+-Inf/Inf
+-Inf/0
+Inf/0
+damn
+library(roxygen2)
+library(devtools)
+getwd()
+setwd("..")
+create("edmsyn")
+document()
+setwd("D:/github/edmsyn")
+document()
