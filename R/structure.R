@@ -1469,18 +1469,74 @@ keep <- function(model){
   KEEP[[model]]
 }
 
+#' @export
+dissect <- function(a){
+  n <- nrow(a)
+  temp <- a
+  a.sym <- (a+t(a)) > 0
+  temp.sym <- a.sym
+  r <- list(a)
+  r.sym <- list(a.sym)
+  for (i in 1:(n-2)){
+    temp <- temp %*% a
+    temp.sym <- temp.sym %*% a.sym
+    r <- append(r, list(temp))
+    r.sym <- append(r.sym, list(temp.sym))
+  }
+  r_ <- lapply(r,t)
+  s.cy <- matrix(0, n, n) # same.cycle
+  s.co <- s.cy # same.component
+  for (i in 1:(n-1)){
+    for (j in 1:(n-1)){
+      s.cy <- s.cy + (r[[i]] * r_[[j]])
+    }
+    s.co <- s.co + r.sym[[i]]
+  }
+  
+  s.cy <- 0 + (s.cy > 0)
+  if (any(s.cy == 1)) stop("Loop detected in poks structure")
+  s.co <- 0 + (s.co > 0)
+  s.co <- unique.matrix(s.co)
+  leaf <- which(rowSums(a) == 0)
+  comp <- list()
+  
+  order <- function(raw, part){
+    raw <- raw[!sapply(raw, function(x){x %in% part})]
+    raw <- append(part, raw)
+  }
+  for (i in 1:nrow(s.co)){
+    nodes.i <- which(s.co[i,] == 1)
+    dissect.i <- a[nodes.i,nodes.i]
+    leaf.i <- intersect(leaf, nodes.i)
+    nodes.i <- order(nodes.i, leaf.i)
+    lvlSizes <- length(leaf.i)
+    lvl.j <- leaf.i
+    for (j in (1:(n-1))){
+      lvl.j <- which(rowSums(as.matrix(r[[j]][,leaf.i])) > 0)
+      if (length(lvl.j) == 0) break
+      nodes.i <- order(nodes.i, lvl.j)
+      lvlSizes <- append(length(lvl.j), lvlSizes)
+    }
+    comp <- append(comp, list(list(matrix = a[nodes.i,nodes.i], level.sizes = lvlSizes)))
+  }
+  
+  list(ks = a, comp = comp)
+}
+
+
 #' This function is so lame I cant take it
 #'
 #' @importFrom diagram plotmat
 #' @export
 viz <- function(po){
+  if (is.null(po$comp)) po <- dissect(po)
   n <- length(po$comp)
   n.row <- floor(sqrt(n))
   n.col <- ceiling(n/n.row)
   par(mfrow = c(n.row, n.col))
   for (i in 1:n){
     comp.i <- po$comp[[i]]
-    plotmat(comp.i$matrix,
+    plotmat(t(comp.i$matrix),
             pos = comp.i$level.sizes,
             lwd = 0.1,
             arr.type = "triangle",
