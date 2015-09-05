@@ -1471,7 +1471,7 @@ dissect <- function(a){
     r.sym <- append(r.sym, list(temp.sym))
   }
   s.cy <- matrix(0, n, n) # same.cycle
-  s.co <- s.cy # same.component
+  s.co <- diag(n) # same.component
   for (i in 1:(n-1)){
     for (j in 1:(n-1)){
       s.cy <- s.cy + (r[[i]] * t(r[[j]]))
@@ -1486,6 +1486,8 @@ dissect <- function(a){
   root <- which(colSums(a) == 0)
   leaf <- which(rowSums(a) == 0)
   comp <- list()
+  
+  print(s.co)
   
   for (i in 1:nrow(s.co)){
     nodes.i <- which(s.co[i,] == 1)
@@ -1533,7 +1535,10 @@ dissect <- function(a){
       new.order <- append(new.order, which(lvl.i == j))
       lvlSizes <- append(lvlSizes, sum(lvl.i == j))
     }
-    comp <- append(comp, list(list(matrix = a[new.order,new.order], level.sizes = lvlSizes)))
+    mat <- as.matrix(a[new.order, new.order])
+    rownames(mat) <- new.order
+    colnames(mat) <- new.order
+    comp <- append(comp, list(list(matrix = mat, level.sizes = lvlSizes)))
   }
   
   list(ks = a, comp = comp)
