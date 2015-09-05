@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(cache=TRUE)
+knitr::opts_chunk$set(cache=FALSE)
 ```
 
 **0. Load the package**
@@ -124,7 +124,7 @@ In fact, `gen()` is simply a wrapper of `get.par()` with some additional feature
 ```{r control_poks}
 p <- pars(p, density = 1, min.depth = 3, max.depth = 3, max.ntree = 1)
 poks.data <- gen("poks",p)
-poks.data$po$ks
+poks.data$po
 ```
 Of course, we can always hand-design `po` and update it into `p` by `p <- pars(p, po = ...)`
 
@@ -155,7 +155,7 @@ poks.data
 learnt.poks <- learn("poks",data = poks.data$poks)
 learnt.poks
 # percentage of similarity between the original po and learned po
-mean((poks.data$po$ks + learnt.poks$po$ks) != 1)
+mean((poks.data$po + learnt.poks$po) != 1)
 ```
 Another example, here we learn from poks.data using DINA model.
 ```{r dina_learn}

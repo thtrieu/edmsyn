@@ -251,7 +251,6 @@ assemble.structure <- function(){
     list(R=randGen(sqrt(QSAvgGenR2(Q = Q,S = S))), concepts = nrow(S))
   }
   Gen.Synthetic.POKS <- function(St.Var, Students, State, OR.t, OR.f, PO, alpha.c, alpha.p, p.min){
-    PO <- PO$ks
     Items <- length(State)
     if(St.Var>0.3) stVar <- 0.3
     if(St.Var<0) stVar <- 0
@@ -281,7 +280,6 @@ assemble.structure <- function(){
     list(R=t(R), alpha.c = alpha.c, alpha.p = alpha.p, p.min = p.min)
   }
   poksGen <- function(students, poks, successRate, alpha.c, alpha.p, p.min){
-    poks <- poks$ks
     items <- nrow(poks)
     poks_ <- poks
     R <- matrix(-1,items,students)
@@ -449,7 +447,6 @@ assemble.structure <- function(){
     list(R=R, order = order)
   }
   po2State <- function(PO){
-    PO <- PO$ks
     Items <- nrow(PO)
     Get.Ks.State <- function(Node,PO,State)
     {
@@ -465,14 +462,12 @@ assemble.structure <- function(){
     State <- PToOdds(State)
   }
   stVarPo2Ort <- function(stVar, PO){
-    PO <- PO$ks
     Items <- nrow(PO)
     OR.t = matrix(0.5,Items,Items)
     OR.t[which(t(PO)==1)] <- runif(sum(PO),0.8-stVar,1)
     OR.t <- PToOdds(OR.t)
   }
   stVarPo2Orf <- function(stVar, PO){
-    PO <- PO$ks
     Items <- nrow(PO)
     OR.f = matrix(0.5,Items,Items)
     OR.f[which(t(PO)==1)] <- runif(sum(PO),0,0.2+stVar)
@@ -651,21 +646,13 @@ assemble.structure <- function(){
         }
       }
       # ###############
-      list.i <- perm[1:size.i]
-      tree.i <- as.matrix(poks[list.i,list.i])
-      colnames(tree.i) <- as.character(list.i)
-      rownames(tree.i) <- as.character(list.i)
-      tree.i <- list(tree.i, levelSizes)
-      names(tree.i) <- c("matrix","level.sizes")
-      subtrees <- append(subtrees,list(tree.i))
-
       perm <- perm[(size.i + 1):length(perm)]
     }
 
     colnames(poks) <- as.character(1:items)
     rownames(poks) <- colnames(poks)
 
-    list(ks = poks, comp = subtrees)
+    return(poks)
   }
 
   nmfComLearn <- function(R, concepts){
@@ -854,7 +841,7 @@ assemble.structure <- function(){
     or$f[or$f==0] <- 1                # neutral evidence effect
     nlinks = colSums(m.rel, na.rm=T) + rowSums(m.rel, na.rm=T)
     log.nlinks = 0.6931472 / (log((nlinks+1)) + 0.6931472) # 0.6931472 is the entropy of 0.5
-    list(student.var = student.var, avg.success = mean(raw), state = state, or.t = odds.t, or.f = odds.f, po = list(ks = m.rel, comp = NULL),
+    list(student.var = student.var, avg.success = mean(raw), state = state, or.t = odds.t, or.f = odds.f, po = m.rel,
          alpha.c = alpha.c, alpha.p = alpha.p, p.min = p.min)
   }
   irt2plLearn <- function(R){
@@ -1194,7 +1181,7 @@ assemble.structure <- function(){
   po. <- list(c("items","items"), list(c("items","min.ntree","max.ntree",
                                          "min.depth","max.depth","density",
                                          "min.it.per.tree","max.it.per.tree")),
-              function(x){list(nrow(x$ks),ncol(x$ks))},
+              function(x){list(nrow(x),ncol(x))},
               list(items.tree.depth.dens.per.2.po))
   slip. <- list(c("items"), list(c("items")),
                 length, list(rn))
@@ -1557,8 +1544,7 @@ dissect <- function(a){
 #' @importFrom diagram plotmat
 #' @export
 viz <- function(po){
-  if (class(po) == "matrix") po <- list(ks = po, comp = NULL)
-  if (is.null(po$comp)) po <- dissect(po$ks)
+  po <- dissect(po)
   n <- length(po$comp)
   n.row <- floor(sqrt(n))
   n.col <- ceiling(n/n.row)
