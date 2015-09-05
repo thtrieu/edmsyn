@@ -1483,53 +1483,82 @@ dissect <- function(a){
     r <- append(r, list(temp))
     r.sym <- append(r.sym, list(temp.sym))
   }
-  r_ <- lapply(r,t)
   s.cy <- matrix(0, n, n) # same.cycle
   s.co <- s.cy # same.component
   for (i in 1:(n-1)){
     for (j in 1:(n-1)){
-      s.cy <- s.cy + (r[[i]] * r_[[j]])
+      s.cy <- s.cy + (r[[i]] * t(r[[j]]))
     }
     s.co <- s.co + r.sym[[i]]
   }
-  
   s.cy <- 0 + (s.cy > 0)
-  if (any(s.cy == 1)) stop("Loop detected in poks structure")
+  if (any(s.cy == 1)) stop("Loop detected in the graph")
   s.co <- 0 + (s.co > 0)
   s.co <- unique.matrix(s.co)
+  
+  root <- which(colSums(a) == 0)
   leaf <- which(rowSums(a) == 0)
   comp <- list()
   
-  order <- function(raw, part){
-    raw <- raw[!sapply(raw, function(x){x %in% part})]
-    raw <- append(part, raw)
-  }
   for (i in 1:nrow(s.co)){
     nodes.i <- which(s.co[i,] == 1)
-    dissect.i <- a[nodes.i,nodes.i]
+    root.i <- intersect(root, nodes.i)
     leaf.i <- intersect(leaf, nodes.i)
-    nodes.i <- order(nodes.i, leaf.i)
-    lvlSizes <- length(leaf.i)
-    lvl.j <- leaf.i
-    for (j in (1:(n-1))){
-      lvl.j <- which(rowSums(as.matrix(r[[j]][,leaf.i])) > 0)
-      if (length(lvl.j) == 0) break
-      nodes.i <- order(nodes.i, lvl.j)
-      lvlSizes <- append(length(lvl.j), lvlSizes)
+    root.tell <- rep(-1,n)
+    leaf.tell <- rep(-1,n)
+    root.tell[root.i] <- 0
+    leaf.tell[leaf.i] <- 0
+    for (j in 1:(n-1)){
+      fil <- r[[j]][root.i,]
+      if (is.null(nrow(fil))) fil <- t(as.matrix(fil))
+      reach <- which(colSums(fil) > 0)
+      if (length(reach) == 0) break 
+      root.tell[reach] <- j
     }
-    comp <- append(comp, list(list(matrix = a[nodes.i,nodes.i], level.sizes = lvlSizes)))
+    depth.i <- max(root.tell)
+    for (j in 1:(n-1)){
+      reach <- which(rowSums(as.matrix(r[[j]][,leaf.i])) > 0)
+      if (length(reach) == 0) break 
+      leaf.tell[reach] <- j
+    }
+    leaf.tell <- depth.i - leaf.tell
+    
+    lvl.i <- rep(-1,n)
+    skeleton <- which(leaf.tell == root.tell)
+    lvl.i[skeleton] <- leaf.tell[skeleton]
+    while (sum(lvl.i[nodes.i] == -1) != 0) {
+      for (j in 1:n)
+        if (!(j %in% skeleton) & (j %in% nodes.i)){
+          ske.par <- intersect(skeleton, which(a[,j] == 1))
+          ske.chi <- intersect(skeleton, which(a[j,] == 1))
+          par.tell <- integer()
+          chi.tell <- integer()
+          if (length(ske.par) > 0) par.tell <- lvl.i[ske.par] + 1
+          if (length(ske.chi) > 0) chi.tell <- lvl.i[ske.chi] - 1
+          lvl.i[j] <- round(mean(append(par.tell, chi.tell)))
+          if (!is.na(lvl.i[j])) skeleton <- append(skeleton,j)
+          else lvl.i[j] <- -1
+        }
+    }
+    new.order <- integer()
+    lvlSizes <- integer()
+    for (j in 0:depth.i){
+      new.order <- append(new.order, which(lvl.i == j))
+      lvlSizes <- append(lvlSizes, sum(lvl.i == j))
+    }
+    comp <- append(comp, list(list(matrix = a[new.order,new.order], level.sizes = lvlSizes)))
   }
   
   list(ks = a, comp = comp)
 }
-
 
 #' This function is so lame I cant take it
 #'
 #' @importFrom diagram plotmat
 #' @export
 viz <- function(po){
-  if (is.null(po$comp)) po <- dissect(po)
+  if (class(po) == "matrix") po <- list(ks = po, comp = NULL)
+  if (is.null(po$comp)) po <- dissect(po$ks)
   n <- length(po$comp)
   n.row <- floor(sqrt(n))
   n.col <- ceiling(n/n.row)
