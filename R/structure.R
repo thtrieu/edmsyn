@@ -1464,6 +1464,8 @@ dissect <- function(a){
   temp.sym <- a.sym
   r <- list(a)
   r.sym <- list(a.sym)
+  if (n==1) return(list(ks = a, comp = list(list(matrix = a, level.sizes = 1))))
+  if (n > 2)
   for (i in 1:(n-2)){
     temp <- temp %*% a
     temp.sym <- temp.sym %*% a.sym
@@ -1486,8 +1488,6 @@ dissect <- function(a){
   root <- which(colSums(a) == 0)
   leaf <- which(rowSums(a) == 0)
   comp <- list()
-  
-  print(s.co)
   
   for (i in 1:nrow(s.co)){
     nodes.i <- which(s.co[i,] == 1)
@@ -1561,7 +1561,7 @@ viz <- function(po){
             lwd = 0.1,
             arr.type = "triangle",
             curve = 0,
-            box.size = 0.04,
+            box.size = 0.03,
             box.type = "round",
             endhead = TRUE,
             arr.pos = 0.85,
