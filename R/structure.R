@@ -1488,8 +1488,8 @@ dissect <- function(po){
   s.co <- 0 + (s.co > 0)
   s.co <- unique.matrix(s.co)
   
-  root <- which(colSums(a) == 0)
-  leaf <- which(rowSums(a) == 0)
+  root <- which(colSums(po) == 0)
+  leaf <- which(rowSums(po) == 0)
   comp <- list()
   
   for (i in 1:nrow(s.co)){
@@ -1538,13 +1538,13 @@ dissect <- function(po){
       new.order <- append(new.order, which(lvl.i == j))
       lvlSizes <- append(lvlSizes, sum(lvl.i == j))
     }
-    mat <- as.matrix(a[new.order, new.order])
+    mat <- as.matrix(po[new.order, new.order])
     rownames(mat) <- new.order
     colnames(mat) <- new.order
     comp <- append(comp, list(list(matrix = mat, level.sizes = lvlSizes)))
   }
   
-  list(ks = a, comp = comp)
+  list(ks = po, comp = comp)
 }
 
 #' This function is so lame I cant take it
