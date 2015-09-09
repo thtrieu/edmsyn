@@ -1521,8 +1521,8 @@ dissect <- function(po){
     while (sum(lvl.i[nodes.i] == -1) != 0) {
       for (j in 1:n)
         if (!(j %in% skeleton) & (j %in% nodes.i)){
-          ske.par <- intersect(skeleton, which(a[,j] == 1))
-          ske.chi <- intersect(skeleton, which(a[j,] == 1))
+          ske.par <- intersect(skeleton, which(po[,j] == 1))
+          ske.chi <- intersect(skeleton, which(po[j,] == 1))
           par.tell <- integer()
           chi.tell <- integer()
           if (length(ske.par) > 0) par.tell <- lvl.i[ske.par] + 1
