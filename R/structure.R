@@ -19,7 +19,7 @@ toStr <- function(x, max){
 
 #' @export
 which.closest <- function(target, candidates){
-  ref <- STRUCTURE[[target]][[1]]
+  ref <- STRUCTURE[[target]]$tell
   which.max(
     sapply(candidates, function(c){
       sum(sapply(c,function(x){x %in% ref}))
@@ -1306,8 +1306,8 @@ BOUND.CLASSES <- c("min", "max")
 #' @author Hoang-Trieu Trinh
 #' @details
 #' This function use breadth-first scheme to propagate information in
-#' the STRUCTURE, using the learning functions indicated in 3rd element
-#' of each node inside STRUCTURE to learn the corresponding values of
+#' the structure, using the learning functions indicated in 3rd element
+#' of each node inside \code{STRUCTURE} to learn the corresponding values of
 #' nodes indicated in the 1st element
 #' @export
 down.stream <- function(pars){
@@ -1326,7 +1326,7 @@ down.stream <- function(pars){
       child.not.null <- which(sapply(child.val, function(x){is.null(x)})==0)
       child.names <- child.names[child.not.null]
       child.val <- child.val[child.not.null]
-
+      
       for (j in 1:length(child.names)){
         child.j.val <- pars[[child.names[j]]]
         if (!is.null(child.j.val) &
@@ -1357,17 +1357,17 @@ down.stream <- function(pars){
 #'
 #' This function takes the available parameters and generate higher
 #' level parameters in a tailored direction so that a specified
-#' target can be reach
+#' target can be reach, also detects conflicts due to inactivated but required default values.
 #'
 #' @param target a character string indicates the target's name
 #' @param pars an object of \code{context} class describes all available information in current context
 #' @param progress a boolean value indicates if the generating process should be printed
 #' @return a new \code{context} object obtained from the input, if the target cannot be reach,
 #' the old \code{context} object is returned
-#' @author Hoang-Trieu Trinh
+#' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 #' @details
 #' This function runs a recursive search for available information at lower level
-#' nodes in the STRUCTURE that has been provided by the input. Whenever there is
+#' nodes in the structure that has been provided by the input. Whenever there is
 #' more than two ways to generate a parameter, the function chooses the one that
 #' requires inputs that is more likely to be learned directly from the target.
 #' @seealso \code{which.closest}
@@ -1456,28 +1456,31 @@ keep <- function(model){
   KEEP[[model]]
 }
 
-#' @export
-dissect <- function(a){
-  n <- nrow(a)
-  temp <- a
-  a.sym <- (a+t(a)) > 0
-  temp.sym <- a.sym
-  r <- list(a)
-  r.sym <- list(a.sym)
-  if (n==1) return(list(ks = a, comp = list(list(matrix = a, level.sizes = 1))))
+#' Analyse a partial order knowledge structure
+#' 
+#' This function analyses and return all the connected components of a partial order knowledge structure
+#' 
+#' @param a
+dissect <- function(po){
+  n <- nrow(po)
+  temp <- po
+  po.sym <- (po+t(po)) > 0
+  temp.sym <- po.sym
+  r <- list(po)
+  r.sym <- list(po.sym)
+  if (n==1) return(list(ks = po, comp = list(list(matrix = po, level.sizes = 1))))
   if (n > 2)
   for (i in 1:(n-2)){
-    temp <- temp %*% a
-    temp.sym <- temp.sym %*% a.sym
+    temp <- temp %*% po
+    temp.sym <- temp.sym %*% po.sym
     r <- append(r, list(temp))
     r.sym <- append(r.sym, list(temp.sym))
   }
   s.cy <- matrix(0, n, n) # same.cycle
   s.co <- diag(n) # same.component
   for (i in 1:(n-1)){
-    for (j in 1:(n-1)){
+    for (j in 1:(n-1))
       s.cy <- s.cy + (r[[i]] * t(r[[j]]))
-    }
     s.co <- s.co + r.sym[[i]]
   }
   s.cy <- 0 + (s.cy > 0)
@@ -1587,15 +1590,15 @@ init <- function(student.var = 1/12, avg.success = 0.5, time = 50,
 
 #' Create or update a context
 #'
-#' This function allows user input a set of parameters to a new or available context
+#' This function allows user assemble a new context or update an available context
 #'
 #' @param old.pars an object of \code{context} class describe the context that needed to be updated,
-#' leave this parameter if the user need a new context.
-#' @return an object of \code{context} class describe the updated or new context
-#' @author Hoang-Trieu Trinh
+#' leave this parameter \code{NULL} if a new context is needed.
+#' @return an object of \code{context} class describe the updated or newly assembled context
+#' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 #' @details
-#' This function takes in a set of parameters that the user input and assemble them
-#' into a \code{context} object, it uses the \code{down.stream} function to check for conflicts
+#' This function takes in a set of parameters that the user input and assembles them
+#' into a \code{context} object, it uses the \code{down.stream} function to check for some kind of conflicts
 #' @seealso \code{down.stream}
 #' @export
 
@@ -1642,14 +1645,12 @@ pars <- function(old.pars = NULL,
     new.pars <- new.pars[3:length(new.pars)]
     class(new.pars) <- c("context")
   }
-  if (class(new.pars$po) == "matrix")
-    new.pars$po <- list(ks = new.pars$po, comp = NULL)
   down.stream(new.pars)
 }
 
 #' Get a parameter from the current context
 #'
-#' This function generate (if needed) the required target from a context
+#' This function generates (if needed) the required target from a context
 #'
 #' @param target a character string indicates the target's name
 #' @param pars an object of \code{context} class describes the given context
@@ -1658,10 +1659,10 @@ pars <- function(old.pars = NULL,
 #' \item{value}{value of the target}
 #' \item{context}{the corresponding context}
 #' if not success, NULL
-#' @author Hoang-Trieu Trinh
+#' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 #' @details
-#' This function uses \code{up.stream} function to obtain target's value and context
-#' @seealso \code{up.stream}
+#' This function uses \code{up.stream} to obtain target's value and context
+#' @seealso \code{up.stream}, \code{gen}
 #' @export
 get.par <- function(target, pars, progress = FALSE){
   g <- up.stream(target, pars, progress)
@@ -1675,16 +1676,16 @@ get.par <- function(target, pars, progress = FALSE){
 
 #' Generate data for a model
 #'
-#' This function does something
+#' This function generates a context with a specified data unit activated
 #'
-#' @param model a param
-#' @param pars another param
-#' @param n another param
-#' @param progress another one
-#' @return whatever it is
-#' @author Hoang-Trieu Trinh
-#' @details more detail huh?
-#' @seealso what?
+#' @param model a character string indicates which model governs the generating process.
+#' @param pars a context
+#' @param n numer of runs
+#' @param progress a boolean value indicates if the generating steps should be printed or not.
+#' @details \code{gen} is essentially a wrapper of \code{up.stream}
+#' @return a context with its data unit activated
+#' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
+#' @seealso \code{up.stream}, \code{get.par}
 #' @export
 gen <- function(model, pars, n = 1, progress = FALSE){
 
@@ -1705,18 +1706,20 @@ gen <- function(model, pars, n = 1, progress = FALSE){
   if (n > 1) return(r) else return(r[[1]])
 }
 
-#' Generate data for a set of models
+#' Generate data for a set of models and contexts
 #'
-#' This function does something
 #'
-#' @param model a param
-#' @param pars another param
-#' @param n another param
-#' @param progress another one
+#' @param model a character string indicates which model governs the learning process.
+#' @param pars a context or a list of contexts
+#' @param multiply a boolean value indicates in which way should \code{models} and \code{pars} be matched. 
+#' if \code{TRUE} the generating process will be performed on every possible combination from \code{models} and \code{pars},
+#' if \code{FALSE} each model will be matched with its respective context in the same order specified in \code{models} and \code{pars},
+#' in other words, set \code{multiply} to \code{FALSE} will make \code{gen.apply} does the exact same thing to \code{mapply(gen,models,pars)}
+#' @param n number of runs for each generation
+#' @param progress a boolean value indicates if the generating steps should be printed or not.
 #' @return whatever it is
-#' @author Hoang-Trieu Trinh
-#' @details more detail huh?
-#' @seealso what?
+#' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
+#' @seealso \code{gen}, \code{mapply}, \code{sapply}
 #' @export
 gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
 
@@ -1752,8 +1755,9 @@ gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
     )
   } else {
     result <- as.matrix(sapply(models,function(x){
-      sapply(pars, function(y){
-        list(gen(x, y, n = n, progress))
+      sapply(1:length(pars), function(y){
+        if (y > 1) progress <- FALSE
+        list(gen(x, pars[[y]], n = n, progress))
       })
     }))
     if (length(pars) == 1) result <- t(result)
@@ -1766,15 +1770,10 @@ gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
 
 #' Learn the most probable context for a given data
 #'
-#'
-#' @param model a character string indicates
-#' @param pars another param
-#' @param n another param
-#' @param progress another one
-#' @return whatever it is
-#' @author Hoang-Trieu Trinh
-#' @details more detail huh?
-#' @seealso what?
+#' @param model a character string indicates which model governs the learning process.
+#' @param data a list contains data that needs to be synthesized, first component is the response matrix, the other components are additional information that the specified model requires.
+#' @return the most probable context corresponds to \code{data} in light of \code{model}
+#' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 #' @export
 learn <- function(model, data){
 
@@ -1790,16 +1789,17 @@ learn <- function(model, data){
 
 #' Generate synthetic data
 #'
-#' @param model a character string indicates which model governs the synthesize process, \code{ALL.MODELS} is a vector of available models in the package.
+#' @param model a character string indicates which model governs the synthesizing process.
 #' @param data a list contains data that needs to be synthesized, first component is the response matrix, the other components are additional information that the specified model requires.
-#' @param keep.pars a character string vector contains names of the parameters to kept after learning the most probable context from \code{data}
+#' @param keep.pars a character string vector contains names of the parameters to kept after learning the most probable context from \code{data}.
 #' @param students number of students in the synthetic data.
 #' @param n number of synthetic dataset to generate.
-#' @param progress a boolean value indicates if the generating steps should be printed or not
-#' @return a list
-#' @author Hoang-Trieu Trinh
-#' @details more detail huh?
-#' @seealso what?
+#' @param progress a boolean value indicates if the generating steps should be printed or not.
+#' @return a list with two components, first component is identical to argument \code{data}, second is a context or a list of contexts that have been generated.
+#' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
+#' @details 
+#' This function is essentially a wrapper of function \code{learn} and \code{gen}, where in between it eliminates all parameters are not indicated in \code{keep.pars} in the learned context.
+#' @seealso \code{learn}, \code{gen}
 #' @export
 syn <- function(model, data, keep.pars = keep(model),
                 students = ncol(data$R), n = 1, progress = FALSE){

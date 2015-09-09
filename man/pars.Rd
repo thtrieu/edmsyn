@@ -24,20 +24,20 @@ pars(old.pars = NULL, init.vals = init(), dis = NULL, dif = NULL,
 }
 \arguments{
 \item{old.pars}{an object of \code{context} class describe the context that needed to be updated,
-leave this parameter if the user need a new context.}
+leave this parameter \code{NULL} if a new context is needed.}
 }
 \value{
-an object of \code{context} class describe the updated or new context
+an object of \code{context} class describe the updated or newly assembled context
 }
 \description{
-This function allows user input a set of parameters to a new or available context
+This function allows user assemble a new context or update an available context
 }
 \details{
-This function takes in a set of parameters that the user input and assemble them
-into a \code{context} object, it uses the \code{down.stream} function to check for conflicts
+This function takes in a set of parameters that the user input and assembles them
+into a \code{context} object, it uses the \code{down.stream} function to check for some kind of conflicts
 }
 \author{
-Hoang-Trieu Trinh
+Hoang-Trieu Trinh, \email{thtrieu@apcs.vn}
 }
 \seealso{
 \code{down.stream}

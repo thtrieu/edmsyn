@@ -7,27 +7,17 @@
 learn(model, data)
 }
 \arguments{
-\item{model}{a character string indicates}
+\item{model}{a character string indicates which model governs the learning process.}
 
-\item{pars}{another param}
-
-\item{n}{another param}
-
-\item{progress}{another one}
+\item{data}{a list contains data that needs to be synthesized, first component is the response matrix, the other components are additional information that the specified model requires.}
 }
 \value{
-whatever it is
+the most probable context corresponds to \code{data} in light of \code{model}
 }
 \description{
 Learn the most probable context for a given data
 }
-\details{
-more detail huh?
-}
 \author{
-Hoang-Trieu Trinh
-}
-\seealso{
-what?
+Hoang-Trieu Trinh, \email{thtrieu@apcs.vn}
 }
 

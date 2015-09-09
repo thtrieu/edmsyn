@@ -2,32 +2,34 @@
 % Please edit documentation in R/structure.R
 \name{gen.apply}
 \alias{gen.apply}
-\title{Generate data for a set of models}
+\title{Generate data for a set of models and contexts}
 \usage{
 gen.apply(models, pars, multiply = TRUE, n = 1, progress = FALSE)
 }
 \arguments{
-\item{pars}{another param}
+\item{pars}{a context or a list of contexts}
 
-\item{n}{another param}
+\item{multiply}{a boolean value indicates in which way should \code{models} and \code{pars} be matched.
+if \code{TRUE} the generating process will be performed on every possible combination from \code{models} and \code{pars},
+if \code{FALSE} each model will be matched with its respective context in the same order specified in \code{models} and \code{pars},
+in other words, set \code{multiply} to \code{FALSE} will make \code{gen.apply} does the exact same thing to \code{mapply(gen,models,pars)}}
 
-\item{progress}{another one}
+\item{n}{number of runs for each generation}
 
-\item{model}{a param}
+\item{progress}{a boolean value indicates if the generating steps should be printed or not.}
+
+\item{model}{a character string indicates which model governs the learning process.}
 }
 \value{
 whatever it is
 }
 \description{
-This function does something
-}
-\details{
-more detail huh?
+Generate data for a set of models and contexts
 }
 \author{
-Hoang-Trieu Trinh
+Hoang-Trieu Trinh, \email{thtrieu@apcs.vn}
 }
 \seealso{
-what?
+\code{gen}, \code{mapply}, \code{sapply}
 }
 

@@ -7,27 +7,27 @@
 gen(model, pars, n = 1, progress = FALSE)
 }
 \arguments{
-\item{model}{a param}
+\item{model}{a character string indicates which model governs the generating process.}
 
-\item{pars}{another param}
+\item{pars}{a context}
 
-\item{n}{another param}
+\item{n}{numer of runs}
 
-\item{progress}{another one}
+\item{progress}{a boolean value indicates if the generating steps should be printed or not.}
 }
 \value{
-whatever it is
+a context with its data unit activated
 }
 \description{
-This function does something
+This function generates a context with a specified data unit activated
 }
 \details{
-more detail huh?
+\code{gen} is essentially a wrapper of \code{up.stream}
 }
 \author{
-Hoang-Trieu Trinh
+Hoang-Trieu Trinh, \email{thtrieu@apcs.vn}
 }
 \seealso{
-what?
+\code{up.stream}, \code{get.par}
 }
 

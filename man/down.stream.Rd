@@ -18,8 +18,8 @@ possible parameters at lower level, simultaneously check for conflicts
 }
 \details{
 This function use breadth-first scheme to propagate information in
-the STRUCTURE, using the learning functions indicated in 3rd element
-of each node inside STRUCTURE to learn the corresponding values of
+the structure, using the learning functions indicated in 3rd element
+of each node inside \code{STRUCTURE} to learn the corresponding values of
 nodes indicated in the 1st element
 }
 \author{

@@ -20,15 +20,15 @@ if success, a list with two components
 if not success, NULL
 }
 \description{
-This function generate (if needed) the required target from a context
+This function generates (if needed) the required target from a context
 }
 \details{
-This function uses \code{up.stream} function to obtain target's value and context
+This function uses \code{up.stream} to obtain target's value and context
 }
 \author{
-Hoang-Trieu Trinh
+Hoang-Trieu Trinh, \email{thtrieu@apcs.vn}
 }
 \seealso{
-\code{up.stream}
+\code{up.stream}, \code{gen}
 }
 

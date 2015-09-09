@@ -20,16 +20,16 @@ the old \code{context} object is returned
 \description{
 This function takes the available parameters and generate higher
 level parameters in a tailored direction so that a specified
-target can be reach
+target can be reach, also detects conflicts due to inactivated but required default values.
 }
 \details{
 This function runs a recursive search for available information at lower level
-nodes in the STRUCTURE that has been provided by the input. Whenever there is
+nodes in the structure that has been provided by the input. Whenever there is
 more than two ways to generate a parameter, the function chooses the one that
 requires inputs that is more likely to be learned directly from the target.
 }
 \author{
-Hoang-Trieu Trinh
+Hoang-Trieu Trinh, \email{thtrieu@apcs.vn}
 }
 \seealso{
 \code{which.closest}
