@@ -250,17 +250,56 @@ assemble.structure <- function(){
   QSLinAvgGen<- function(Q,S){
     list(R=randGen(sqrt(QSAvgGenR2(Q = Q,S = S))), concepts = nrow(S))
   }
-  Gen.Synthetic.POKS <- function(St.Var, Students, State, OR.t, OR.f, PO, alpha.c, alpha.p, p.min){
-    Items <- length(State)
-    if(St.Var>0.3) stVar <- 0.3
-    if(St.Var<0) stVar <- 0
-    State_ <- State
+  Get.Ks.State <- function(Node,PO,State)
+  {
+    if(sum(PO[,Node])==0) {res = 0} else
+    {res = max(State[which(PO[,Node]==1)])}
+    level = depth(Node,PO)
+    return(runif(1,res,res+((1-res)/level)))
+  }
+  Gen.Synthetic.POKS <- function(St.Var,Students,State,OR.t, OR.f, PO, alpha.c, alpha.p, p.min)
+  {
+    Items = nrow(PO)
+    item.Var=0
+    LinkNum = 0
+    #Generate random PO
+#     PO = matrix(0,Items,Items)
+#     PO[which(upper.tri(PO))] = round(pnorm(rnorm(sum(
+#       upper.tri(PO)),mean = LinkNum)))
+#     
+    viz(PO)
+    print(mean(PO))
+    
+    #for student variance we use (x+1/2)^4
+    Student.Variance = pnorm(rnorm(Students,0,St.Var))
+    Student.Variance = (Student.Variance+1/2)^4
+    #Gen initial State
+    State = rep(0,Items)
+    for (j in 1:Items){
+      State[j] = Get.Ks.State(j,PO,State)
+    }
+    State.Org <- PToOdds(State)
+    State.Org <- State
+    ItVar = item.Var
+    if(item.Var>0.3)
+      ItVar = 0.3
+    if(item.Var<0)
+      ItVar = 0
+
     R = matrix(-1,Students,Items)
     for(i in 1:Students)
     {
-      State <- State_
+      State <- State.Org*Student.Variance[i]
+      #Gen OR.t
+      OR.t = matrix(0.5,Items,Items)
+      OR.t[which(t(PO)==1)] <- runif(sum(PO),0.8-ItVar,1)
+      OR.t <- PToOdds(OR.t)
+      #Gen OR.f
+      OR.f = matrix(0.5,Items,Items)
+      OR.f[which(t(PO)==1)] <- runif(sum(PO),0,0.2+ItVar)
+      OR.f <- PToOdds(OR.f)
       #Create Samples
-      for(it in sample(Items))
+      for(it in 1:ncol(R))
       {
         R[i,it] <- sample(0:1,size = 1,prob = c(1- OddsToP(State[it]),OddsToP(State[it])))
         #Odds.temp.state[k] <- ks.update(i,RG[j,i],ks$state,ks)[k]
@@ -273,12 +312,43 @@ assemble.structure <- function(){
           for(k in which(PO[,it]==1)){
             State[k] <- State[k]*OR.f[k,it]
           }
-        }
+        }                   
       }
     }
-
-    list(R=t(R), alpha.c = alpha.c, alpha.p = alpha.p, p.min = p.min)
+    res <- list(R = t(R), alpha.c = alpha.c, alpha.p = alpha.p, p.min = p.min)
+    return(res)
   }
+#   Gen.Synthetic.POKS <- function(St.Var, Students, State, OR.t, OR.f, PO, alpha.c, alpha.p, p.min){
+#     Items <- length(State)
+#     if(St.Var>0.3) stVar <- 0.3
+#     if(St.Var<0) stVar <- 0
+# #     Student.Variance = pnorm(rnorm(Students,0,St.Var))
+# #     Student.Variance = (Student.Variance+1/2)^4
+#     State_ <- State
+#     R = matrix(-1,Students,Items)
+#     for(i in 1:Students)
+#     {
+#       State <- State_#*Student.Variance[i]
+#       #Create Samples
+#       for(it in 1:Items)
+#       {
+#         R[i,it] <- sample(0:1,size = 1,prob = c(1- OddsToP(State[it]),OddsToP(State[it])))
+#         #Odds.temp.state[k] <- ks.update(i,RG[j,i],ks$state,ks)[k]
+#         if(R[i,it]==1)
+#         {
+#           for(k in which(PO[it,]==1)){
+#             State[k] <- State[k]*OR.t[k,it]
+#           }
+#         }else{
+#           for(k in which(PO[,it]==1)){
+#             State[k] <- State[k]*OR.f[k,it]
+#           }
+#         }
+#       }
+#     }
+# 
+#     list(R=t(R), alpha.c = alpha.c, alpha.p = alpha.p, p.min = p.min)
+#   }
   poksGen <- function(students, poks, successRate, alpha.c, alpha.p, p.min){
     items <- nrow(poks)
     poks_ <- poks
@@ -474,7 +544,7 @@ assemble.structure <- function(){
     OR.f <- PToOdds(OR.f)
   }
   genPoks <- function(items, minTrees, maxTrees, minDepth, maxDepth,
-                      density, minItemPerTree, maxItemPerTree) {
+                      density, minItemPerTree, maxItemPerTree, trans) {
     treeSizes <- NULL
     treeDepths <- NULL
     #-------------CISAC------------------------------------------------------
@@ -567,7 +637,6 @@ assemble.structure <- function(){
             treeDepths[i] <- sample(max(minDepth,1):upperDepth,1)
       }
     }
-
     #permute to remove bias from ordered samling
     perm <- sample(items)
     poks <- matrix(0,items,items)
@@ -591,7 +660,6 @@ assemble.structure <- function(){
       levels <- treeDepths[i] + 1
       levelSizes <-
         sampleLevel(size.i,levels)[sample(levels)]
-
       # Skeleton
       accumLvl <- cumsum(levelSizes)
 
@@ -627,21 +695,37 @@ assemble.structure <- function(){
       }
 
       if (size.i != 1){
-        groundLvl <- c(0,accumLvl)
-        pNow <- (size.i-1)/sum((c(1,levelSizes)*c(levelSizes,1))[2:levels])
-        if (pNow < 1){
-          p <- (density - pNow)/(1-pNow)
-          if (p < 0) densFail <- TRUE
-          else{
-            # Add random arc
-            for (j in 1:(levels-1))
-              for (k in 1:levelSizes[j])
-                for (m in 1:levelSizes[j+1]){
-                  begin <- perm[groundLvl[j]+k]
-                  end <- perm[groundLvl[j+1]+m]
+        if (trans == FALSE){
+          groundLvl <- c(0,accumLvl)
+          pNow <- (size.i-1)/sum((c(1,levelSizes)*c(levelSizes,1))[2:levels])
+          if (pNow < 1){
+            p <- (density - pNow)/(1-pNow)
+            if (p > 0){
+              # Add random arc
+              for (j in 1:(levels-1))
+                for (k in 1:levelSizes[j])
+                  for (m in 1:levelSizes[j+1]){
+                    begin <- perm[groundLvl[j]+k]
+                    end <- perm[groundLvl[j+1]+m]
+                    if (poks[begin,end] == 0)
+                      poks[begin,end] <- sample(0:1,1,prob = c(1-p,p))
+                  }
+            }
+          }
+        }
+        else{
+          pNow <- 2/(size.i)
+          if (pNow < 1){
+            p <- (density - pNow)/(1-pNow)
+            if (p > 0){
+              for (j in 1:(size.i-1))
+                for (k in (j+1):size.i){
+                  begin <- perm[j]
+                  end <- perm[k]
                   if (poks[begin,end] == 0)
                     poks[begin,end] <- sample(0:1,1,prob = c(1-p,p))
                 }
+            }
           }
         }
       }
@@ -651,7 +735,7 @@ assemble.structure <- function(){
 
     colnames(poks) <- as.character(1:items)
     rownames(poks) <- colnames(poks)
-
+    print(mean(poks))
     return(poks)
   }
 
@@ -968,7 +1052,7 @@ assemble.structure <- function(){
   stvar.po.2.or.t <- function(x){stVarPo2Ort(x[[1]],x[[2]])}
   stvar.po.2.or.f <- function(x){stVarPo2Orf(x[[1]],x[[2]])}
   items.tree.depth.dens.per.2.po <- function(x){
-    genPoks(x[[1]],x[[2]],x[[3]],x[[4]],x[[5]],x[[6]],x[[7]],x[[8]])}
+    genPoks(x[[1]],x[[2]],x[[3]],x[[4]],x[[5]],x[[6]],x[[7]],x[[8]],x[[9]])}
   items.concepts.2.Q <- function(x){genQRand(x[[1]],x[[2]])}
   rn <- function(x) {runif(x[[1]],0,1)}
   rmn <- function(x) {
@@ -1082,6 +1166,7 @@ assemble.structure <- function(){
   init.vals. <- root.
 
   # root nodes with predefined default values initialized only when needed
+  trans. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["trans"]]}))
   bkt.guess.st.var. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["bkt.guess.st.var"]]}))
   bkt.slip.st.var. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["bkt.slip.st.var"]]}))
   S.st.var. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["S.st.var"]]}))
@@ -1180,7 +1265,7 @@ assemble.structure <- function(){
                 n.row.col, list(stvar.po.2.or.f))
   po. <- list(c("items","items"), list(c("items","min.ntree","max.ntree",
                                          "min.depth","max.depth","density",
-                                         "min.it.per.tree","max.it.per.tree")),
+                                         "min.it.per.tree","max.it.per.tree","trans")),
               function(x){list(nrow(x),ncol(x))},
               list(items.tree.depth.dens.per.2.po))
   slip. <- list(c("items"), list(c("items")),
@@ -1232,7 +1317,7 @@ assemble.structure <- function(){
          time = time., bkt.mod = bkt.mod.,
          per.item = per.item., order = order.,
          min.ntree = min.ntree., max.ntree = max.ntree., min.depth = min.depth.,
-         max.depth = max.depth., min.it.per.tree = min.it.per.tree.,
+         max.depth = max.depth., min.it.per.tree = min.it.per.tree., trans = trans.,
          max.it.per.tree = max.it.per.tree., density = density.,
          init.vals = init.vals.)
   sapply(1:length(r), function(x){names(r[[x]]) <<- c("tell","gen","f.tell","f.gen")})
@@ -1295,7 +1380,7 @@ BOUND.CLASSES <- c("min", "max")
 # up.stream() propagates info through type-2 connection in the STRUCTURE,     |
 # the propagation is tailored so that a specified target can be calculated    |
 #-----------------------------------------------------------------------------+
-
+ 
 #' Propagate information downwards
 #'
 #' This function takes the available parameters and try to learn all
@@ -1413,7 +1498,7 @@ up.stream <- function(target, pars, progress = FALSE){
         new.pars[[node.name]] <<- node$f.gen[[1]](list(new.pars$init.vals))
       else {
         dummy <- sapply(gen.method, follow)
-        if (fill == TRUE)
+        if (fill == TRUE & is.null(new.pars[[node.name]]))
           new.pars[[node.name]] <<- node$f.gen[[pick]](new.pars[gen.method])
       }
       if (fill == TRUE) trace[[node.name]] <<- gen.method
@@ -1517,6 +1602,7 @@ dissect <- function(po){
     
     lvl.i <- rep(-1,n)
     skeleton <- which(leaf.tell == root.tell)
+    print(length(skeleton))
     lvl.i[skeleton] <- leaf.tell[skeleton]
     while (sum(lvl.i[nodes.i] == -1) != 0) {
       for (j in 1:n)
@@ -1580,7 +1666,7 @@ init <- function(student.var = 1/12, avg.success = 0.5, time = 50,
                  min.ntree = 1, min.depth = 0, min.it.per.tree = 1,
                  per.item = FALSE, bkt.mod = "dina", density = 0.5,
                  alpha.c = 0.25, alpha.p = 0.25, p.min = 0.5,
-                 abi.mean = 0, abi.sd = 1){
+                 abi.mean = 0, abi.sd = 1, trans = TRUE){
   as.list(environment())
 }
 
@@ -1610,7 +1696,7 @@ pars <- function(old.pars = NULL,
                  items = NULL, concepts = NULL, students = NULL,
                  state = NULL, po = NULL, or.t = NULL, or.f = NULL,
                  student.var = NULL, avg.success = NULL,
-                 min.ntree = NULL, max.ntree = NULL,
+                 min.ntree = NULL, max.ntree = NULL, trans = NULL,
                  min.depth = NULL, max.depth = NULL, density = NULL,
                  min.it.per.tree = NULL, max.it.per.tree = NULL,
                  alpha.c= NULL, alpha.p= NULL, p.min= NULL,
