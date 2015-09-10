@@ -261,14 +261,6 @@ assemble.structure <- function(){
   {
     Items = nrow(PO)
     item.Var=0
-    LinkNum = 0
-    #Generate random PO
-#     PO = matrix(0,Items,Items)
-#     PO[which(upper.tri(PO))] = round(pnorm(rnorm(sum(
-#       upper.tri(PO)),mean = LinkNum)))
-#     
-    viz(PO)
-    print(mean(PO))
     
     #for student variance we use (x+1/2)^4
     Student.Variance = pnorm(rnorm(Students,0,St.Var))
@@ -280,11 +272,11 @@ assemble.structure <- function(){
     }
     State.Org <- PToOdds(State)
     State.Org <- State
-    ItVar = item.Var
-    if(item.Var>0.3)
-      ItVar = 0.3
-    if(item.Var<0)
-      ItVar = 0
+    
+    if(St.Var>0.3)
+      St.Var = 0.3
+    if(St.Var<0)
+      St.Var = 0
 
     R = matrix(-1,Students,Items)
     for(i in 1:Students)
@@ -292,11 +284,11 @@ assemble.structure <- function(){
       State <- State.Org*Student.Variance[i]
       #Gen OR.t
       OR.t = matrix(0.5,Items,Items)
-      OR.t[which(t(PO)==1)] <- runif(sum(PO),0.8-ItVar,1)
+      OR.t[which(t(PO)==1)] <- runif(sum(PO),0.8-St.Var,1)
       OR.t <- PToOdds(OR.t)
       #Gen OR.f
       OR.f = matrix(0.5,Items,Items)
-      OR.f[which(t(PO)==1)] <- runif(sum(PO),0,0.2+ItVar)
+      OR.f[which(t(PO)==1)] <- runif(sum(PO),0,0.2+St.Var)
       OR.f <- PToOdds(OR.f)
       #Create Samples
       for(it in 1:ncol(R))
@@ -318,37 +310,7 @@ assemble.structure <- function(){
     res <- list(R = t(R), alpha.c = alpha.c, alpha.p = alpha.p, p.min = p.min)
     return(res)
   }
-#   Gen.Synthetic.POKS <- function(St.Var, Students, State, OR.t, OR.f, PO, alpha.c, alpha.p, p.min){
-#     Items <- length(State)
-#     if(St.Var>0.3) stVar <- 0.3
-#     if(St.Var<0) stVar <- 0
-# #     Student.Variance = pnorm(rnorm(Students,0,St.Var))
-# #     Student.Variance = (Student.Variance+1/2)^4
-#     State_ <- State
-#     R = matrix(-1,Students,Items)
-#     for(i in 1:Students)
-#     {
-#       State <- State_#*Student.Variance[i]
-#       #Create Samples
-#       for(it in 1:Items)
-#       {
-#         R[i,it] <- sample(0:1,size = 1,prob = c(1- OddsToP(State[it]),OddsToP(State[it])))
-#         #Odds.temp.state[k] <- ks.update(i,RG[j,i],ks$state,ks)[k]
-#         if(R[i,it]==1)
-#         {
-#           for(k in which(PO[it,]==1)){
-#             State[k] <- State[k]*OR.t[k,it]
-#           }
-#         }else{
-#           for(k in which(PO[,it]==1)){
-#             State[k] <- State[k]*OR.f[k,it]
-#           }
-#         }
-#       }
-#     }
-# 
-#     list(R=t(R), alpha.c = alpha.c, alpha.p = alpha.p, p.min = p.min)
-#   }
+
   poksGen <- function(students, poks, successRate, alpha.c, alpha.p, p.min){
     items <- nrow(poks)
     poks_ <- poks
@@ -637,6 +599,7 @@ assemble.structure <- function(){
             treeDepths[i] <- sample(max(minDepth,1):upperDepth,1)
       }
     }
+    
     #permute to remove bias from ordered samling
     perm <- sample(items)
     poks <- matrix(0,items,items)
@@ -695,8 +658,8 @@ assemble.structure <- function(){
       }
 
       if (size.i != 1){
+        groundLvl <- c(0,accumLvl)
         if (trans == FALSE){
-          groundLvl <- c(0,accumLvl)
           pNow <- (size.i-1)/sum((c(1,levelSizes)*c(levelSizes,1))[2:levels])
           if (pNow < 1){
             p <- (density - pNow)/(1-pNow)
@@ -718,10 +681,10 @@ assemble.structure <- function(){
           if (pNow < 1){
             p <- (density - pNow)/(1-pNow)
             if (p > 0){
-              for (j in 1:(size.i-1))
-                for (k in (j+1):size.i){
-                  begin <- perm[j]
-                  end <- perm[k]
+              for (j in 1:(levels-1))
+                for (k in 1:levelSizes[j]){
+                  begin <- perm[groundLvl[j]+k]
+                  for (end in perm[(groundLvl[j+1]+1):size.i])
                   if (poks[begin,end] == 0)
                     poks[begin,end] <- sample(0:1,1,prob = c(1-p,p))
                 }
@@ -735,7 +698,6 @@ assemble.structure <- function(){
 
     colnames(poks) <- as.character(1:items)
     rownames(poks) <- colnames(poks)
-    print(mean(poks))
     return(poks)
   }
 
@@ -1208,11 +1170,13 @@ assemble.structure <- function(){
   #lin.pes. <- list(NULL, list(c("Q","S")), NULL, list(Q.S.2.lin.pes))
   lin.avg. <- list(c("Q","S"), list(c("Q","S")),
                    lin.avg.2.Q.S, list(Q.S.2.lin.avg))
-  poks.<- list(c("student.var","avg.success","state","or.t","or.f","po","alpha.c","alpha.p","p.min"),
-               list(c("student.var", "students", "state", "or.t","or.f","po","alpha.c","alpha.p","p.min"),
-                    c("students","po","avg.success","alpha.c","alpha.p","p.min")),
-               poks.learn, list(stvar.stu.state.or.po.2.poks,
-                                st.po.avg.2.poks))
+  poks. <- list(c("student.var","avg.success","state","or.t","or.f","po","alpha.c","alpha.p","p.min"),
+               list(c("student.var", "students", "state", "or.t","or.f","po","alpha.c","alpha.p","p.min")
+                    #,c("students","po","avg.success","alpha.c","alpha.p","p.min")
+                    ),
+               poks.learn, list(stvar.stu.state.or.po.2.poks
+                                #,st.po.avg.2.poks
+                                ))
   bkt. <- list(c("S","L","bkt.slip","bkt.guess","time","order","per.item","Q"),
                list(c("S","L","bkt.slip","bkt.guess","time","order","per.item"),
                     c("S","L","bkt.slip","bkt.guess","time","order","per.item","Q","bkt.mod")),
@@ -1460,6 +1424,7 @@ down.stream <- function(pars){
 up.stream <- function(target, pars, progress = FALSE){
 
   miss <- NULL
+  input <- names(pars)[which(sapply(pars,is.null) == 0)]
   new.pars <- pars
   trace <- list(NULL)
   track <- list(NULL)
@@ -1484,7 +1449,21 @@ up.stream <- function(target, pars, progress = FALSE){
       return(FALSE)
     }
     if (length(avail) == 1) pick <- avail
-    else pick <- avail[which.closest(target, gen.methods[avail])]
+    else { #criterion: pick the most available first, the most likely to be learned from target later
+      ratio.avail <- rep(0,length(avail))
+      for (i in 1:length(avail)){
+        gen.med.i <- gen.methods[[avail[i]]]
+        ratio.avail[i] <- sum(sapply(gen.med.i, function(x){
+          x %in% input
+        }))/length(gen.med.i)
+      }
+      if (node.name == "poks") print(ratio.avail)
+      max.ratio <- max(ratio.avail)
+      avail <- avail[ratio.avail == max.ratio]
+      if (length(avail) == 1) pick <- avail
+      else 
+        pick <- avail[which.closest(target, gen.methods[avail])]
+    }
 
     track[[node.name]] <<- pick
     return(TRUE)
@@ -1602,7 +1581,6 @@ dissect <- function(po){
     
     lvl.i <- rep(-1,n)
     skeleton <- which(leaf.tell == root.tell)
-    print(length(skeleton))
     lvl.i[skeleton] <- leaf.tell[skeleton]
     while (sum(lvl.i[nodes.i] == -1) != 0) {
       for (j in 1:n)
@@ -1650,7 +1628,7 @@ viz <- function(po){
             lwd = 0.1,
             arr.type = "triangle",
             curve = 0,
-            box.size = 0.03,
+            box.size = 0.015,
             box.type = "round",
             endhead = TRUE,
             arr.pos = 0.85,
