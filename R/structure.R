@@ -1458,7 +1458,7 @@ down.stream <- function(pars){
 #' requires inputs that is more likely to be learned directly from the target.
 #' @seealso \code{which.closest}
 #' @export
-up.stream <- function(target, pars, progress = FALSE){
+up.stream <- function(target, pars, target.base = TRUE, progress = FALSE){
 
   miss <- NULL
   input <- names(pars)[which(sapply(pars,is.null) == 0)]
@@ -1487,21 +1487,23 @@ up.stream <- function(target, pars, progress = FALSE){
     }
     if (length(avail) == 1) pick <- avail
     else { #criterion: pick the most usage first, available second, the most likely to be learned from target last
-      ratio.avail <- rep(0,length(avail))
-      ratio.usage <- ratio.avail
-      for (i in 1:length(avail)){
-        gen.med.i <- gen.methods[[avail[i]]]
-        ratio.avail[i] <- sum(sapply(gen.med.i, function(x){
-          x %in% input
-        }))/length(gen.med.i)
-        ratio.usage[i] <- sum(sapply(input, function(x){
-          x %in% gen.med.i
-        }))/length(input)
+      if (target.base == FALSE){
+        ratio.avail <- rep(0,length(avail))
+        ratio.usage <- ratio.avail
+        for (i in 1:length(avail)){
+          gen.med.i <- gen.methods[[avail[i]]]
+          ratio.avail[i] <- sum(sapply(gen.med.i, function(x){
+            x %in% input
+          }))/length(gen.med.i)
+          ratio.usage[i] <- sum(sapply(input, function(x){
+            x %in% gen.med.i
+          }))/length(input)
+        }
+        max.usage <- max(ratio.usage)
+        ratio.avail <- ratio.avail * (ratio.usage == max.usage)
+        max.avail <- max(ratio.avail)
+        avail <- avail[ratio.avail == max.avail]
       }
-      max.usage <- max(ratio.usage)
-      ratio.avail <- ratio.avail * (ratio.usage == max.usage)
-      max.avail <- max(ratio.avail)
-      avail <- avail[ratio.avail == max.avail]
       if (length(avail) == 1) pick <- avail
       else 
         pick <- avail[which.closest(target, gen.methods[avail])]
@@ -1771,7 +1773,7 @@ pars <- function(old.pars = NULL,
 #' @seealso \code{up.stream}, \code{gen}
 #' @export
 get.par <- function(target, pars, progress = FALSE){
-  g <- up.stream(target, pars, progress)
+  g <- up.stream(target, pars, target.base = FALSE, progress)
   if (!is.null(g)) {
     ret <- list(g[[target]], g)
     names(ret) <- c("value", "context")
