@@ -1459,7 +1459,6 @@ down.stream <- function(pars){
 #' @seealso \code{which.closest}
 #' @export
 up.stream <- function(target, pars, target.base = TRUE, progress = FALSE){
-
   miss <- NULL
   input <- names(pars)[which(sapply(pars,is.null) == 0)]
   new.pars <- pars
@@ -1487,7 +1486,7 @@ up.stream <- function(target, pars, target.base = TRUE, progress = FALSE){
     }
     if (length(avail) == 1) pick <- avail
     else { #criterion: pick the most usage first, available second, the most likely to be learned from target last
-      if (target.base == FALSE){
+      if (target.base == FALSE | (target.base == TRUE & node.name == target)){
         ratio.avail <- rep(0,length(avail))
         ratio.usage <- ratio.avail
         for (i in 1:length(avail)){
@@ -1672,7 +1671,7 @@ viz <- function(po){
             lwd = 0.1,
             arr.type = "triangle",
             curve = 0,
-            box.size = 0.015,
+            box.size = 0.03,
             box.type = "round",
             endhead = TRUE,
             arr.pos = 0.85,
@@ -1773,7 +1772,7 @@ pars <- function(old.pars = NULL,
 #' @seealso \code{up.stream}, \code{gen}
 #' @export
 get.par <- function(target, pars, progress = FALSE){
-  g <- up.stream(target, pars, target.base = FALSE, progress)
+  g <- up.stream(target, pars, FALSE, progress)
   if (!is.null(g)) {
     ret <- list(g[[target]], g)
     names(ret) <- c("value", "context")
@@ -1805,7 +1804,7 @@ gen <- function(model, pars, n = 1, progress = FALSE){
   r <-
     sapply(1:n,function(x){
       if (x > 1) progress <- FALSE
-      trial <- up.stream(model, pars, progress)
+      trial <- up.stream(model, pars, TRUE, progress)
       if (is.null(trial))
         stop(paste0("Insufficient information to generate '",model,"'"))
       list(trial)
