@@ -1340,7 +1340,7 @@ ALL.MODELS <- c("exp", "irt", "poks", "dina", "dino",
 #' @export
 KEEP <- list(exp = c("avg.success","it.exp","student.var"),
              irt = c("dis","dif","abi.mean","abi.sd"),
-             poks = c("po","avg.success","alpha.c","alpha.p","p.min"),
+             poks = c("po","student.var","state","alpha.c","alpha.p","p.min"),
              dina = c("Q","skill.space","skill.dist","slip","guess"),
              dino = c("Q","skill.space","skill.dist","slip","guess"),
              lin.avg = c("Q", "S.st.var", "S.con.exp"),
