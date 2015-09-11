@@ -257,20 +257,13 @@ assemble.structure <- function(){
     level = depth(Node,PO)
     return(runif(1,res,res+((1-res)/level)))
   }
-  Gen.Synthetic.POKS <- function(St.Var,Students,State,OR.t, OR.f, PO, alpha.c, alpha.p, p.min)
+  Gen.Synthetic.POKS <- function(St.Var,Students,State,PO, alpha.c, alpha.p, p.min)
   {
     Items = nrow(PO)
-    item.Var=0
     
     #for student variance we use (x+1/2)^4
     Student.Variance = pnorm(rnorm(Students,0,St.Var))
     Student.Variance = (Student.Variance+1/2)^4
-    #Gen initial State
-    State = rep(0,Items)
-    for (j in 1:Items){
-      State[j] = Get.Ks.State(j,PO,State)
-    }
-    State.Org <- PToOdds(State)
     State.Org <- State
     
     if(St.Var>0.3)
@@ -310,7 +303,44 @@ assemble.structure <- function(){
     res <- list(R = t(R), alpha.c = alpha.c, alpha.p = alpha.p, p.min = p.min)
     return(res)
   }
-
+  Gen.Synthetic.POKS.OR <- function(St.Var,Students,State, OR.t, OR.f, PO, alpha.c, alpha.p, p.min)
+  {
+    Items = nrow(PO)
+    
+    #for student variance we use (x+1/2)^4
+    Student.Variance = pnorm(rnorm(Students,0,St.Var))
+    Student.Variance = (Student.Variance+1/2)^4
+    State.Org <- State
+    
+    if(St.Var>0.3)
+      St.Var = 0.3
+    if(St.Var<0)
+      St.Var = 0
+    
+    R = matrix(-1,Students,Items)
+    for(i in 1:Students)
+    {
+      State <- State.Org*Student.Variance[i]
+      #Create Samples
+      for(it in 1:ncol(R))
+      {
+        R[i,it] <- sample(0:1,size = 1,prob = c(1- OddsToP(State[it]),OddsToP(State[it])))
+        #Odds.temp.state[k] <- ks.update(i,RG[j,i],ks$state,ks)[k]
+        if(R[i,it]==1)
+        {
+          for(k in which(PO[it,]==1)){
+            State[k] <- State[k]*OR.t[k,it]
+          }
+        }else{
+          for(k in which(PO[,it]==1)){
+            State[k] <- State[k]*OR.f[k,it]
+          }
+        }                   
+      }
+    }
+    res <- list(R = t(R), alpha.c = alpha.c, alpha.p = alpha.p, p.min = p.min)
+    return(res)
+  }
   poksGen <- function(students, poks, successRate, alpha.c, alpha.p, p.min){
     items <- nrow(poks)
     poks_ <- poks
@@ -344,6 +374,7 @@ assemble.structure <- function(){
 
     # 2-generation Incremental fitting the successRate param
     tol <- 0.01
+    count <- 0
     twoSteps <- poks %*% poks
     while (abs(mean(R) - successRate) > tol) {
       flip <- mean(R) < successRate
@@ -356,6 +387,8 @@ assemble.structure <- function(){
         copy <- t(copy)
       follows <- which(copy[item,] > 0)
       R[follows,student] <- flip
+      count <- count + 1
+      if (count > 5000) break
     }
 
     list(R=R, alpha.c = alpha.c, alpha.p = alpha.p, p.min = p.min)
@@ -1003,7 +1036,9 @@ assemble.structure <- function(){
   #Q.S.2.lin.pes <- function(x){QSLinPesGen(x[[1]],x[[2]])}
   Q.S.2.lin.avg <- function(x){QSLinAvgGen(x[[1]],x[[2]])}
   stvar.stu.state.or.po.2.poks <- function(x){
-    Gen.Synthetic.POKS(x[[1]],x[[2]],x[[3]],x[[4]],x[[5]],x[[6]],x[[7]],x[[8]],x[[9]])}
+    Gen.Synthetic.POKS.OR(x[[1]],x[[2]],x[[3]],x[[4]],x[[5]],x[[6]],x[[7]],x[[8]],x[[9]])}
+  stvar.stu.state.po.2.poks <- function(x){
+    Gen.Synthetic.POKS(x[[1]],x[[2]],x[[3]],x[[4]],x[[5]],x[[6]],x[[7]])}
   st.po.avg.2.poks <- function(x){poksGen(x[[1]],x[[2]],x[[3]],x[[4]],x[[5]],x[[6]])}
   S.L.slip.guess.time.order.peritem.2.bkt <- function(x){
     skillBktGen(x[[1]],x[[2]],x[[3]],x[[4]],x[[5]],x[[6]],x[[7]])}
@@ -1172,10 +1207,12 @@ assemble.structure <- function(){
                    lin.avg.2.Q.S, list(Q.S.2.lin.avg))
   poks. <- list(c("student.var","avg.success","state","or.t","or.f","po","alpha.c","alpha.p","p.min"),
                list(c("student.var", "students", "state", "or.t","or.f","po","alpha.c","alpha.p","p.min")
-                    #,c("students","po","avg.success","alpha.c","alpha.p","p.min")
+                    ,c("student.var", "students", "state", "po", "alpha.c", "alpha.p", "p.min")
+                    ,c("students","po","avg.success","alpha.c","alpha.p","p.min")
                     ),
                poks.learn, list(stvar.stu.state.or.po.2.poks
-                                #,st.po.avg.2.poks
+                                ,stvar.stu.state.po.2.poks
+                                ,st.po.avg.2.poks
                                 ))
   bkt. <- list(c("S","L","bkt.slip","bkt.guess","time","order","per.item","Q"),
                list(c("S","L","bkt.slip","bkt.guess","time","order","per.item"),
@@ -1449,17 +1486,22 @@ up.stream <- function(target, pars, progress = FALSE){
       return(FALSE)
     }
     if (length(avail) == 1) pick <- avail
-    else { #criterion: pick the most available first, the most likely to be learned from target later
+    else { #criterion: pick the most usage first, available second, the most likely to be learned from target last
       ratio.avail <- rep(0,length(avail))
+      ratio.usage <- ratio.avail
       for (i in 1:length(avail)){
         gen.med.i <- gen.methods[[avail[i]]]
         ratio.avail[i] <- sum(sapply(gen.med.i, function(x){
           x %in% input
         }))/length(gen.med.i)
+        ratio.usage[i] <- sum(sapply(input, function(x){
+          x %in% gen.med.i
+        }))/length(input)
       }
-      if (node.name == "poks") print(ratio.avail)
-      max.ratio <- max(ratio.avail)
-      avail <- avail[ratio.avail == max.ratio]
+      max.usage <- max(ratio.usage)
+      ratio.avail <- ratio.avail * (ratio.usage == max.usage)
+      max.avail <- max(ratio.avail)
+      avail <- avail[ratio.avail == max.avail]
       if (length(avail) == 1) pick <- avail
       else 
         pick <- avail[which.closest(target, gen.methods[avail])]
