@@ -2,11 +2,27 @@
 % Please edit documentation in R/structure.R
 \name{viz}
 \alias{viz}
-\title{This function is so lame I cant take it}
+\title{Vizualize POK structure}
 \usage{
 viz(po)
 }
+\arguments{
+\item{po}{the dependency matrix of POKS to be vizualized}
+}
+\value{
+a list with two components \code{ks} and \code{comp},
+being the original \code{po} and analyzed connected components of \code{po}
+respectively, each component of \code{comp} is itself a list with two components
+\code{matrix} and \code{level.sizes}, being the corresponding subgraph of
+\code{po} and a vector indicates the number of items on each level of depth.
+}
 \description{
-This function is so lame I cant take it
+Vizualize POK structure
+}
+\author{
+Hoang-Trieu trinh, \email{thtrieu@apcs.vn}
+}
+\seealso{
+\code{plotmat}
 }
 

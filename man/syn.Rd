@@ -12,11 +12,12 @@ syn(model, data, keep.pars = keep(model), students = ncol(data$R), n = 1,
 
 \item{data}{a list contains data that needs to be synthesized, first component is the response matrix, the other components are additional information that the specified model requires.}
 
-\item{keep.pars}{a character string vector contains names of the parameters to kept after learning the most probable context from \code{data}.}
+\item{keep.pars}{a character string vector contains names of the parameters to be kept after learning the most probable context from \code{data},
+by default this parameter is set by values indicated in vector \code{KEEP}.}
 
-\item{students}{number of students in the synthetic data.}
+\item{students}{number of students in the synthetic data, by default this number is kept.}
 
-\item{n}{number of synthetic dataset to generate.}
+\item{n}{number of synthetic dataset(s) to generate.}
 
 \item{progress}{a boolean value indicates if the generating steps should be printed or not.}
 }
@@ -24,7 +25,7 @@ syn(model, data, keep.pars = keep(model), students = ncol(data$R), n = 1,
 a list with two components, first component is identical to argument \code{data}, second is a context or a list of contexts that have been generated.
 }
 \description{
-Generate synthetic data
+This function synthesize a given data under the assumptions of a given model
 }
 \details{
 This function is essentially a wrapper of function \code{learn} and \code{gen}, where in between it eliminates all parameters are not indicated in \code{keep.pars} in the learned context.
@@ -33,6 +34,6 @@ This function is essentially a wrapper of function \code{learn} and \code{gen}, 
 Hoang-Trieu Trinh, \email{thtrieu@apcs.vn}
 }
 \seealso{
-\code{learn}, \code{gen}
+\code{learn}, \code{gen}, \code{KEEP}
 }
 

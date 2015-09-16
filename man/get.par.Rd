@@ -22,13 +22,10 @@ if not success, NULL
 \description{
 This function generates (if needed) the required target from a context
 }
-\details{
-This function uses \code{up.stream} to obtain target's value and context
-}
 \author{
 Hoang-Trieu Trinh, \email{thtrieu@apcs.vn}
 }
 \seealso{
-\code{up.stream}, \code{gen}
+\code{gen}
 }
 

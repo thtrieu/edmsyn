@@ -2,14 +2,12 @@
 # Sub-Routine functions |
 #=======================+
 
-
 #' @export
 print.context <- function(x){
-  cat("Activated units in the context:\n")
+  cat("Activated information in the context:\n")
   print(names(x)[which(sapply(x,is.null)==0)])
 }
 
-#' @export
 toStr <- function(x, max){
   if (max<10) r <- toString(x)
   else
@@ -17,7 +15,6 @@ toStr <- function(x, max){
   return(paste0("0",r))
 }
 
-#' @export
 which.closest <- function(target, candidates){
   ref <- STRUCTURE[[target]]$tell
   which.max(
@@ -26,7 +23,6 @@ which.closest <- function(target, candidates){
     }))
 }
 
-#' @export
 compat <- function(val,tel){
   if (class(tel) == "min") return(all(tel <= val))
   if (class(tel) == "max") return(all(tel >= val))
@@ -37,9 +33,7 @@ compat <- function(val,tel){
 #===========+
 # STRUCTURE |
 #===========+
-
-#' This function is the shit.
-#'
+ 
 #' @importFrom CDM sim.din
 #' @importFrom CDM din
 #' @importFrom stats optim
@@ -920,7 +914,7 @@ assemble.structure <- function(){
     or$f[or$f==0] <- 1                # neutral evidence effect
     nlinks = colSums(m.rel, na.rm=T) + rowSums(m.rel, na.rm=T)
     log.nlinks = 0.6931472 / (log((nlinks+1)) + 0.6931472) # 0.6931472 is the entropy of 0.5
-    list(student.var = student.var, avg.success = mean(raw), state = state, or.t = odds.t, or.f = odds.f, po = m.rel,
+    list(student.var = student.var, avg.success = mean(raw), state = state, or.t = or$t, or.f = or$f, po = m.rel,
          alpha.c = alpha.c, alpha.p = alpha.p, p.min = p.min)
   }
   irt2plLearn <- function(R){
@@ -1069,18 +1063,24 @@ assemble.structure <- function(){
     m <- x[[1]]
     n <- x[[2]]
     v <- x[[3]]
-    if (v == 0) v <- 1e-10
+    if (v == 0) v <- 1e-100
     s <- m*(1-m)/v - 1
-    if (s < 0) s <- 0
+    if (s < 0) {
+      warning('Cannot achieve the specified variance')
+      return(mean.n.2.vec(list(m,n)))
+    }
     rbeta(n, s*m, s - s*m)
   }
   rmean.n.cvar.2.mat <- function(x){
     n <- x[[2]]
     v <- x[[3]]
-    if (v == 0) v <- 1e-10
+    if (v == 0) v <- 1e-100
     t(sapply(x[[1]], function(m){
       s <- m*(1-m)/v - 1
-      if (s < 0) s <- 0
+      if (s < 0) {
+        warning('Cannot achieve the specified variance')
+        return(mean.n.2.vec(list(m,n)))
+      }
       rbeta(n, s*m, s - s*m)
     }))
   }
@@ -1325,18 +1325,33 @@ assemble.structure <- function(){
   return(r)
 }
 
-#' @export
+# Context structure
+# 
+# This constant is the structure of every context, it contains all the necessary
+# information that the package operates on.
+# 
+# @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
+# @seealso \code{assemble.structure}
+# @export
 STRUCTURE <- assemble.structure()
 
 #===========+
 # CONSTANTS |
 #===========+
 
+#' A character vector of names of all available models
+#' 
+#' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
+#'
 #' @export
 ALL.MODELS <- c("exp", "irt", "poks", "dina", "dino",
                 #"lin.pes",
                 "lin.avg","nmf.con", "nmf.dis", "nmf.com", "bkt")
 
+#' List of parameters to be kept for each model in the synthesize process
+#' 
+#' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
+#' 
 #' @export
 KEEP <- list(exp = c("avg.success","it.exp","student.var"),
              irt = c("dis","dif","abi.mean","abi.sd"),
@@ -1352,17 +1367,16 @@ KEEP <- list(exp = c("avg.success","it.exp","student.var"),
                      "bkt.guess.st.var","bkt.guess.it.exp",
                      "time","order","per.item","Q"))
 
-#' @export
-INTEGER <- c("items","students","concepts","time","skill.space.size",
+# @export
+DEFINITE <- c("items","students","concepts","time","skill.space.size")
+
+# @export
+BOUND.CLASSES <- c("min", "max")
+
+# @export
+INTEGER <- c(DEFINITE,
              "min.ntree","max.ntree","min.depth","max.depth",
              "min.it.per.tree","max.it.per.tree")
-
-#' @export
-DEFINITE <- c("items","students","concepts","time",
-              "skill.space.size", "avg.success")
-
-#' @export
-BOUND.CLASSES <- c("min", "max")
 
 #=====================+
 # OPERATING FUNCTIONS |
@@ -1382,20 +1396,20 @@ BOUND.CLASSES <- c("min", "max")
 # the propagation is tailored so that a specified target can be calculated    |
 #-----------------------------------------------------------------------------+
  
-#' Propagate information downwards
-#'
-#' This function takes the available parameters and try to learn all
-#' possible parameters at lower level, simultaneously check for conflicts
-#'
-#' @param pars an object of \code{context} class describes all available information in current context
-#' @return a new \code{context} object obtained from the input
-#' @author Hoang-Trieu Trinh
-#' @details
-#' This function use breadth-first scheme to propagate information in
-#' the structure, using the learning functions indicated in 3rd element
-#' of each node inside \code{STRUCTURE} to learn the corresponding values of
-#' nodes indicated in the 1st element
-#' @export
+# Propagate information downwards
+#
+# This function takes the available parameters and try to learn all
+# possible parameters at lower level, simultaneously check for conflicts
+#
+# param pars an object of \code{context} class describes all available information in current context
+# return a new \code{context} object obtained from the input
+# author Hoang-Trieu Trinh
+# details
+# This function use breadth-first scheme to propagate information in
+# the structure, using the learning functions indicated in 3rd element
+# of each node inside \code{STRUCTURE} to learn the corresponding values of
+# nodes indicated in the 1st element
+# export
 down.stream <- function(pars){
   curr <- names(pars)[which(sapply(pars,is.null) == 0)]
 
@@ -1439,25 +1453,25 @@ down.stream <- function(pars){
   pars
 }
 
-#' Propagate information upwards
-#'
-#' This function takes the available parameters and generate higher
-#' level parameters in a tailored direction so that a specified
-#' target can be reach, also detects conflicts due to inactivated but required default values.
-#'
-#' @param target a character string indicates the target's name
-#' @param pars an object of \code{context} class describes all available information in current context
-#' @param progress a boolean value indicates if the generating process should be printed
-#' @return a new \code{context} object obtained from the input, if the target cannot be reach,
-#' the old \code{context} object is returned
-#' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
-#' @details
-#' This function runs a recursive search for available information at lower level
-#' nodes in the structure that has been provided by the input. Whenever there is
-#' more than two ways to generate a parameter, the function chooses the one that
-#' requires inputs that is more likely to be learned directly from the target.
-#' @seealso \code{which.closest}
-#' @export
+# Propagate information upwards
+#
+# This function takes the available parameters and generate higher
+# level parameters in a tailored direction so that a specified
+# target can be reach, also detects conflicts due to inactivated but required default values.
+#
+# param target a character string indicates the target's name
+# param pars an object of \code{context} class describes all available information in current context
+# param progress a boolean value indicates if the generating process should be printed
+# return a new \code{context} object obtained from the input, if the target cannot be reach,
+# the old \code{context} object is returned
+# author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
+# details
+# This function runs a recursive search for available information at lower level
+# nodes in the structure that has been provided by the input. Whenever there is
+# more than two ways to generate a parameter, the function chooses the one that
+# requires inputs that is more likely to be learned directly from the target.
+# seealso \code{which.closest}
+# export
 up.stream <- function(target, pars, target.base = TRUE, progress = FALSE){
   miss <- NULL
   input <- names(pars)[which(sapply(pars,is.null) == 0)]
@@ -1558,16 +1572,18 @@ up.stream <- function(target, pars, target.base = TRUE, progress = FALSE){
 # User Interface's sub-routines |
 #-------------------------------+
 
-#' @export
-keep <- function(model){
-  KEEP[[model]]
-}
-
-#' Analyse a partial order knowledge structure
-#' 
-#' This function analyses and return all the connected components of a partial order knowledge structure
-#' 
-#' @param a
+# Analyse a partial order knowledge structure
+# 
+# This function analyzes and return all the connected components of a partial order knowledge structure
+# 
+# param po the POK structure to be analyzed
+# return a list with two components \code{ks} and \code{comp}, 
+# being the original \code{po} and analyzed connected components of \code{po} 
+# respectively, each component of \code{comp} is itself a list with two components 
+# \code{matrix} and \code{level.sizes}, being the corresponding subgraph of 
+# \code{po} and a vector indicates the number of items on each level of depth.
+# author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
+# export
 dissect <- function(po){
   n <- nrow(po)
   temp <- po
@@ -1654,8 +1670,16 @@ dissect <- function(po){
   list(ks = po, comp = comp)
 }
 
-#' This function is so lame I cant take it
-#'
+#' Vizualize POK structure
+#' 
+#' @param po the dependency matrix of POKS to be vizualized
+#' @return a list with two components \code{ks} and \code{comp}, 
+#' being the original \code{po} and analyzed connected components of \code{po} 
+#' respectively, each component of \code{comp} is itself a list with two components 
+#' \code{matrix} and \code{level.sizes}, being the corresponding subgraph of 
+#' \code{po} and a vector indicates the number of items on each level of depth.
+#' @author Hoang-Trieu trinh, \email{thtrieu@@apcs.vn}
+#' @seealso \code{plotmat}
 #' @importFrom diagram plotmat
 #' @export
 viz <- function(po){
@@ -1678,17 +1702,23 @@ viz <- function(po){
             shadow.size = 0,
             cex.txt = 0)
   }
+  return(po)
 }
 
 #' @export
-init <- function(student.var = 1/12, avg.success = 0.5, time = 50,
+init <- function(student.var = 1/12, avg.success = 0.5, time = 50L,
                  S.st.var = 1/12, L.st.var = 1/12,
                  bkt.slip.st.var = 1/12, bkt.guess.st.var = 1/12,
-                 min.ntree = 1, min.depth = 0, min.it.per.tree = 1,
+                 min.ntree = 1L, min.depth = 0L, min.it.per.tree = 1L,
                  per.item = FALSE, bkt.mod = "dina", density = 0.5,
                  alpha.c = 0.25, alpha.p = 0.25, p.min = 0.5,
                  abi.mean = 0, abi.sd = 1, trans = TRUE){
   as.list(environment())
+}
+
+#' @export
+keep <- function(model){
+  KEEP[[model]]
 }
 
 #==========================+
@@ -1701,12 +1731,74 @@ init <- function(student.var = 1/12, avg.success = 0.5, time = 50,
 #'
 #' @param old.pars an object of \code{context} class describe the context that needed to be updated,
 #' leave this parameter \code{NULL} if a new context is needed.
-#' @return an object of \code{context} class describe the updated or newly assembled context
+#' @param init.vals a list contains initial values for some parameters in the context, by default it is initialized by function \code{init}
+#' @param dis a vector of discrimination values for each item
+#' @param dif a vector of difficulty values for each item
+#' @param abi a vector of ability values for each student
+#' @param abi.mean mean value of parameter \code{abi}
+#' @param abi.sd standard deviation of parameter \code{abi}
+#' @param st.exp a vector of expected success rates for each student
+#' @param it.exp a vector of expected success rates for each item
+#' @param items number of items
+#' @param concepts number of concepts
+#' @param students number of students
+#' @param state
+#' @param po dependency matrix of a partial order knowledge structure among items
+#' @param or.t 
+#' @param or.f
+#' @param student.var variance of student expected success rate
+#' @param avg.success mean value of the response matrix
+#' @param min.ntree minimum number of connected components of \code{po}
+#' @param max.ntree maximum number of connected components of \code{po}
+#' @param trans a boolean value indicates if transitive links are allowed in \code{po}
+#' @param min.depth minimum depth of the connected components of \code{po}
+#' @param max.depth maximum depth of the connected components of \code{po}
+#' @param density density of \code{po}
+#' @param min.it.per.tree minimum number of items per each connected component of \code{po}
+#' @param max.it.per.tree maxinum number of items per each connected component of \code{po} 
+#' @param alpha.c 
+#' @param alpha.p
+#' @param p.min
+#' @param slip a vector of slip factor for each item
+#' @param guess a vector of guess factor for each item
+#' @param per.item a boolean value indicates if the students can improve after taking each item
+#' @param order a vector indicates in which order did the students take the test in case \code{per.item} is set to be \code{TRUE}
+#' @param Q Q-matrix with size \code{items} times \code{concepts}
+#' @param S Skill matrix with size \code{concepts} times \code{students}
+#' @param M Skill mastery matrix with size\code{concepts} times \code{students}
+#' @param L Learn matrix indicates the transition probabilities for \code{M} matrix
+#' @param bkt.mod a character string indicates which model governs to generating process for sequential data
+#' @param S.st.var variance of student expected success rates for matrix \code{S}
+#' @param S.con.exp a vector of expected success rate for each concept in matrix \code{S}
+#' @param L.st.var variance of student expected success rates for matrix \code{L}
+#' @param L.con.exp a vector of expected success rate for each concept in matrix \code{L}
+#' @param skill.space.size size of the skill space
+#' @param skill.space a matrix with size \code{concepts} times \code{skill.space.size}
+#' @param skill.dist a vector of length \code{skill.space.size} that sums to one, indicates the probability of each skill pattern in \code{skill.space.size}
+#' @param concept.exp a vector of expected mastery rate for each concept
+#' @param bkt.slip a matrix of size \code{items} times \code{students} indicates slip factor for each combination of one item and one student
+#' @param bkt.guess a matrix of size \code{items} times \code{students} indicates slip factor for each combination of one item and one student
+#' @param time the length in time for sequential data
+#' @param bkt.slip.it.exp a vector of expected value for each item in \code{bkt.slip}
+#' @param bkt.slip.st.var variance of expected values of students in \code{bkt.slip}
+#' @param bkt.guess.it.exp a vector of expected value for each item in \code{bkt.guess}
+#' @param bkt.guess.st.var variance of expected values of students in \code{bkt.guess}
+#' @param irt a list with one component \code{R} being the response matrix, use in case of IRT model
+#' @param exp a list with one component \code{R} being the response matrix, use in case of expected model
+#' @param dina a list with two components \code{R} and \code{Q}, being the response matrix and Q matrix respectively, use in case of DINA model
+#' @param dino a list with two components \code{R} and \code{Q}, being the response matrix and Q matrix respectively, use in case of DINO model
+#' @param nmf.con a list with two components \code{R} and \code{concepts}, being the response matrix and number of concepts, use in case of NMF CONJUNCTIVE model
+#' @param nmf.dis a list with two components \code{R} and \code{concepts}, being the response matrix and number of concepts, use in case of NMF DISJUNCTIVE model
+#' @param nmf.com a list with two components \code{R} and \code{concepts}, being the response matrix and number of concepts, use in case of NMF COMPENSATORY model
+#' @param lin.avg a list with two components \code{R} and \code{concepts}, being the response matrix and number of concepts, use in case of LINEAR AVERAGE model
+#' @param poks a list with four components \code{R}, \code{alpha.p}, \code{alpha.c}, \code{p.min}, use in case of POKS model
+#' @param bkt a list with two components \code{R} and \code{order}, being the response matrix and its corresponding \code{order} vector (in case student improvement is allowed between taking two items), use in case of sequential data
+#' @return an object of \code{context} class describes the updated or newly assembled context
 #' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 #' @details
 #' This function takes in a set of parameters that the user input and assembles them
-#' into a \code{context} object, it uses the \code{down.stream} function to check for some kind of conflicts
-#' @seealso \code{down.stream}
+#' into a \code{context} object, also checks for some simple types of potential conflicts
+#' @seealso \code{init}
 #' @export
 
 pars <- function(old.pars = NULL,
@@ -1732,7 +1824,7 @@ pars <- function(old.pars = NULL,
                  bkt.guess.it.exp = NULL, bkt.guess.st.var = NULL,
                  irt = NULL, exp = NULL, dina = NULL, dino = NULL,
                  nmf.con = NULL, nmf.dis = NULL, nmf.com = NULL,
-                 lin.pes = NULL, lin.avg = NULL, poks = NULL, bkt = NULL){
+                 lin.avg = NULL, poks = NULL, bkt = NULL){
   new.pars <- NULL #return this.
   if (!is.null(old.pars)) {
     if (!identical(class(old.pars),c("context")))
@@ -1745,13 +1837,14 @@ pars <- function(old.pars = NULL,
   }
   else {
     new.pars <- as.list(environment())
-    sapply(INTEGER, function(x){
-      if (!is.null(new.pars[[x]]))
-        new.pars[[x]] <<- as.integer(new.pars[[x]])
-    })
     new.pars <- new.pars[3:length(new.pars)]
     class(new.pars) <- c("context")
   }
+  
+  sapply(INTEGER, function(x){
+    if (!is.null(new.pars[[x]]))
+      new.pars[[x]] <<- as.integer(new.pars[[x]])
+  })
   down.stream(new.pars)
 }
 
@@ -1767,9 +1860,7 @@ pars <- function(old.pars = NULL,
 #' \item{context}{the corresponding context}
 #' if not success, NULL
 #' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
-#' @details
-#' This function uses \code{up.stream} to obtain target's value and context
-#' @seealso \code{up.stream}, \code{gen}
+#' @seealso \code{gen}
 #' @export
 get.par <- function(target, pars, progress = FALSE){
   g <- up.stream(target, pars, FALSE, progress)
@@ -1789,10 +1880,9 @@ get.par <- function(target, pars, progress = FALSE){
 #' @param pars a context
 #' @param n numer of runs
 #' @param progress a boolean value indicates if the generating steps should be printed or not.
-#' @details \code{gen} is essentially a wrapper of \code{up.stream}
 #' @return a context with its data unit activated
 #' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
-#' @seealso \code{up.stream}, \code{get.par}
+#' @seealso \code{get.par}
 #' @export
 gen <- function(model, pars, n = 1, progress = FALSE){
 
@@ -1824,7 +1914,7 @@ gen <- function(model, pars, n = 1, progress = FALSE){
 #' in other words, set \code{multiply} to \code{FALSE} will make \code{gen.apply} does the exact same thing to \code{mapply(gen,models,pars)}
 #' @param n number of runs for each generation
 #' @param progress a boolean value indicates if the generating steps should be printed or not.
-#' @return whatever it is
+#' @return a matrix with each entry is a context or a list of contexts, depending on the format indicated by \code{multiply}
 #' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 #' @seealso \code{gen}, \code{mapply}, \code{sapply}
 #' @export
@@ -1879,7 +1969,7 @@ gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
 #'
 #' @param model a character string indicates which model governs the learning process.
 #' @param data a list contains data that needs to be synthesized, first component is the response matrix, the other components are additional information that the specified model requires.
-#' @return the most probable context corresponds to \code{data} in light of \code{model}
+#' @return the most probable context corresponds to \code{data} under the assumptions made by \code{model}
 #' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 #' @export
 learn <- function(model, data){
@@ -1895,18 +1985,25 @@ learn <- function(model, data){
 }
 
 #' Generate synthetic data
+#' 
+#' This function synthesize a given data under the assumptions of a given model
 #'
 #' @param model a character string indicates which model governs the synthesizing process.
-#' @param data a list contains data that needs to be synthesized, first component is the response matrix, the other components are additional information that the specified model requires.
-#' @param keep.pars a character string vector contains names of the parameters to kept after learning the most probable context from \code{data}.
-#' @param students number of students in the synthetic data.
-#' @param n number of synthetic dataset to generate.
+#' @param data a list contains data that needs to be synthesized, first component 
+#' is the response matrix, the other components are additional information that the
+#' specified model requires.
+#' @param keep.pars a character string vector contains names of the parameters to be
+#'  kept after learning the most probable context from \code{data},
+#' by default this parameter is set by values indicated in vector \code{KEEP}.
+#' @param students number of students in the synthetic data, by default this number is kept.
+#' @param n number of synthetic dataset(s) to generate.
 #' @param progress a boolean value indicates if the generating steps should be printed or not.
 #' @return a list with two components, first component is identical to argument \code{data}, second is a context or a list of contexts that have been generated.
 #' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 #' @details 
-#' This function is essentially a wrapper of function \code{learn} and \code{gen}, where in between it eliminates all parameters are not indicated in \code{keep.pars} in the learned context.
-#' @seealso \code{learn}, \code{gen}
+#' This function is essentially a wrapper of function \code{learn} and \code{gen}, 
+#' where in between it eliminates all parameters are not indicated in \code{keep.pars} in the learned context.
+#' @seealso \code{learn}, \code{gen}, \code{KEEP}
 #' @export
 syn <- function(model, data, keep.pars = keep(model),
                 students = ncol(data$R), n = 1, progress = FALSE){

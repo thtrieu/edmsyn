@@ -21,13 +21,10 @@ a context with its data unit activated
 \description{
 This function generates a context with a specified data unit activated
 }
-\details{
-\code{gen} is essentially a wrapper of \code{up.stream}
-}
 \author{
 Hoang-Trieu Trinh, \email{thtrieu@apcs.vn}
 }
 \seealso{
-\code{up.stream}, \code{get.par}
+\code{get.par}
 }
 

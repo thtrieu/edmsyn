@@ -12,7 +12,7 @@ learn(model, data)
 \item{data}{a list contains data that needs to be synthesized, first component is the response matrix, the other components are additional information that the specified model requires.}
 }
 \value{
-the most probable context corresponds to \code{data} in light of \code{model}
+the most probable context corresponds to \code{data} under the assumptions made by \code{model}
 }
 \description{
 Learn the most probable context for a given data

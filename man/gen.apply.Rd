@@ -21,7 +21,7 @@ in other words, set \code{multiply} to \code{FALSE} will make \code{gen.apply} d
 \item{model}{a character string indicates which model governs the learning process.}
 }
 \value{
-whatever it is
+a matrix with each entry is a context or a list of contexts, depending on the format indicated by \code{multiply}
 }
 \description{
 Generate data for a set of models and contexts
