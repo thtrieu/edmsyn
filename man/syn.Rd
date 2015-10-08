@@ -10,9 +10,12 @@ syn(model, data, keep.pars = keep(model), students = ncol(data$R), n = 1,
 \arguments{
 \item{model}{a character string indicates which model governs the synthesizing process.}
 
-\item{data}{a list contains data that needs to be synthesized, first component is the response matrix, the other components are additional information that the specified model requires.}
+\item{data}{a list contains data that needs to be synthesized, first component
+is the response matrix, the other components are additional information that the
+specified model requires.}
 
-\item{keep.pars}{a character string vector contains names of the parameters to be kept after learning the most probable context from \code{data},
+\item{keep.pars}{a character string vector contains names of the parameters to be
+ kept after learning the most probable context from \code{data},
 by default this parameter is set by values indicated in vector \code{KEEP}.}
 
 \item{students}{number of students in the synthetic data, by default this number is kept.}
@@ -28,7 +31,8 @@ a list with two components, first component is identical to argument \code{data}
 This function synthesize a given data under the assumptions of a given model
 }
 \details{
-This function is essentially a wrapper of function \code{learn} and \code{gen}, where in between it eliminates all parameters are not indicated in \code{keep.pars} in the learned context.
+This function is essentially a wrapper of function \code{learn} and \code{gen},
+where in between it eliminates all parameters are not indicated in \code{keep.pars} in the learned context.
 }
 \author{
 Hoang-Trieu Trinh, \email{thtrieu@apcs.vn}

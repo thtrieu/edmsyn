@@ -1,11 +1,11 @@
 Package: edmsyn
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Educational Data Synthesizer
 Version: 0.1
 Date: 2015-08-30
 Author: Hoang-Trieu Trinh
 Maintainer: Hoang-Trieu Trinh <thtrieu@apcs.vn>
-Description: More about what it does (maybe more than one line)
+Description: There are eleven models available in the package. By frameworks built in this package, users can learn parameters from raw data, under any one among these models' assumption, and generate synthetic data from them in just simple step
 License: GPL-3
 LazyData: TRUE
 Imports: MASS, diagram, HMM, CDM, stats

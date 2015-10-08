@@ -1757,8 +1757,8 @@ keep <- function(model){
 #' @param min.it.per.tree minimum number of items per each connected component of \code{po}
 #' @param max.it.per.tree maxinum number of items per each connected component of \code{po} 
 #' @param alpha.c 
-#' @param alpha.p
-#' @param p.min
+#' @param alpha.p 
+#' @param p.min p-value for interation test while constructing POK structure
 #' @param slip a vector of slip factor for each item
 #' @param guess a vector of guess factor for each item
 #' @param per.item a boolean value indicates if the students can improve after taking each item

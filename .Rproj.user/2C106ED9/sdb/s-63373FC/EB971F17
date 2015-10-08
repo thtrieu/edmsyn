@@ -1,0 +1,17 @@
+{
+    "contents" : "Package: edmsyn\nType: Package\nTitle: Educational Data Synthesizer\nVersion: 0.1\nDate: 2015-08-30\nAuthor: Hoang-Trieu Trinh\nMaintainer: Hoang-Trieu Trinh <thtrieu@apcs.vn>\nDescription: There are eleven models available in the package. By frameworks built in this package, users can learn parameters from raw data, under any one among these models' assumption, and generate synthetic data from them in just simple step\nLicense: GPL-3\nLazyData: TRUE\nImports: MASS, diagram, HMM, CDM, stats\n",
+    "created" : 1444273283371.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1848744576",
+    "id" : "EB971F17",
+    "lastKnownWriteTime" : 1444274551,
+    "path" : "D:/github/edmsyn/DESCRIPTION",
+    "project_path" : "DESCRIPTION",
+    "properties" : {
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "type" : "dcf"
+}

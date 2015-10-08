@@ -80,7 +80,7 @@ leave this parameter \code{NULL} if a new context is needed.}
 
 \item{alpha.p}{}
 
-\item{p.min}{}
+\item{p.min}{p-value for interation test while constructing POK structure}
 
 \item{slip}{a vector of slip factor for each item}
 
