@@ -106,7 +106,7 @@ poks.data
 ```
 
 `edmsyn` package views data as **a part of the context**, getting the data from a context is the same as getting a parameter from that context
-
+z
 ```{r get_poks}
 poks.data[[1]]$po
 poks.data[[1]]$poks

@@ -3,6 +3,11 @@
 #=======================+
 
 #' @export
+class.context <- function(x){
+  print("context")
+}
+
+#' @export
 print.context <- function(x){
   cat("Activated information in the context:\n")
   print(names(x)[which(sapply(x,is.null)==0)])
@@ -1936,15 +1941,17 @@ gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
       paste0("p",toStr(x,num.ac))
     })
   }
-
+  
   if (multiply == FALSE){
     suppressWarnings(
       result <- as.matrix(mapply(function(x,y){
         gen(x, y, n = n, progress)
       },models, pars))
     )
-    if (length(pars) == 1) result <- t(result)
+    #if (length(pars) == 1) result <- t(result)
+    #print(dim(result)
     rownames(result) <- sapply(1:n, function(x){toStr(x,n)})
+    
     suppressWarnings(
       colnames(result) <- mapply(function(x,y){
         paste(x,y,sep=".")

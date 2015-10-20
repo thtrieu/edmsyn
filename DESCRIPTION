@@ -9,3 +9,5 @@ Description: There are eleven models available in edmsyn. By frameworks built in
 License: GPL-3
 LazyData: TRUE
 Imports: MASS, diagram, HMM, CDM, stats
+Suggests: knitr
+VignetteBuilder: knitr
