@@ -1,12 +1,9 @@
 ---
 title: "Educational Data Synthesizer"
 author: "Hoang-Trieu Trinh"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Vignette Title}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+context: "mitacs globalink internship. Montreal, QC, Canada 2015"
+supervisor: "Michel C. Desmarais"
+institution: "Ecole Polytechnique de Montreal"
 ---
 
 ## Introduction
