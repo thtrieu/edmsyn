@@ -1,0 +1,276 @@
+---
+title: "Educational Data Synthesizer"
+author: "Hoang-Trieu Trinh"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Introduction
+
+In general, generating data from a given set of parameters under a specified model's assumptions is straightforward, as long as the following two conditions are satisfied:
+
+- _condition 1_ : All the necessary parameters are given.
+- _condition 2_ : Information inferred from the given parameters' values does not conflict with itself (user input is consistent).
+
+However, checking these conditions is not always a straightforward task. Namely, difficulties may arise from the Educational Data Mining literature, where parameters are usually organised in a complex manner. Some of them are shared between different models (e.g. average success rate, student variance, number of concepts, etc), the collection of all parameters can also be arranged into a hierarchical structure in the sense that some parameters can be used to generate some others, as oppose to a set of parameters that directly generates data. 
+
+For example, with Non-negative Matrix Factorization models, Q-matrix and Skill matrix are parameters that directly generate data, while these two parameters can be generated using parameters at lower level such as number of students, number of items, or number of concepts. A sufficient set of parameters to generate data in this case can be {Q-matrix, Skill matrix} or {Q-matrix, number of students}. For the former set to be consistent, number of columns of Q-matrix must equate the number of rows of Skill matrix because both represent number of concepts.
+
+One can conclude from the above observation that there are many different ways to generate data depending on which model is being acquired and which parameters are given (assuming that they all satisfy _condition 1_ and _condition 2_). At this point it is important to stress that for different sufficient and consistent sets of parameters, even with respect to a single model _M_, we must expect different amounts of variance in the generated data. The reason is, with a set of parameters at lower level, it requires more intermediate generating steps before reaching the final one (generating data), thus produces more variability in the corresponding generated data.
+
+R package `edmsyn` provides users a simple framework that conveniently handles all the situations above while generating data, including checking for _condition 1_ and _condition 2_. It also automates the process of learning parameters from raw data, modifying and using this information to create synthetic data from 10 different models. This document is intended to give a quick and thorough tutorial on using `edmsyn`.
+
+## Loading the package
+
+```{r load_the_package}
+library(edmsyn)
+```
+
+Vector `ALL.MODELS` loaded at the start of this package contains the names of all available models.
+
+```{r all_models}
+edmsyn::ALL.MODELS
+```
+
+## Class `context` and function `pars()`
+
+Since some of the parameters are shared between different models, `edmsyn` did not regard the collection of all parameters from 10 models separately, but jointly as different aspects describing a single instance of reality. For example, the vector of discrimination factors of all items is a parameter belongs to the IRT-2pl model, which is not the case for the parameter Q-matrix, however, `edmsyn` introduces the class `context` where these two parameters co-exist in a single object and can be utilized according to user purpose.
+
+Function `pars()` produce an object of class `context`.
+
+```{r create_context}
+p <- pars(students = 15, items = 20)
+class(p)
+names(p)
+```
+As we can see, there are collectively 62 parameters in a single context, see `?pars` for the description of them. By the assignment `p <- pars(students = 20, items = 20)` there is currently no other information in the context `p` except  `students`, `items`, and `init.vals`.
+
+```{r print_p}
+print(p)
+```
+
+`init.vals` is the component that is available (activated) in any `context` object, it is a list containing the default values for some of the parameters. Whenever one of these parameters is needed without user idicated input, the corresponding value will be loaded into the `context`.
+
+```{r init_vals}
+names(p$init.vals)
+p$init.vals$avg.success
+p$avg.success
+```
+
+At some point in the future, if data need to be generated from `p` by a model that requires `avg.success`, in case this parameter had not been inputted by the user, the value of `0.5` would be used.
+
+We can change these default values by using the `init` function
+```{r change_init}
+p_ <- pars(init.vals = init(avg.success = 0.6))
+p_$init.vals$avg.success
+```
+
+Function `pars` can also be used to update an available `context`, for example, we can change the number of students in `p` from 15 to 20, and add the _number of concepts_ information into `p`
+```{r pars_update}
+p <- pars(p, concepts = 5, students = 20)
+p
+```
+
+`pars` also automatically figures out obtainable parameters at lower level whenever a parameter is activated. For example, dimensions of `M` imply the number of concepts and the number of students. Thus, if a context is supplied with `M`, `concepts` and `students` (and some other obtainable parameters) are activated.
+
+```{r lower_level_activated}
+p_ <- pars(M = matrix(1, 7, 30))
+p_
+p_$concepts
+```
+
+while assembling input parameters from users, `pars` will check for their consistency (_condition 2_) ^[Currently `edmsyn` is able to detect whether a parameter is receiving different values, or if it violates some bounds indicated by users]. Since `p` is a context where there are 20 question items, a Q-matrix with 30 rows is incompatible.
+
+```{r conflict, error = TRUE}
+p <- pars(p, Q = matrix(1,30,5))
+```
+
+In short, the introduction of class `context` and function `pars` is mostly for convenience in the following cases:
+
+- An user is working across many different models with some shared parameters.
+- An user wants to study data generation from different sufficient sets of parameters. Without having to use many functions to handle each case separately, he/she will only need a function to deal with objects of a single class `context`.
+
+## Get a parameter from a context by `get.par`
+
+We can access to components of a `context` object just like accessing to components of a list. `edmsyn` provides an alternative approach to this by the function `get.par`
+
+```{r conventional_access}
+p$students
+get.par("students", p)
+```
+
+The advantage of `get.par` is that, it gives result even when the parameter is not available, as long as the parameter is possible to be generated. For example, if we want to produce the value of the skill mastery matrix (`M`) from `p`, the conventional operator `$` will return `NULL`, while `get.par` finds a way to generate `M` from `concepts` and `students`. Set the argument `progress = TRUE` to see how `get.par` does it. 
+
+```{r get.par_advantage}
+p$M
+M_ <- get.par("M", p, progress = TRUE)
+M_
+```
+
+As can be seen, the progress involves generating an intermediate parameter called `concept.exp` before generating `M`. `concept.exp` is a vector of the expected mastery rates for 5 concepts in `p`. By using `get.par`, we can examine the values of these intermediate generations.
+
+```{r see_concept.exp}
+M_$context$concept.exp
+```
+
+For example, looking at the above `concept.exp`, it is expected that there is about `r round(M_$context$concept.exp[1]*100)` percent of the students who mastered the first concept in `p`. In fact, due to the abundant availability of parameters co-existing in a context, generating `concept.exp` is just one amongst many other ways by which `get.par` can reach `M`, the reason why it turns out to be this way will be discussed in later parts.
+
+If we run `get.par` to obtain `M` again, in general the result will be different. This is because of the fact that each time doing so, another probabilistic generation will be carried out, thus we receive a different `concept.exp`, and after that a different `M`.
+
+```{r different_time}
+identical(M_$value, get.par("M", p)$value)
+```
+
+`get.par` can detect whether there is enough information to generate the required parameters. For example, Q-matrix needs the number of concepts to be defined, without the number of concepts, there is no way Q-matrix can be derived.
+
+```{r get.par_Q_need_concept}
+p_ <- pars(students = 20, items = 15)
+get.par("Q", p_)
+```
+
+One way to fix this is supplying `M` to the context, which essentially contains the _number of concepts_ information. By this, the process becomes possible
+
+```{r supply_concept_genQ}
+p_ <- pars(p_, M = matrix(1, 4, 20))
+get.par("Q", p_)
+```
+
+## Generate data from a context using `gen`
+
+Parameters activated in a single context are ensured non-conflict while being put together by `pars` (_condition 2_). If a context satisfies _condition 1_, there will be a way to generate data from it. `edmsyn` provides function `gen` that can check for _condition 2_ and generates data with the specified model. For example, the following code generates data from `p` by POKS model (Partial Order Knowledge Structure model) twice:
+
+```{r gen_poks}
+poks.data <- gen("poks", p, n = 2, progress = TRUE)
+poks.data
+```
+
+As can be seen, `gen` returns a list of two components, correspond to two generations required by option `n = 2`. Each of the two is a context. `edmsyn` views the generated data as _a part of the context_. In fact, we can consider _data_ as a parameter at highest level. In each of the generated context, there is a component whose name is the same as the specified model `poks`, this component contains the generated data.
+
+```{r get_poks}
+poks.data[[1]]$poks
+```
+
+Looking at the result, the `poks` component is a list with component `R` being the response matrix, and other components representing other information that is needed for the learning process. This point will be explained in later sections.
+
+Since data is considered to be just another parameter in a context, we can actually use `get.par` to generate data. In fact, `gen` is simply a wrapper of `get.par` with an additional feature `n`, where users can specify how many times the process should be repeated.
+
+```{r gen_data_by_get.par}
+get.par("poks", p)
+```
+
+Following is two more examples on using `gen`. In the first one, `gen` will generate data by POKS model again, but from a different context where user have more control on the Partial Order structure of items. In the second one, `gen` generates data by DINA model (Deterministic Input Noisy And model).
+
+__Example 1__
+
+Suppose this time we want the Partial Order structure of items to have two connected components, each with height 3 and no transitive link between items, this can be done by updating `p` with some more parameters. To visualize this structure, whose dependency matrix will be component `po` in the context returned by `gen`, we can use function `viz`.
+
+```{r more_control_poks, fig.width = 6, fig.height = 6}
+p <- pars(p, min.depth = 3, max.depth = 3, min.ntree = 2, max.ntree = 2, trans = FALSE)
+poks.data <- gen("poks", p)
+v <- viz(poks.data$po)
+```
+
+`v` contains analysed information about the structure. Its first component is identical to `po`, the second one is a list with equal number of components to the number of connected components of the structure `po` represents. Each of these components is in turn a list with first component being the corresponding dependency matrix, and sencond component represents how many items are there on each level of depth.
+
+```{r about_viz}
+print(v)
+```
+
+__Example 2__
+
+```{r dina_gen}
+dina.data <- gen("dina", p, progress = TRUE)
+dina.data
+```
+
+As reported by `gen`, unlike the previous case, `M` is now generated from three parameters `students`, `skill.space`, and `skill.dist` instead of `concept.exp` and `students`. The reason for this particular situation is that, `skill.space` and `skill.dist` are formal parameters of DINA model, so they should be used in the process of generating data. Again, we can access this data by referring to component `dina` of the generated context. Besides the response matrix, `dina.data$dina` also have another component `Q`, this is because of the fact that under DINA's view, a response matrix without its corresponding Q-matrix is incomplete.
+
+```{r dina_data}
+dina.data$dina
+```
+
+`gen` only allow one model and one context at a time, we can save time generating data across different models and contexts using `gen.apply`. Setting the argument `multiply` to `TRUE` or `FALSE` decides what kind of matching will be made between models and contexts.
+
+```{r gen_apply}
+dat.1 <- gen.apply(ALL.MODELS, list(p1 = p,p2 = p_), multiply = FALSE, n = 5)
+dat.1
+dat.1["dino.p1", 3]
+dat.2 <- gen.apply(ALL.MODELS, list(p1 = p,p2 = p_), multiply = TRUE, n = 5)
+dat.2
+dat.2["nmf.com", "p2"]
+```
+
+## Learning the most probable context from data using `learn`
+
+Let's say we want to get the third data generation from the matching between context `p1` and model `poks`, and use POKS model to learn from this data.
+
+```{r learn_poks_data}
+poks.data <- dat.2["poks", "p1"][[1]][[3]]
+poks.data
+poks.data$poks
+learn.poks <- learn("poks", data = poks.data$poks)
+learn.poks
+learn.poks$po
+```
+
+If we want to learn from this same data using DINA model, `poks.data$poks` cannot be used because components `p.min`, `alpha.p`, `alpha.c` are meaningless to DINA. In order to do the task, one will need to hand-design this data. DINA requires one additional component besides the response matrix: Q-matrix. Normally, Q-matrix is expected to be expert-defined, however this illustration will just simply generate it randomly.
+
+```{r learn_poks_data_by_DINA}
+Q <- get.par("Q", p)$value
+R <- poks.data$poks$R
+dina.data <- list(R=R,Q=Q)
+learn.dina <- learn("dina", data = dina.data)
+learn.dina
+```
+
+Here we have a look at two parameters `skill.space` and `skill.dist`
+
+```{r skill}
+learn.dina$skill.space
+learn.dina$skill.dist
+```
+
+## Generate synthetic data using `syn`
+
+Generating synthetic data includes three steps:
+
+1. Learn the most probable context from a given data by a specified model.
+
+2. Modify the learned context by keeping some of the parameters, changing some and discarding the rest.
+
+3. Generate data from the new context.
+
+`edmsyn` provides function `syn` that automates the above process, specifically, `syn` consists of three parts:
+
+1. Learn the most probable context by using `learn`.
+
+2. Keep some parameters (the default choice is stored in `KEEP`^[`KEEP` is designed in a way such that, with any new value the user updates for `students`, the new context is still consistent and sufficient, in this sense function `syn` generates synthetic data by creating simulated students.]) and discard the rest, also allow the user to change parameter `students`.
+
+```{r keep}
+KEEP
+```
+
+3. Generate synthetic data from this new context by `gen`
+
+Now we synthesize `dina.data` with a new number of student
+
+```{r syn_dina}
+dina.syn <- syn("dina", data = dina.data, students = 12, n = 10)
+dina.syn$synthetic[[5]]$dina
+```
+
+In case the default option is not favoured, `syn` also allows users to manually specify which parameters to keep through argument `keep.pars`.
+
+```{r which_to_keep}
+dina.syn <- syn("dina", data = dina.data, keep.pars = c("Q", "concept.exp"), students = 12)
+```
+
+However, in this case users take their own risk if the kept parameters (together with the new number of students if `students` is redefined), form an inconsistent or insufficient set with respect to the specified model. For example, for synthesizing data by DINA model case, if we choose to keep `M` (which essentially retain the number of students) and define a new number of students, there will be conflict.
+
+```{r keep_wrong, error = TRUE}
+dina.syn <- syn("dina", data = dina.data, keep.pars = c("Q", "M"), students = 12)
+```
