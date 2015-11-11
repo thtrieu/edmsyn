@@ -1,6 +1,6 @@
 ---
 title: "Educational Data Synthesizer"
-author: "Hoang-Trieu Trinh"
+author: "Hoang-Trieu Trinh, Behzad Beheshti, Michel C. Desmarais"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
