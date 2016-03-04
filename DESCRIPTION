@@ -5,9 +5,18 @@ Version: 0.1
 Date: 2015-08-30
 Author: Hoang-Trieu Trinh
 Maintainer: Hoang-Trieu Trinh <thtrieu@apcs.vn>
-Description: There are eleven models available in edmsyn. By frameworks built in this package, users can learn parameters from raw data under any model's assumptions, and then generate synthetic data in a few simple steps.
+Description: There are eleven models available in edmsyn. By frameworks built
+    in this package, users can learn parameters from raw data under any model's
+    assumptions, and then generate synthetic data in a few simple steps.
 License: GPL-3
 LazyData: TRUE
-Imports: MASS, diagram, HMM, CDM, stats
-Suggests: knitr
+Imports:
+    MASS,
+    diagram,
+    HMM,
+    CDM,
+    stats
+Suggests:
+    knitr
 VignetteBuilder: knitr
+RoxygenNote: 5.0.1.9000

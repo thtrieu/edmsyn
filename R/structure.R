@@ -1538,11 +1538,11 @@ up.stream <- function(target, pars, target.base = TRUE, progress = FALSE){
       if (identical(gen.method,"init.vals"))
         new.pars[[node.name]] <<- node$f.gen[[1]](list(new.pars$init.vals))
       else {
-        dummy <- sapply(gen.method, follow)
+        dummy <- sapply(gen.method, follow) #this is a dummy variable 
         if (fill == TRUE & is.null(new.pars[[node.name]]))
           new.pars[[node.name]] <<- node$f.gen[[pick]](new.pars[gen.method])
       }
-      if (fill == TRUE) trace[[node.name]] <<- gen.method
+      if (fill == TRUE) trace[[node.name]] <<- gen.method #if fill==TRUE trace[]
     }
     return(NULL)
   }
@@ -1772,7 +1772,7 @@ keep <- function(model){
 #' @param S Skill matrix with size \code{concepts} times \code{students}
 #' @param M Skill mastery matrix with size\code{concepts} times \code{students}
 #' @param L Learn matrix indicates the transition probabilities for \code{M} matrix
-#' @param bkt.mod a character string indicates which model governs to generating process for sequential data
+#' @param bkt.mod a character string indicates which model governs the generating process for sequential data
 #' @param S.st.var variance of student expected success rates for matrix \code{S}
 #' @param S.con.exp a vector of expected success rate for each concept in matrix \code{S}
 #' @param L.st.var variance of student expected success rates for matrix \code{L}
@@ -2009,7 +2009,7 @@ learn <- function(model, data){
 #' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 #' @details 
 #' This function is essentially a wrapper of function \code{learn} and \code{gen}, 
-#' where in between it eliminates all parameters are not indicated in \code{keep.pars} in the learned context.
+#' where in between it eliminates all parameters that are not indicated in \code{keep.pars} in the learned context.
 #' @seealso \code{learn}, \code{gen}, \code{KEEP}
 #' @export
 syn <- function(model, data, keep.pars = keep(model),
