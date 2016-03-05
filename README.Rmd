@@ -1,9 +1,12 @@
 ---
 title: "Educational Data Synthesizer"
-author: "Hoang-Trieu Trinh"
-context: "mitacs globalink internship. Montreal, QC, Canada 2015"
-supervisor: "Michel C. Desmarais"
-institution: "Ecole Polytechnique de Montreal"
+author: "Hoang-Trieu Trinh, Behzad Beheshti, Michel C. Desmarais"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ## Introduction
@@ -13,7 +16,7 @@ In general, generating data from a given set of parameters under a specified mod
 - _condition 1_ : All the necessary parameters are given.
 - _condition 2_ : Information inferred from the given parameters' values does not conflict with itself (user input is consistent).
 
-However, checking these conditions is not always a straightforward task. Namely, difficulties may arise from the Educational Data Mining literature, where parameters are usually organised in a complex manner. Some of them are shared between different models (e.g. average success rate, student variance, number of concepts, etc), the collection of all parameters can also be arranged into a hierarchical structure in the sense that some parameters can be used to generate some others, as oppose to a set of parameters that directly generates data. 
+However, checking for these conditions is not always a straightforward task. Namely, difficulties may arise from the Educational Data Mining literature, where parameters are usually organised in a complex manner. Some of them are shared between different models (e.g. average success rate, student variance, number of concepts, etc), the collection of all parameters can also be arranged into a hierarchical structure in the sense that some parameters can be used to generate some others, as oppose to a set of parameters that directly generates data. 
 
 For example, with Non-negative Matrix Factorization models, Q-matrix and Skill matrix are parameters that directly generate data, while these two parameters can be generated using parameters at lower level such as number of students, number of items, or number of concepts. A sufficient set of parameters to generate data in this case can be {Q-matrix, Skill matrix} or {Q-matrix, number of students}. For the former set to be consistent, number of columns of Q-matrix must equate the number of rows of Skill matrix because both represent number of concepts.
 
@@ -80,7 +83,7 @@ p_
 p_$concepts
 ```
 
-while assembling input parameters from users, `pars` will check for their consistency (_condition 2_) ^[Currently `edmsyn` is able to detect whether a parameter is receiving different values, or if it violates some bounds indicated by users]. Since `p` is a context where there are 20 question items, a Q-matrix with 30 rows is incompatible.
+While assembling input parameters from users, `pars` will check for their consistency (_condition 2_) ^[Currently `edmsyn` is able to detect whether a parameter is receiving different values, or if it violates some bounds indicated by users]. Since `p` is a context where there are 20 question items, a Q-matrix with 30 rows is incompatible.
 
 ```{r conflict, error = TRUE}
 p <- pars(p, Q = matrix(1,30,5))
@@ -271,3 +274,6 @@ However, in this case users take their own risk if the kept parameters (together
 ```{r keep_wrong, error = TRUE}
 dina.syn <- syn("dina", data = dina.data, keep.pars = c("Q", "M"), students = 12)
 ```
+
+## License
+The `edmsyn` package is licensed under the GPLv3 (<http://www.gnu.org/licenses/gpl.html>)

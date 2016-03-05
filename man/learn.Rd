@@ -17,6 +17,24 @@ the most probable context corresponds to \code{data} under the assumptions made 
 \description{
 Learn the most probable context for a given data
 }
+\examples{
+# Let us make up some data to learn
+p <- pars(students = 20, concepts = 4, items = 15)
+poks.data <- gen("poks", p)
+# Notice that the generated data is in component poks,
+# together with other hyper-parameters for learning by POKS model.
+poks.data$poks
+# Assume we want to learn with DINA (Deterministic Input Noisy And) model
+# then poks.data$poks is not relevant anymore, instead we need a Q-matrix
+# For demonstration, let's just make it up
+Q <- get.par("Q", p)$value
+R <- poks.data$poks$R
+dina_dat <- list(R=R, Q=Q)
+# Now learn from poks.data
+learned.poks <- learn("dina", data = dina_dat)
+# learned.poks is a context with learned parameters
+class(learned.poks) # returns "context"
+}
 \author{
 Hoang-Trieu Trinh, \email{thtrieu@apcs.vn}
 }

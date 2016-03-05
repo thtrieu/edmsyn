@@ -9,7 +9,7 @@ gen.apply(models, pars, multiply = TRUE, n = 1, progress = FALSE)
 \arguments{
 \item{pars}{a context or a list of contexts}
 
-\item{multiply}{a boolean value indicates in which way should \code{models} and \code{pars} be matched. 
+\item{multiply}{a boolean value indicates in which way should \code{models} and \code{pars} be matched. If \code{TRUE}, each of the models is matched with every contexts in \code{pars}. Otherwise, they are matched element-wise.
 if \code{TRUE} the generating process will be performed on every possible combination from \code{models} and \code{pars},
 if \code{FALSE} each model will be matched with its respective context in the same order specified in \code{models} and \code{pars},
 in other words, set \code{multiply} to \code{FALSE} will make \code{gen.apply} does the exact same thing to \code{mapply(gen,models,pars)}}
@@ -25,6 +25,11 @@ a matrix with each entry is a context or a list of contexts, depending on the fo
 }
 \description{
 Generate data for a set of models and contexts
+}
+\examples{
+# Suppose p1 and p2 are two different contexts
+dat.1 <- gen.apply(ALL.MODELS, list(p1, p2), multiply = TRUE, n = 5)
+dat.2 <- gen.apply(ALL.MODELS, list(p1, p2), multiply = FALSE, n = 5)
 }
 \author{
 Hoang-Trieu Trinh, \email{thtrieu@apcs.vn}

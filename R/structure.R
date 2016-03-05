@@ -1,3 +1,19 @@
+# edmsyn, a package that synthesizes data
+# Copyright (C) 2015  Hoang-Trieu Trinh
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #=======================+
 # Sub-Routine functions |
 #=======================+
@@ -1683,6 +1699,18 @@ dissect <- function(po){
 #' respectively, each component of \code{comp} is itself a list with two components 
 #' \code{matrix} and \code{level.sizes}, being the corresponding subgraph of 
 #' \code{po} and a vector indicates the number of items on each level of depth.
+#' @examples
+#' # Example: Vizualising Partial Order structure
+#' # Declare a context where there are 15 students and 20 items
+#' p <- pars(students = 15, items = 20)
+#' # Add information that the Partial Order Structure should have depth of 3, two connected components and no transitive links
+#' p <- pars(p, min.depth = 3, max.depth = 3, min.ntree = 2, max.ntree = 2, trans = FALSE)
+#' # Generate data to calculate the `po` parameter
+#' poks.data <- gen("poks", p)
+#' # Visualise the Partial Order Structure
+#' v <- viz(poks.data$po)
+#' # Print the analysed structure
+#' print(v)
 #' @author Hoang-Trieu trinh, \email{thtrieu@@apcs.vn}
 #' @seealso \code{plotmat}
 #' @importFrom diagram plotmat
@@ -1747,10 +1775,10 @@ keep <- function(model){
 #' @param items number of items
 #' @param concepts number of concepts
 #' @param students number of students
-#' @param state
+#' @param state parameter for generating data from POKS model
 #' @param po dependency matrix of a partial order knowledge structure among items
-#' @param or.t 
-#' @param or.f
+#' @param or.t parameter for generating data from POKS model
+#' @param or.f parameter for generating data from POKS model
 #' @param student.var variance of student expected success rate
 #' @param avg.success mean value of the response matrix
 #' @param min.ntree minimum number of connected components of \code{po}
@@ -1761,8 +1789,8 @@ keep <- function(model){
 #' @param density density of \code{po}
 #' @param min.it.per.tree minimum number of items per each connected component of \code{po}
 #' @param max.it.per.tree maxinum number of items per each connected component of \code{po} 
-#' @param alpha.c 
-#' @param alpha.p 
+#' @param alpha.c parameter for learning by POKS model, see reference
+#' @param alpha.p parameter for learning by POKS model, see reference
 #' @param p.min p-value for interation test while constructing POK structure
 #' @param slip a vector of slip factor for each item
 #' @param guess a vector of guess factor for each item
@@ -1799,6 +1827,14 @@ keep <- function(model){
 #' @param poks a list with four components \code{R}, \code{alpha.p}, \code{alpha.c}, \code{p.min}, use in case of POKS model
 #' @param bkt a list with two components \code{R} and \code{order}, being the response matrix and its corresponding \code{order} vector (in case student improvement is allowed between taking two items), use in case of sequential data
 #' @return an object of \code{context} class describes the updated or newly assembled context
+#' @examples
+#' # Declare a context where there are 15 students and 20 items
+#' p <- pars(students = 15, items = 20)
+#' class(p)
+#' # See all parameters inside p
+#' names(p)
+#' # See the currently available parameters in p
+#' print(p)
 #' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 #' @details
 #' This function takes in a set of parameters that the user input and assembles them
@@ -1864,6 +1900,18 @@ pars <- function(old.pars = NULL,
 #' \item{value}{value of the target}
 #' \item{context}{the corresponding context}
 #' if not success, NULL
+#' @examples
+#' # Declare a context
+#' p <- pars(students = 20, items = 15)
+#' # Regular way to access information inside a context
+#' p$students # returns 20
+#' # get.par is a alternative
+#' get.par("students", p)
+#' # However, it is not trivial to generate a skill mastery matrix from p
+#' p$M # NULL returned
+#' # get.par can do this
+#' M <- get.par("M", p, progress = True)
+#' print(M)
 #' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 #' @seealso \code{gen}
 #' @export
@@ -1886,6 +1934,15 @@ get.par <- function(target, pars, progress = FALSE){
 #' @param n numer of runs
 #' @param progress a boolean value indicates if the generating steps should be printed or not.
 #' @return a context with its data unit activated
+#' @examples
+#' # Defind a context
+#' p <- pars(students = 20, items = 15)
+#' # Generate data from p by POKS model (Partial Order Knowledge Structure model) twice
+#' poks.data <- gen("poks", p, n = 2, progress = TRUE)
+#' # poks.data is a list of two contexts (since we generated data twice)
+#' poks.data
+#' # To access to the generated data, access to poks component
+#' poks.data[[1]]$poks 
 #' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 #' @seealso \code{get.par}
 #' @export
@@ -1913,13 +1970,17 @@ gen <- function(model, pars, n = 1, progress = FALSE){
 #'
 #' @param model a character string indicates which model governs the learning process.
 #' @param pars a context or a list of contexts
-#' @param multiply a boolean value indicates in which way should \code{models} and \code{pars} be matched. 
+#' @param multiply a boolean value indicates in which way should \code{models} and \code{pars} be matched. If \code{TRUE}, each of the models is matched with every contexts in \code{pars}. Otherwise, they are matched element-wise.
 #' if \code{TRUE} the generating process will be performed on every possible combination from \code{models} and \code{pars},
 #' if \code{FALSE} each model will be matched with its respective context in the same order specified in \code{models} and \code{pars},
 #' in other words, set \code{multiply} to \code{FALSE} will make \code{gen.apply} does the exact same thing to \code{mapply(gen,models,pars)}
 #' @param n number of runs for each generation
 #' @param progress a boolean value indicates if the generating steps should be printed or not.
 #' @return a matrix with each entry is a context or a list of contexts, depending on the format indicated by \code{multiply}
+#' @examples 
+#' # Suppose p1 and p2 are two different contexts
+#' dat.1 <- gen.apply(ALL.MODELS, list(p1, p2), multiply = TRUE, n = 5)
+#' dat.2 <- gen.apply(ALL.MODELS, list(p1, p2), multiply = FALSE, n = 5)
 #' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 #' @seealso \code{gen}, \code{mapply}, \code{sapply}
 #' @export
@@ -1977,6 +2038,23 @@ gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
 #' @param model a character string indicates which model governs the learning process.
 #' @param data a list contains data that needs to be synthesized, first component is the response matrix, the other components are additional information that the specified model requires.
 #' @return the most probable context corresponds to \code{data} under the assumptions made by \code{model}
+#' @examples
+#' # Let us make up some data to learn
+#' p <- pars(students = 20, concepts = 4, items = 15)
+#' poks.data <- gen("poks", p)
+#' # Notice that the generated data is in component poks,
+#' # together with other hyper-parameters for learning by POKS model.
+#' poks.data$poks
+#' # Assume we want to learn with DINA (Deterministic Input Noisy And) model
+#' # then poks.data$poks is not relevant anymore, instead we need a Q-matrix
+#' # For demonstration, let's just make it up
+#' Q <- get.par("Q", p)$value
+#' R <- poks.data$poks$R
+#' dina_dat <- list(R=R, Q=Q)
+#' # Now learn from poks.data
+#' learned.poks <- learn("dina", data = dina_dat)
+#' # learned.poks is a context with learned parameters
+#' class(learned.poks) # returns "context"
 #' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 #' @export
 learn <- function(model, data){
@@ -2006,6 +2084,10 @@ learn <- function(model, data){
 #' @param n number of synthetic dataset(s) to generate.
 #' @param progress a boolean value indicates if the generating steps should be printed or not.
 #' @return a list with two components, first component is identical to argument \code{data}, second is a context or a list of contexts that have been generated.
+#' @examples
+#' # Let us make up some data to synthesize
+#' dina.data <- gen('dina', pars(students = 20, concepts = 4, items = 5))$dina
+#' dina.syn <- syn('dina', data = dina.data, students = 50, n = 10)
 #' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 #' @details 
 #' This function is essentially a wrapper of function \code{learn} and \code{gen}, 

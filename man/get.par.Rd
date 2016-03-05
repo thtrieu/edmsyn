@@ -22,6 +22,19 @@ if not success, NULL
 \description{
 This function generates (if needed) the required target from a context
 }
+\examples{
+# Declare a context
+p <- pars(students = 20, items = 15)
+# Regular way to access information inside a context
+p$students # returns 20
+# get.par is a alternative
+get.par("students", p)
+# However, it is not trivial to generate a skill mastery matrix from p
+p$M # NULL returned
+# get.par can do this
+M <- get.par("M", p, progress = True)
+print(M)
+}
 \author{
 Hoang-Trieu Trinh, \email{thtrieu@apcs.vn}
 }

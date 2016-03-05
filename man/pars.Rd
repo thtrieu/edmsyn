@@ -48,9 +48,13 @@ leave this parameter \code{NULL} if a new context is needed.}
 
 \item{students}{number of students}
 
+\item{state}{parameter for generating data from POKS model}
+
 \item{po}{dependency matrix of a partial order knowledge structure among items}
 
-\item{or.t}{}
+\item{or.t}{parameter for generating data from POKS model}
+
+\item{or.f}{parameter for generating data from POKS model}
 
 \item{student.var}{variance of student expected success rate}
 
@@ -72,9 +76,9 @@ leave this parameter \code{NULL} if a new context is needed.}
 
 \item{max.it.per.tree}{maxinum number of items per each connected component of \code{po}}
 
-\item{alpha.c}{}
+\item{alpha.c}{parameter for learning by POKS model, see reference}
 
-\item{alpha.p}{}
+\item{alpha.p}{parameter for learning by POKS model, see reference}
 
 \item{p.min}{p-value for interation test while constructing POK structure}
 
@@ -155,6 +159,15 @@ This function allows user assemble a new context or update an available context
 \details{
 This function takes in a set of parameters that the user input and assembles them
 into a \code{context} object, also checks for some simple types of potential conflicts
+}
+\examples{
+# Declare a context where there are 15 students and 20 items
+p <- pars(students = 15, items = 20)
+class(p)
+# See all parameters inside p
+names(p)
+# See the currently available parameters in p
+print(p)
 }
 \author{
 Hoang-Trieu Trinh, \email{thtrieu@apcs.vn}

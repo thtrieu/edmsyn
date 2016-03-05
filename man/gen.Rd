@@ -21,6 +21,16 @@ a context with its data unit activated
 \description{
 This function generates a context with a specified data unit activated
 }
+\examples{
+# Defind a context
+p <- pars(students = 20, items = 15)
+# Generate data from p by POKS model (Partial Order Knowledge Structure model) twice
+poks.data <- gen("poks", p, n = 2, progress = TRUE)
+# poks.data is a list of two contexts (since we generated data twice)
+poks.data
+# To access to the generated data, access to poks component
+poks.data[[1]]$poks 
+}
 \author{
 Hoang-Trieu Trinh, \email{thtrieu@apcs.vn}
 }

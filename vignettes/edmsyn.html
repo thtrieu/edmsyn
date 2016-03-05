@@ -7,10 +7,11 @@
 <meta charset="utf-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<meta name="author" content="Hoang-Trieu Trinh" />
+<meta name="author" content="Hoang-Trieu Trinh, Behzad Beheshti, Michel C. Desmarais" />
 
-<meta name="date" content="2015-11-03" />
+<meta name="date" content="2016-03-05" />
 
 <title>Educational Data Synthesizer</title>
 
@@ -18,32 +19,45 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
+div.sourceCode { overflow-x: auto; }
 table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
   margin: 0; padding: 0; vertical-align: baseline; border: none; }
 table.sourceCode { width: 100%; line-height: 100%; }
 td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
 td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; }
-code > span.dt { color: #902000; }
-code > span.dv { color: #40a070; }
-code > span.bn { color: #40a070; }
-code > span.fl { color: #40a070; }
-code > span.ch { color: #4070a0; }
-code > span.st { color: #4070a0; }
-code > span.co { color: #60a0b0; font-style: italic; }
-code > span.ot { color: #007020; }
-code > span.al { color: #ff0000; font-weight: bold; }
-code > span.fu { color: #06287e; }
-code > span.er { color: #ff0000; font-weight: bold; }
-</style>
-<style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
 </style>
 
 
-<link href="data:text/css,body%20%7B%0A%20%20background%2Dcolor%3A%20%23fff%3B%0A%20%20margin%3A%201em%20auto%3B%0A%20%20max%2Dwidth%3A%20700px%3B%0A%20%20overflow%3A%20visible%3B%0A%20%20padding%2Dleft%3A%202em%3B%0A%20%20padding%2Dright%3A%202em%3B%0A%20%20font%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0A%20%20font%2Dsize%3A%2014px%3B%0A%20%20line%2Dheight%3A%201%2E35%3B%0A%7D%0A%0A%23header%20%7B%0A%20%20text%2Dalign%3A%20center%3B%0A%7D%0A%0A%23TOC%20%7B%0A%20%20clear%3A%20both%3B%0A%20%20margin%3A%200%200%2010px%2010px%3B%0A%20%20padding%3A%204px%3B%0A%20%20width%3A%20400px%3B%0A%20%20border%3A%201px%20solid%20%23CCCCCC%3B%0A%20%20border%2Dradius%3A%205px%3B%0A%0A%20%20background%2Dcolor%3A%20%23f6f6f6%3B%0A%20%20font%2Dsize%3A%2013px%3B%0A%20%20line%2Dheight%3A%201%2E3%3B%0A%7D%0A%20%20%23TOC%20%2Etoctitle%20%7B%0A%20%20%20%20font%2Dweight%3A%20bold%3B%0A%20%20%20%20font%2Dsize%3A%2015px%3B%0A%20%20%20%20margin%2Dleft%3A%205px%3B%0A%20%20%7D%0A%0A%20%20%23TOC%20ul%20%7B%0A%20%20%20%20padding%2Dleft%3A%2040px%3B%0A%20%20%20%20margin%2Dleft%3A%20%2D1%2E5em%3B%0A%20%20%20%20margin%2Dtop%3A%205px%3B%0A%20%20%20%20margin%2Dbottom%3A%205px%3B%0A%20%20%7D%0A%20%20%23TOC%20ul%20ul%20%7B%0A%20%20%20%20margin%2Dleft%3A%20%2D2em%3B%0A%20%20%7D%0A%20%20%23TOC%20li%20%7B%0A%20%20%20%20line%2Dheight%3A%2016px%3B%0A%20%20%7D%0A%0Atable%20%7B%0A%20%20margin%3A%201em%20auto%3B%0A%20%20border%2Dwidth%3A%201px%3B%0A%20%20border%2Dcolor%3A%20%23DDDDDD%3B%0A%20%20border%2Dstyle%3A%20outset%3B%0A%20%20border%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0A%20%20border%2Dwidth%3A%202px%3B%0A%20%20padding%3A%205px%3B%0A%20%20border%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0A%20%20border%2Dwidth%3A%201px%3B%0A%20%20border%2Dstyle%3A%20inset%3B%0A%20%20line%2Dheight%3A%2018px%3B%0A%20%20padding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0A%20%20border%2Dleft%2Dstyle%3A%20none%3B%0A%20%20border%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0A%20%20background%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0A%0Ap%20%7B%0A%20%20margin%3A%200%2E5em%200%3B%0A%7D%0A%0Ablockquote%20%7B%0A%20%20background%2Dcolor%3A%20%23f6f6f6%3B%0A%20%20padding%3A%200%2E25em%200%2E75em%3B%0A%7D%0A%0Ahr%20%7B%0A%20%20border%2Dstyle%3A%20solid%3B%0A%20%20border%3A%20none%3B%0A%20%20border%2Dtop%3A%201px%20solid%20%23777%3B%0A%20%20margin%3A%2028px%200%3B%0A%7D%0A%0Adl%20%7B%0A%20%20margin%2Dleft%3A%200%3B%0A%7D%0A%20%20dl%20dd%20%7B%0A%20%20%20%20margin%2Dbottom%3A%2013px%3B%0A%20%20%20%20margin%2Dleft%3A%2013px%3B%0A%20%20%7D%0A%20%20dl%20dt%20%7B%0A%20%20%20%20font%2Dweight%3A%20bold%3B%0A%20%20%7D%0A%0Aul%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%7D%0A%20%20ul%20li%20%7B%0A%20%20%20%20list%2Dstyle%3A%20circle%20outside%3B%0A%20%20%7D%0A%20%20ul%20ul%20%7B%0A%20%20%20%20margin%2Dbottom%3A%200%3B%0A%20%20%7D%0A%0Apre%2C%20code%20%7B%0A%20%20background%2Dcolor%3A%20%23f7f7f7%3B%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20color%3A%20%23333%3B%0A%7D%0Apre%20%7B%0A%20%20white%2Dspace%3A%20pre%2Dwrap%3B%20%20%20%20%2F%2A%20Wrap%20long%20lines%20%2A%2F%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20margin%3A%205px%200px%2010px%200px%3B%0A%20%20padding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0A%20%20background%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0A%0Acode%20%7B%0A%20%20font%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0A%20%20font%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0A%20%20padding%3A%202px%200px%3B%0A%7D%0A%0Adiv%2Efigure%20%7B%0A%20%20text%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20padding%3A%202px%3B%0A%20%20border%3A%201px%20solid%20%23DDDDDD%3B%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20border%3A%201px%20solid%20%23CCCCCC%3B%0A%20%20margin%3A%200%205px%3B%0A%7D%0A%0Ah1%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%20%20font%2Dsize%3A%2035px%3B%0A%20%20line%2Dheight%3A%2040px%3B%0A%7D%0A%0Ah2%20%7B%0A%20%20border%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0A%20%20padding%2Dtop%3A%2010px%3B%0A%20%20padding%2Dbottom%3A%202px%3B%0A%20%20font%2Dsize%3A%20145%25%3B%0A%7D%0A%0Ah3%20%7B%0A%20%20border%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0A%20%20padding%2Dtop%3A%2010px%3B%0A%20%20font%2Dsize%3A%20120%25%3B%0A%7D%0A%0Ah4%20%7B%0A%20%20border%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0A%20%20margin%2Dleft%3A%208px%3B%0A%20%20font%2Dsize%3A%20105%25%3B%0A%7D%0A%0Ah5%2C%20h6%20%7B%0A%20%20border%2Dbottom%3A%201px%20solid%20%23ccc%3B%0A%20%20font%2Dsize%3A%20105%25%3B%0A%7D%0A%0Aa%20%7B%0A%20%20color%3A%20%230033dd%3B%0A%20%20text%2Ddecoration%3A%20none%3B%0A%7D%0A%20%20a%3Ahover%20%7B%0A%20%20%20%20color%3A%20%236666ff%3B%20%7D%0A%20%20a%3Avisited%20%7B%0A%20%20%20%20color%3A%20%23800080%3B%20%7D%0A%20%20a%3Avisited%3Ahover%20%7B%0A%20%20%20%20color%3A%20%23BB00BB%3B%20%7D%0A%20%20a%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0A%20%20%20%20text%2Ddecoration%3A%20underline%3B%20%7D%0A%20%20a%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0A%20%20%20%20text%2Ddecoration%3A%20underline%3B%20%7D%0A%0A%2F%2A%20Class%20described%20in%20https%3A%2F%2Fbenjeffrey%2Ecom%2Fposts%2Fpandoc%2Dsyntax%2Dhighlighting%2Dcss%0A%20%20%20Colours%20from%20https%3A%2F%2Fgist%2Egithub%2Ecom%2Frobsimmons%2F1172277%20%2A%2F%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%2F%2A%20Keyword%20%2A%2F%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%2F%2A%20DataType%20%2A%2F%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%2F%2A%20DecVal%20%28decimal%20values%29%20%2A%2F%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20BaseN%20%2A%2F%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20Float%20%2A%2F%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20Char%20%2A%2F%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20String%20%2A%2F%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%2F%2A%20Comment%20%2A%2F%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%2F%2A%20OtherToken%20%2A%2F%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%2F%2A%20AlertToken%20%2A%2F%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%2F%2A%20Function%20calls%20%2A%2F%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%2F%2A%20ErrorTok%20%2A%2F%0A%0A" rel="stylesheet" type="text/css" />
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
 
 </head>
 
@@ -51,10 +65,13 @@ code > span.er { color: #ff0000; font-weight: bold; }
 
 
 
-<div id="header">
+<div class="fluid-row" id="header">
+
+
 <h1 class="title">Educational Data Synthesizer</h1>
-<h4 class="author"><em>Hoang-Trieu Trinh</em></h4>
-<h4 class="date"><em>2015-11-03</em></h4>
+<h4 class="author"><em>Hoang-Trieu Trinh, Behzad Beheshti, Michel C. Desmarais</em></h4>
+<h4 class="date"><em>2016-03-05</em></h4>
+
 </div>
 
 
@@ -65,16 +82,16 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <li><em>condition 1</em> : All the necessary parameters are given.</li>
 <li><em>condition 2</em> : Information inferred from the given parameters’ values does not conflict with itself (user input is consistent).</li>
 </ul>
-<p>However, checking these conditions is not always a straightforward task. Namely, difficulties may arise from the Educational Data Mining literature, where parameters are usually organised in a complex manner. Some of them are shared between different models (e.g. average success rate, student variance, number of concepts, etc), the collection of all parameters can also be arranged into a hierarchical structure in the sense that some parameters can be used to generate some others, as oppose to a set of parameters that directly generates data.</p>
+<p>However, checking for these conditions is not always a straightforward task. Namely, difficulties may arise from the Educational Data Mining literature, where parameters are usually organised in a complex manner. Some of them are shared between different models (e.g. average success rate, student variance, number of concepts, etc), the collection of all parameters can also be arranged into a hierarchical structure in the sense that some parameters can be used to generate some others, as oppose to a set of parameters that directly generates data.</p>
 <p>For example, with Non-negative Matrix Factorization models, Q-matrix and Skill matrix are parameters that directly generate data, while these two parameters can be generated using parameters at lower level such as number of students, number of items, or number of concepts. A sufficient set of parameters to generate data in this case can be {Q-matrix, Skill matrix} or {Q-matrix, number of students}. For the former set to be consistent, number of columns of Q-matrix must equate the number of rows of Skill matrix because both represent number of concepts.</p>
 <p>One can conclude from the above observation that there are many different ways to generate data depending on which model is being acquired and which parameters are given (assuming that they all satisfy <em>condition 1</em> and <em>condition 2</em>). At this point it is important to stress that for different sufficient and consistent sets of parameters, even with respect to a single model <em>M</em>, we must expect different amounts of variance in the generated data. The reason is, with a set of parameters at lower level, it requires more intermediate generating steps before reaching the final one (generating data), thus produces more variability in the corresponding generated data.</p>
 <p>R package <code>edmsyn</code> provides users a simple framework that conveniently handles all the situations above while generating data, including checking for <em>condition 1</em> and <em>condition 2</em>. It also automates the process of learning parameters from raw data, modifying and using this information to create synthetic data from 10 different models. This document is intended to give a quick and thorough tutorial on using <code>edmsyn</code>.</p>
 </div>
 <div id="loading-the-package" class="section level2">
 <h2>Loading the package</h2>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(edmsyn)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(edmsyn)</code></pre></div>
 <p>Vector <code>ALL.MODELS</code> loaded at the start of this package contains the names of all available models.</p>
-<pre class="sourceCode r"><code class="sourceCode r">edmsyn::ALL.MODELS</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">edmsyn::ALL.MODELS</code></pre></div>
 <pre><code>##  [1] &quot;exp&quot;     &quot;irt&quot;     &quot;poks&quot;    &quot;dina&quot;    &quot;dino&quot;    &quot;lin.avg&quot; &quot;nmf.con&quot;
 ##  [8] &quot;nmf.dis&quot; &quot;nmf.com&quot; &quot;bkt&quot;</code></pre>
 </div>
@@ -82,10 +99,10 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <h2>Class <code>context</code> and function <code>pars()</code></h2>
 <p>Since some of the parameters are shared between different models, <code>edmsyn</code> did not regard the collection of all parameters from 10 models separately, but jointly as different aspects describing a single instance of reality. For example, the vector of discrimination factors of all items is a parameter belongs to the IRT-2pl model, which is not the case for the parameter Q-matrix, however, <code>edmsyn</code> introduces the class <code>context</code> where these two parameters co-exist in a single object and can be utilized according to user purpose.</p>
 <p>Function <code>pars()</code> produce an object of class <code>context</code>.</p>
-<pre class="sourceCode r"><code class="sourceCode r">p &lt;-<span class="st"> </span><span class="kw">pars</span>(<span class="dt">students =</span> <span class="dv">15</span>, <span class="dt">items =</span> <span class="dv">20</span>)
-<span class="kw">class</span>(p)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p &lt;-<span class="st"> </span><span class="kw">pars</span>(<span class="dt">students =</span> <span class="dv">15</span>, <span class="dt">items =</span> <span class="dv">20</span>)
+<span class="kw">class</span>(p)</code></pre></div>
 <pre><code>## [1] &quot;context&quot;</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">names</span>(p)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">names</span>(p)</code></pre></div>
 <pre><code>##  [1] &quot;init.vals&quot;        &quot;dis&quot;              &quot;dif&quot;             
 ##  [4] &quot;abi&quot;              &quot;abi.mean&quot;         &quot;abi.sd&quot;          
 ##  [7] &quot;st.exp&quot;           &quot;it.exp&quot;           &quot;items&quot;           
@@ -108,11 +125,11 @@ code > span.er { color: #ff0000; font-weight: bold; }
 ## [58] &quot;nmf.dis&quot;          &quot;nmf.com&quot;          &quot;lin.avg&quot;         
 ## [61] &quot;poks&quot;             &quot;bkt&quot;</code></pre>
 <p>As we can see, there are collectively 62 parameters in a single context, see <code>?pars</code> for the description of them. By the assignment <code>p &lt;- pars(students = 20, items = 20)</code> there is currently no other information in the context <code>p</code> except <code>students</code>, <code>items</code>, and <code>init.vals</code>.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(p)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(p)</code></pre></div>
 <pre><code>## Activated information in the context:
 ## [1] &quot;init.vals&quot; &quot;items&quot;     &quot;students&quot;</code></pre>
 <p><code>init.vals</code> is the component that is available (activated) in any <code>context</code> object, it is a list containing the default values for some of the parameters. Whenever one of these parameters is needed without user idicated input, the corresponding value will be loaded into the <code>context</code>.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">names</span>(p$init.vals)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">names</span>(p$init.vals)</code></pre></div>
 <pre><code>##  [1] &quot;student.var&quot;      &quot;avg.success&quot;      &quot;time&quot;            
 ##  [4] &quot;S.st.var&quot;         &quot;L.st.var&quot;         &quot;bkt.slip.st.var&quot; 
 ##  [7] &quot;bkt.guess.st.var&quot; &quot;min.ntree&quot;        &quot;min.depth&quot;       
@@ -120,29 +137,29 @@ code > span.er { color: #ff0000; font-weight: bold; }
 ## [13] &quot;density&quot;          &quot;alpha.c&quot;          &quot;alpha.p&quot;         
 ## [16] &quot;p.min&quot;            &quot;abi.mean&quot;         &quot;abi.sd&quot;          
 ## [19] &quot;trans&quot;</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">p$init.vals$avg.success</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p$init.vals$avg.success</code></pre></div>
 <pre><code>## [1] 0.5</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">p$avg.success</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p$avg.success</code></pre></div>
 <pre><code>## NULL</code></pre>
 <p>At some point in the future, if data need to be generated from <code>p</code> by a model that requires <code>avg.success</code>, in case this parameter had not been inputted by the user, the value of <code>0.5</code> would be used.</p>
 <p>We can change these default values by using the <code>init</code> function</p>
-<pre class="sourceCode r"><code class="sourceCode r">p_ &lt;-<span class="st"> </span><span class="kw">pars</span>(<span class="dt">init.vals =</span> <span class="kw">init</span>(<span class="dt">avg.success =</span> <span class="fl">0.6</span>))
-p_$init.vals$avg.success</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p_ &lt;-<span class="st"> </span><span class="kw">pars</span>(<span class="dt">init.vals =</span> <span class="kw">init</span>(<span class="dt">avg.success =</span> <span class="fl">0.6</span>))
+p_$init.vals$avg.success</code></pre></div>
 <pre><code>## [1] 0.6</code></pre>
 <p>Function <code>pars</code> can also be used to update an available <code>context</code>, for example, we can change the number of students in <code>p</code> from 15 to 20, and add the <em>number of concepts</em> information into <code>p</code></p>
-<pre class="sourceCode r"><code class="sourceCode r">p &lt;-<span class="st"> </span><span class="kw">pars</span>(p, <span class="dt">concepts =</span> <span class="dv">5</span>, <span class="dt">students =</span> <span class="dv">20</span>)
-p</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p &lt;-<span class="st"> </span><span class="kw">pars</span>(p, <span class="dt">concepts =</span> <span class="dv">5</span>, <span class="dt">students =</span> <span class="dv">20</span>)
+p</code></pre></div>
 <pre><code>## Activated information in the context:
 ## [1] &quot;init.vals&quot; &quot;items&quot;     &quot;concepts&quot;  &quot;students&quot;</code></pre>
 <p><code>pars</code> also automatically figures out obtainable parameters at lower level whenever a parameter is activated. For example, dimensions of <code>M</code> imply the number of concepts and the number of students. Thus, if a context is supplied with <code>M</code>, <code>concepts</code> and <code>students</code> (and some other obtainable parameters) are activated.</p>
-<pre class="sourceCode r"><code class="sourceCode r">p_ &lt;-<span class="st"> </span><span class="kw">pars</span>(<span class="dt">M =</span> <span class="kw">matrix</span>(<span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">30</span>))
-p_</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p_ &lt;-<span class="st"> </span><span class="kw">pars</span>(<span class="dt">M =</span> <span class="kw">matrix</span>(<span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">30</span>))
+p_</code></pre></div>
 <pre><code>## Activated information in the context:
 ## [1] &quot;init.vals&quot;   &quot;concepts&quot;    &quot;students&quot;    &quot;M&quot;           &quot;concept.exp&quot;</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">p_$concepts</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p_$concepts</code></pre></div>
 <pre><code>## [1] 7</code></pre>
-<p>while assembling input parameters from users, <code>pars</code> will check for their consistency (<em>condition 2</em>) <a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>. Since <code>p</code> is a context where there are 20 question items, a Q-matrix with 30 rows is incompatible.</p>
-<pre class="sourceCode r"><code class="sourceCode r">p &lt;-<span class="st"> </span><span class="kw">pars</span>(p, <span class="dt">Q =</span> <span class="kw">matrix</span>(<span class="dv">1</span>,<span class="dv">30</span>,<span class="dv">5</span>))</code></pre>
+<p>While assembling input parameters from users, <code>pars</code> will check for their consistency (<em>condition 2</em>) <a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>. Since <code>p</code> is a context where there are 20 question items, a Q-matrix with 30 rows is incompatible.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p &lt;-<span class="st"> </span><span class="kw">pars</span>(p, <span class="dt">Q =</span> <span class="kw">matrix</span>(<span class="dv">1</span>,<span class="dv">30</span>,<span class="dv">5</span>))</code></pre></div>
 <pre><code>## Error in down.stream(new.pars): 'items' receives different values at once</code></pre>
 <p>In short, the introduction of class <code>context</code> and function <code>pars</code> is mostly for convenience in the following cases:</p>
 <ul>
@@ -153,9 +170,9 @@ p_</code></pre>
 <div id="get-a-parameter-from-a-context-by-get.par" class="section level2">
 <h2>Get a parameter from a context by <code>get.par</code></h2>
 <p>We can access to components of a <code>context</code> object just like accessing to components of a list. <code>edmsyn</code> provides an alternative approach to this by the function <code>get.par</code></p>
-<pre class="sourceCode r"><code class="sourceCode r">p$students</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p$students</code></pre></div>
 <pre><code>## [1] 20</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">get.par</span>(<span class="st">&quot;students&quot;</span>, p)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">get.par</span>(<span class="st">&quot;students&quot;</span>, p)</code></pre></div>
 <pre><code>## $value
 ## [1] 20
 ## 
@@ -163,40 +180,40 @@ p_</code></pre>
 ## Activated information in the context:
 ## [1] &quot;init.vals&quot; &quot;items&quot;     &quot;concepts&quot;  &quot;students&quot;</code></pre>
 <p>The advantage of <code>get.par</code> is that, it gives result even when the parameter is not available, as long as the parameter is possible to be generated. For example, if we want to produce the value of the skill mastery matrix (<code>M</code>) from <code>p</code>, the conventional operator <code>$</code> will return <code>NULL</code>, while <code>get.par</code> finds a way to generate <code>M</code> from <code>concepts</code> and <code>students</code>. Set the argument <code>progress = TRUE</code> to see how <code>get.par</code> does it.</p>
-<pre class="sourceCode r"><code class="sourceCode r">p$M</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p$M</code></pre></div>
 <pre><code>## NULL</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">M_ &lt;-<span class="st"> </span><span class="kw">get.par</span>(<span class="st">&quot;M&quot;</span>, p, <span class="dt">progress =</span> <span class="ot">TRUE</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">M_ &lt;-<span class="st"> </span><span class="kw">get.par</span>(<span class="st">&quot;M&quot;</span>, p, <span class="dt">progress =</span> <span class="ot">TRUE</span>)</code></pre></div>
 <pre><code>## Generate M from c(&quot;students&quot;, &quot;concept.exp&quot;)
 ## Generate concept.exp from concepts</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">M_</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">M_</code></pre></div>
 <pre><code>## $value
 ##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-## [1,]    0    0    0    0    1    0    0    0    0     0     0     0     0
-## [2,]    1    1    1    0    1    1    1    1    1     0     1     1     1
-## [3,]    0    1    0    0    0    1    0    0    0     0     0     1     0
-## [4,]    1    0    1    0    1    1    1    1    1     1     0     1     1
-## [5,]    0    1    0    1    1    1    1    1    1     1     1     1     1
+## [1,]    0    0    1    0    0    0    1    0    0     0     0     0     0
+## [2,]    1    0    0    1    1    0    1    1    1     0     1     0     1
+## [3,]    0    1    1    1    1    1    1    0    1     1     1     1     1
+## [4,]    0    0    0    1    0    0    1    1    0     1     0     0     0
+## [5,]    0    0    0    0    0    0    1    1    0     0     0     1     0
 ##      [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-## [1,]     0     0     0     0     0     0     0
-## [2,]     1     1     0     1     1     1     1
-## [3,]     0     1     0     1     1     0     0
-## [4,]     1     1     1     1     1     0     1
-## [5,]     1     0     1     1     1     1     1
+## [1,]     1     0     0     0     0     0     0
+## [2,]     1     1     1     1     1     0     0
+## [3,]     1     1     1     1     1     1     1
+## [4,]     0     0     0     0     1     0     0
+## [5,]     0     1     0     0     0     0     1
 ## 
 ## $context
 ## Activated information in the context:
 ## [1] &quot;init.vals&quot;   &quot;items&quot;       &quot;concepts&quot;    &quot;students&quot;    &quot;M&quot;          
 ## [6] &quot;concept.exp&quot;</code></pre>
 <p>As can be seen, the progress involves generating an intermediate parameter called <code>concept.exp</code> before generating <code>M</code>. <code>concept.exp</code> is a vector of the expected mastery rates for 5 concepts in <code>p</code>. By using <code>get.par</code>, we can examine the values of these intermediate generations.</p>
-<pre class="sourceCode r"><code class="sourceCode r">M_$context$concept.exp</code></pre>
-<pre><code>## [1] 0.1157386 0.8573776 0.4237814 0.6442823 0.9076862</code></pre>
-<p>For example, looking at the above <code>concept.exp</code>, it is expected that there is about 12 percent of the students who mastered the first concept in <code>p</code>. In fact, due to the abundant availability of parameters co-existing in a context, generating <code>concept.exp</code> is just one amongst many other ways by which <code>get.par</code> can reach <code>M</code>, the reason why it turns out to be this way will be discussed in later parts.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">M_$context$concept.exp</code></pre></div>
+<pre><code>## [1] 0.2912938 0.6893649 0.9533042 0.1827477 0.2361644</code></pre>
+<p>For example, looking at the above <code>concept.exp</code>, it is expected that there is about 29 percent of the students who mastered the first concept in <code>p</code>. In fact, due to the abundant availability of parameters co-existing in a context, generating <code>concept.exp</code> is just one amongst many other ways by which <code>get.par</code> can reach <code>M</code>, the reason why it turns out to be this way will be discussed in later parts.</p>
 <p>If we run <code>get.par</code> to obtain <code>M</code> again, in general the result will be different. This is because of the fact that each time doing so, another probabilistic generation will be carried out, thus we receive a different <code>concept.exp</code>, and after that a different <code>M</code>.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">identical</span>(M_$value, <span class="kw">get.par</span>(<span class="st">&quot;M&quot;</span>, p)$value)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">identical</span>(M_$value, <span class="kw">get.par</span>(<span class="st">&quot;M&quot;</span>, p)$value)</code></pre></div>
 <pre><code>## [1] FALSE</code></pre>
 <p><code>get.par</code> can detect whether there is enough information to generate the required parameters. For example, Q-matrix needs the number of concepts to be defined, without the number of concepts, there is no way Q-matrix can be derived.</p>
-<pre class="sourceCode r"><code class="sourceCode r">p_ &lt;-<span class="st"> </span><span class="kw">pars</span>(<span class="dt">students =</span> <span class="dv">20</span>, <span class="dt">items =</span> <span class="dv">15</span>)
-<span class="kw">get.par</span>(<span class="st">&quot;Q&quot;</span>, p_)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p_ &lt;-<span class="st"> </span><span class="kw">pars</span>(<span class="dt">students =</span> <span class="dv">20</span>, <span class="dt">items =</span> <span class="dv">15</span>)
+<span class="kw">get.par</span>(<span class="st">&quot;Q&quot;</span>, p_)</code></pre></div>
 <pre><code>## Cannot reach 'Q' since 'concepts' is missing</code></pre>
 <pre><code>## $value
 ## NULL
@@ -205,25 +222,25 @@ p_</code></pre>
 ## Activated information in the context:
 ## [1] &quot;init.vals&quot; &quot;items&quot;     &quot;students&quot;</code></pre>
 <p>One way to fix this is supplying <code>M</code> to the context, which essentially contains the <em>number of concepts</em> information. By this, the process becomes possible</p>
-<pre class="sourceCode r"><code class="sourceCode r">p_ &lt;-<span class="st"> </span><span class="kw">pars</span>(p_, <span class="dt">M =</span> <span class="kw">matrix</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">20</span>))
-<span class="kw">get.par</span>(<span class="st">&quot;Q&quot;</span>, p_)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p_ &lt;-<span class="st"> </span><span class="kw">pars</span>(p_, <span class="dt">M =</span> <span class="kw">matrix</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">20</span>))
+<span class="kw">get.par</span>(<span class="st">&quot;Q&quot;</span>, p_)</code></pre></div>
 <pre><code>## $value
 ##       [,1] [,2] [,3] [,4]
-##  [1,]    0    1    1    1
-##  [2,]    1    0    1    1
-##  [3,]    1    1    0    1
-##  [4,]    1    0    1    0
-##  [5,]    1    1    0    0
-##  [6,]    1    1    1    0
-##  [7,]    1    1    1    0
-##  [8,]    1    0    0    1
+##  [1,]    1    0    0    1
+##  [2,]    1    0    0    0
+##  [3,]    1    0    0    0
+##  [4,]    1    1    0    0
+##  [5,]    1    1    1    1
+##  [6,]    1    1    0    0
+##  [7,]    1    0    1    1
+##  [8,]    1    0    0    0
 ##  [9,]    1    1    1    1
-## [10,]    0    0    0    1
-## [11,]    1    0    1    1
-## [12,]    0    1    1    0
-## [13,]    1    0    1    1
-## [14,]    1    0    0    0
-## [15,]    1    1    0    1
+## [10,]    1    0    1    1
+## [11,]    0    0    1    0
+## [12,]    1    0    0    1
+## [13,]    1    0    1    0
+## [14,]    0    1    1    1
+## [15,]    1    1    1    1
 ## 
 ## $context
 ## Activated information in the context:
@@ -233,7 +250,7 @@ p_</code></pre>
 <div id="generate-data-from-a-context-using-gen" class="section level2">
 <h2>Generate data from a context using <code>gen</code></h2>
 <p>Parameters activated in a single context are ensured non-conflict while being put together by <code>pars</code> (<em>condition 2</em>). If a context satisfies <em>condition 1</em>, there will be a way to generate data from it. <code>edmsyn</code> provides function <code>gen</code> that can check for <em>condition 2</em> and generates data with the specified model. For example, the following code generates data from <code>p</code> by POKS model (Partial Order Knowledge Structure model) twice:</p>
-<pre class="sourceCode r"><code class="sourceCode r">poks.data &lt;-<span class="st"> </span><span class="kw">gen</span>(<span class="st">&quot;poks&quot;</span>, p, <span class="dt">n =</span> <span class="dv">2</span>, <span class="dt">progress =</span> <span class="ot">TRUE</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">poks.data &lt;-<span class="st"> </span><span class="kw">gen</span>(<span class="st">&quot;poks&quot;</span>, p, <span class="dt">n =</span> <span class="dv">2</span>, <span class="dt">progress =</span> <span class="ot">TRUE</span>)</code></pre></div>
 <pre><code>## Generate poks from c(&quot;students&quot;, &quot;po&quot;, &quot;avg.success&quot;, &quot;alpha.c&quot;, &quot;alpha.p&quot;, &quot;p.min&quot;)
 ## Generate po from c(&quot;items&quot;, &quot;min.ntree&quot;, &quot;max.ntree&quot;, &quot;min.depth&quot;, &quot;max.depth&quot;, &quot;density&quot;, &quot;min.it.per.tree&quot;, &quot;max.it.per.tree&quot;, &quot;trans&quot;)
 ## Generate min.ntree from init.vals
@@ -248,7 +265,7 @@ p_</code></pre>
 ## Generate alpha.c from init.vals
 ## Generate alpha.p from init.vals
 ## Generate p.min from init.vals</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">poks.data</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">poks.data</code></pre></div>
 <pre><code>## [[1]]
 ## Activated information in the context:
 ##  [1] &quot;init.vals&quot;       &quot;items&quot;           &quot;concepts&quot;       
@@ -267,50 +284,50 @@ p_</code></pre>
 ## [13] &quot;min.it.per.tree&quot; &quot;max.it.per.tree&quot; &quot;alpha.c&quot;        
 ## [16] &quot;alpha.p&quot;         &quot;p.min&quot;           &quot;poks&quot;</code></pre>
 <p>As can be seen, <code>gen</code> returns a list of two components, correspond to two generations required by option <code>n = 2</code>. Each of the two is a context. <code>edmsyn</code> views the generated data as <em>a part of the context</em>. In fact, we can consider <em>data</em> as a parameter at highest level. In each of the generated context, there is a component whose name is the same as the specified model <code>poks</code>, this component contains the generated data.</p>
-<pre class="sourceCode r"><code class="sourceCode r">poks.data[[<span class="dv">1</span>]]$poks</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">poks.data[[<span class="dv">1</span>]]$poks</code></pre></div>
 <pre><code>## $R
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    1    0    0    1    1    1    1    0    0     0     1     0     0
-##  [2,]    0    0    1    1    1    0    0    1    0     0     1     0     1
-##  [3,]    1    0    1    0    1    0    1    0    0     0     0     1     0
-##  [4,]    0    1    0    1    0    1    1    0    1     1     1     0     1
-##  [5,]    1    1    1    0    1    1    1    1    0     1     1     0     0
-##  [6,]    1    1    0    1    1    0    0    0    1     0     0     0     0
-##  [7,]    0    1    1    0    0    1    1    0    1     1     0     1     1
-##  [8,]    0    0    0    1    1    1    1    0    0     0     0     0     1
-##  [9,]    0    1    1    1    1    0    1    1    0     0     0     0     0
-## [10,]    1    0    0    1    1    1    1    1    0     1     1     0     1
-## [11,]    1    0    0    1    1    0    0    1    0     1     1     0     1
-## [12,]    0    1    0    1    0    0    0    0    0     1     1     1     1
-## [13,]    1    0    1    0    0    0    1    0    0     1     0     0     0
-## [14,]    1    0    1    1    1    1    1    1    1     1     1     0     1
-## [15,]    0    1    0    0    1    0    0    1    0     1     1     0     0
-## [16,]    0    0    0    0    1    1    0    0    0     0     0     0     1
-## [17,]    1    0    1    1    1    0    1    0    1     1     1     0     1
-## [18,]    0    0    1    1    1    1    1    1    1     1     0     1     0
-## [19,]    0    1    0    0    1    0    0    1    0     1     1     0     1
-## [20,]    1    1    0    0    1    1    1    1    1     1     0     1     0
+##  [1,]    0    0    0    0    0    0    1    0    1     0     0     0     0
+##  [2,]    0    0    0    0    0    0    1    0    1     0     1     0     1
+##  [3,]    0    1    0    0    0    0    0    0    0     0     1     0     0
+##  [4,]    0    1    0    0    1    0    0    1    0     1     1     1     0
+##  [5,]    0    1    1    0    0    1    1    0    1     0     0     1     0
+##  [6,]    0    1    0    0    1    1    1    1    0     1     1     1     1
+##  [7,]    0    1    0    0    1    0    0    0    0     0     1     1     1
+##  [8,]    0    1    0    0    0    0    0    0    0     0     1     0     0
+##  [9,]    1    1    1    1    1    1    1    0    1     1     1     1     1
+## [10,]    1    1    1    1    1    0    1    0    1     0     1     1     1
+## [11,]    1    1    0    0    1    1    0    1    1     1     1     1     1
+## [12,]    0    1    0    0    0    0    0    0    0     0     1     0     0
+## [13,]    1    1    0    0    0    0    1    0    1     0     1     1     1
+## [14,]    0    0    0    0    0    0    1    0    1     0     1     0     0
+## [15,]    0    1    0    0    1    1    1    1    1     1     1     1     1
+## [16,]    0    0    0    0    1    1    1    1    1     1     1     1     1
+## [17,]    0    0    0    0    0    0    1    0    0     0     0     0     0
+## [18,]    0    0    0    0    0    0    1    0    1     0     1     0     1
+## [19,]    1    1    1    0    1    1    1    1    1     1     1     1     1
+## [20,]    1    1    1    0    1    1    1    1    1     1     0     1     0
 ##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
 ##  [1,]     0     0     0     0     0     0     0
-##  [2,]     0     1     1     0     1     1     1
-##  [3,]     0     1     1     0     1     0     0
-##  [4,]     1     0     1     1     1     0     1
-##  [5,]     0     1     0     0     1     0     1
-##  [6,]     0     0     1     0     0     1     0
-##  [7,]     0     0     1     1     1     1     1
-##  [8,]     0     1     0     1     0     1     1
-##  [9,]     0     1     1     0     0     1     0
-## [10,]     0     1     0     1     1     1     0
-## [11,]     0     1     0     1     0     0     1
-## [12,]     1     0     0     0     1     0     0
-## [13,]     1     0     1     0     1     0     0
-## [14,]     1     1     1     1     1     0     1
-## [15,]     1     0     0     0     0     1     0
-## [16,]     0     1     1     0     0     0     1
-## [17,]     0     0     1     1     0     0     1
-## [18,]     0     1     0     1     0     0     1
-## [19,]     0     0     1     0     1     1     0
-## [20,]     1     0     0     1     1     1     1
+##  [2,]     0     1     0     0     0     0     0
+##  [3,]     0     1     0     0     0     0     1
+##  [4,]     1     1     0     0     0     1     1
+##  [5,]     0     1     1     1     1     0     1
+##  [6,]     1     1     0     1     1     1     1
+##  [7,]     0     1     0     0     0     1     1
+##  [8,]     0     0     0     0     0     0     0
+##  [9,]     1     1     1     0     1     0     1
+## [10,]     1     1     1     1     1     1     1
+## [11,]     1     1     1     1     0     1     1
+## [12,]     0     1     0     0     0     0     0
+## [13,]     1     1     1     0     0     0     1
+## [14,]     0     1     0     1     0     0     0
+## [15,]     1     1     1     1     1     1     1
+## [16,]     1     1     1     1     0     0     1
+## [17,]     0     0     0     0     0     0     0
+## [18,]     1     1     1     0     0     0     0
+## [19,]     1     1     1     1     1     1     1
+## [20,]     0     1     1     1     1     1     1
 ## 
 ## $alpha.c
 ## [1] 0.25
@@ -322,51 +339,51 @@ p_</code></pre>
 ## [1] 0.5</code></pre>
 <p>Looking at the result, the <code>poks</code> component is a list with component <code>R</code> being the response matrix, and other components representing other information that is needed for the learning process. This point will be explained in later sections.</p>
 <p>Since data is considered to be just another parameter in a context, we can actually use <code>get.par</code> to generate data. In fact, <code>gen</code> is simply a wrapper of <code>get.par</code> with an additional feature <code>n</code>, where users can specify how many times the process should be repeated.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">get.par</span>(<span class="st">&quot;poks&quot;</span>, p)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">get.par</span>(<span class="st">&quot;poks&quot;</span>, p)</code></pre></div>
 <pre><code>## $value
 ## $value$R
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    0    1    1    1    1    1    0    0    0     1     0     0     0
-##  [2,]    1    1    1    1    1    0    1    0    1     0     1     1     1
-##  [3,]    0    1    1    0    1    1    0    0    0     0     1     0     1
-##  [4,]    1    1    1    1    0    0    1    1    0     0     1     1     0
-##  [5,]    0    1    0    0    0    0    0    0    0     0     0     1     1
-##  [6,]    0    1    0    0    1    0    0    0    0     0     1     0     0
-##  [7,]    1    1    1    1    1    0    1    0    1     0     0     0     1
-##  [8,]    0    1    0    0    0    0    1    1    1     1     0     1     0
-##  [9,]    0    0    0    1    0    0    0    0    0     1     0     0     0
-## [10,]    1    1    0    1    1    0    0    1    0     1     0     0     1
-## [11,]    1    1    1    1    1    1    1    1    0     1     1     1     1
-## [12,]    0    1    1    1    1    0    0    0    1     1     1     1     1
-## [13,]    0    0    1    1    1    0    1    1    0     1     1     0     0
-## [14,]    0    0    1    1    1    1    1    0    1     0     1     0     1
-## [15,]    1    0    0    0    1    1    0    1    1     0     1     0     1
-## [16,]    0    0    1    1    0    0    0    0    0     0     0     0     0
-## [17,]    1    0    0    1    0    1    0    1    1     0     1     0     1
-## [18,]    1    1    0    0    0    1    1    0    0     0     0     1     1
-## [19,]    1    1    0    1    1    1    0    1    1     1     1     1     1
-## [20,]    0    1    1    1    1    1    0    0    0     0     1     0     0
+##  [1,]    0    1    1    1    1    0    0    0    0     1     1     1     1
+##  [2,]    0    1    1    0    1    0    0    0    0     0     1     0     1
+##  [3,]    1    0    0    0    1    1    1    0    0     1     0     1     0
+##  [4,]    0    0    0    0    1    0    0    0    0     0     0     0     1
+##  [5,]    1    1    1    0    1    1    1    1    1     1     0     1     1
+##  [6,]    0    0    1    1    0    1    0    0    0     1     0     1     0
+##  [7,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+##  [8,]    0    1    0    0    1    0    1    1    1     1     0     1     1
+##  [9,]    0    0    1    0    0    0    0    0    0     0     1     0     1
+## [10,]    1    1    1    1    1    1    0    1    0     1     1     1     1
+## [11,]    0    0    1    1    1    1    0    1    1     0     1     0     0
+## [12,]    0    1    0    0    0    0    0    0    0     1     0     0     0
+## [13,]    1    1    1    0    1    0    0    0    0     0     1     1     1
+## [14,]    1    1    1    1    1    1    1    0    1     1     1     1     1
+## [15,]    0    1    1    1    0    1    1    0    0     1     0     1     1
+## [16,]    1    1    1    1    1    0    1    1    1     1     1     1     1
+## [17,]    0    0    0    0    1    0    0    0    0     0     0     0     0
+## [18,]    1    1    1    1    1    0    0    1    0     1     1     1     1
+## [19,]    0    1    1    1    0    0    1    1    0     0     1     0     1
+## [20,]    1    1    0    0    1    0    1    1    1     1     1     1     1
 ##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     1     0     0     0     1     0     0
-##  [2,]     1     1     1     1     1     1     1
-##  [3,]     1     0     0     0     1     0     1
-##  [4,]     0     1     1     0     1     0     0
-##  [5,]     1     0     1     1     0     1     0
-##  [6,]     0     1     0     1     0     0     0
-##  [7,]     1     0     1     0     1     0     0
-##  [8,]     0     1     1     1     0     0     1
-##  [9,]     0     0     1     0     1     0     1
-## [10,]     1     1     0     1     1     1     0
-## [11,]     1     1     1     1     1     0     1
-## [12,]     1     1     1     1     1     1     1
-## [13,]     1     0     1     0     0     0     1
-## [14,]     1     0     0     1     1     0     0
-## [15,]     0     0     1     0     0     1     0
-## [16,]     0     0     0     0     1     0     0
-## [17,]     1     0     1     1     1     0     0
-## [18,]     1     0     0     0     0     0     0
-## [19,]     1     0     1     1     1     0     0
-## [20,]     0     0     0     1     1     0     0
+##  [1,]     0     0     1     1     1     1     0
+##  [2,]     0     0     1     1     1     1     0
+##  [3,]     1     1     1     1     1     1     1
+##  [4,]     0     0     0     0     1     0     0
+##  [5,]     1     0     0     0     1     1     0
+##  [6,]     0     1     1     1     0     0     0
+##  [7,]     0     0     0     0     0     0     0
+##  [8,]     0     0     0     1     0     0     0
+##  [9,]     0     0     0     1     1     0     0
+## [10,]     1     1     1     1     0     1     1
+## [11,]     0     1     0     0     0     1     1
+## [12,]     0     0     0     0     0     0     0
+## [13,]     0     1     1     1     1     1     0
+## [14,]     0     1     1     1     1     1     1
+## [15,]     0     1     1     1     0     0     0
+## [16,]     1     1     1     1     1     1     1
+## [17,]     0     0     0     0     1     1     0
+## [18,]     0     0     1     1     1     1     0
+## [19,]     0     1     0     1     0     0     0
+## [20,]     1     1     0     1     0     1     1
 ## 
 ## $value$alpha.c
 ## [1] 0.25
@@ -389,72 +406,72 @@ p_</code></pre>
 <p>Following is two more examples on using <code>gen</code>. In the first one, <code>gen</code> will generate data by POKS model again, but from a different context where user have more control on the Partial Order structure of items. In the second one, <code>gen</code> generates data by DINA model (Deterministic Input Noisy And model).</p>
 <p><strong>Example 1</strong></p>
 <p>Suppose this time we want the Partial Order structure of items to have two connected components, each with height 3 and no transitive link between items, this can be done by updating <code>p</code> with some more parameters. To visualize this structure, whose dependency matrix will be component <code>po</code> in the context returned by <code>gen</code>, we can use function <code>viz</code>.</p>
-<pre class="sourceCode r"><code class="sourceCode r">p &lt;-<span class="st"> </span><span class="kw">pars</span>(p, <span class="dt">min.depth =</span> <span class="dv">3</span>, <span class="dt">max.depth =</span> <span class="dv">3</span>, <span class="dt">min.ntree =</span> <span class="dv">2</span>, <span class="dt">max.ntree =</span> <span class="dv">2</span>, <span class="dt">trans =</span> <span class="ot">FALSE</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p &lt;-<span class="st"> </span><span class="kw">pars</span>(p, <span class="dt">min.depth =</span> <span class="dv">3</span>, <span class="dt">max.depth =</span> <span class="dv">3</span>, <span class="dt">min.ntree =</span> <span class="dv">2</span>, <span class="dt">max.ntree =</span> <span class="dv">2</span>, <span class="dt">trans =</span> <span class="ot">FALSE</span>)
 poks.data &lt;-<span class="st"> </span><span class="kw">gen</span>(<span class="st">&quot;poks&quot;</span>, p)
-v &lt;-<span class="st"> </span><span class="kw">viz</span>(poks.data$po)</code></pre>
-<p><img src="data:image/png;base64,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" /></p>
+v &lt;-<span class="st"> </span><span class="kw">viz</span>(poks.data$po)</code></pre></div>
+<p><img src="data:image/png;base64,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" alt /></p>
 <p><code>v</code> contains analysed information about the structure. Its first component is identical to <code>po</code>, the second one is a list with equal number of components to the number of connected components of the structure <code>po</code> represents. Each of these components is in turn a list with first component being the corresponding dependency matrix, and sencond component represents how many items are there on each level of depth.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(v)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(v)</code></pre></div>
 <pre><code>## $ks
 ##    1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
-## 1  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 2  0 0 1 0 0 0 0 0 0  0  0  0  0  0  0  0  1  0  0  0
-## 3  0 0 0 0 0 1 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 4  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 1  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  1  0  0  0
+## 2  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  1
+## 3  0 0 0 0 1 0 0 0 0  1  0  0  1  0  0  0  1  1  0  0
+## 4  0 0 0 0 0 0 0 0 1  0  0  0  0  0  0  0  0  0  0  0
 ## 5  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 6  0 0 0 0 1 0 0 0 0  0  0  0  0  0  0  0  0  0  1  1
-## 7  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 6  0 0 0 0 0 0 0 0 0  0  0  0  0  0  1  0  0  1  0  0
+## 7  0 0 0 0 0 0 0 0 0  1  0  0  0  0  1  0  1  0  0  0
 ## 8  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
 ## 9  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 10 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 11 1 0 0 1 0 0 1 1 1  1  0  0  1  0  0  1  0  1  0  0
-## 12 0 0 0 0 0 0 0 0 0  0  0  0  0  1  1  0  0  0  0  0
+## 10 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  1  0  0  0  0
+## 11 0 0 0 1 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 12 0 0 0 0 0 0 0 0 0  0  1  0  0  0  0  0  0  0  1  1
 ## 13 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 14 0 0 0 0 0 0 0 0 0  0  1  0  0  0  0  0  0  0  0  0
+## 14 0 0 0 0 1 0 0 0 0  1  0  0  1  0  1  0  1  0  0  0
 ## 15 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 16 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 16 0 0 0 0 0 0 0 1 0  0  0  0  0  0  0  0  0  0  0  0
 ## 17 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 18 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 18 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  1  0  0  0  0
 ## 19 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
 ## 20 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
 ## 
 ## $comp
 ## $comp[[1]]
 ## $comp[[1]]$matrix
-##    12 14 15 11 1 4 7 8 9 10 13 16 18
-## 12  0  1  1  0 0 0 0 0 0  0  0  0  0
-## 14  0  0  0  1 0 0 0 0 0  0  0  0  0
-## 15  0  0  0  0 0 0 0 0 0  0  0  0  0
-## 11  0  0  0  0 1 1 1 1 1  1  1  1  1
-## 1   0  0  0  0 0 0 0 0 0  0  0  0  0
-## 4   0  0  0  0 0 0 0 0 0  0  0  0  0
-## 7   0  0  0  0 0 0 0 0 0  0  0  0  0
-## 8   0  0  0  0 0 0 0 0 0  0  0  0  0
-## 9   0  0  0  0 0 0 0 0 0  0  0  0  0
-## 10  0  0  0  0 0 0 0 0 0  0  0  0  0
-## 13  0  0  0  0 0 0 0 0 0  0  0  0  0
-## 16  0  0  0  0 0 0 0 0 0  0  0  0  0
-## 18  0  0  0  0 0 0 0 0 0  0  0  0  0
+##    1 3 6 7 14 5 10 13 15 17 18 16 8
+## 1  0 0 0 0  0 0  0  0  0  1  0  0 0
+## 3  0 0 0 0  0 1  1  1  0  1  1  0 0
+## 6  0 0 0 0  0 0  0  0  1  0  1  0 0
+## 7  0 0 0 0  0 0  1  0  1  1  0  0 0
+## 14 0 0 0 0  0 1  1  1  1  1  0  0 0
+## 5  0 0 0 0  0 0  0  0  0  0  0  0 0
+## 10 0 0 0 0  0 0  0  0  0  0  0  1 0
+## 13 0 0 0 0  0 0  0  0  0  0  0  0 0
+## 15 0 0 0 0  0 0  0  0  0  0  0  0 0
+## 17 0 0 0 0  0 0  0  0  0  0  0  0 0
+## 18 0 0 0 0  0 0  0  0  0  0  0  1 0
+## 16 0 0 0 0  0 0  0  0  0  0  0  0 1
+## 8  0 0 0 0  0 0  0  0  0  0  0  0 0
 ## 
 ## $comp[[1]]$level.sizes
-## [1] 1 2 1 9
+## [1] 5 6 1 1
 ## 
 ## 
 ## $comp[[2]]
 ## $comp[[2]]$matrix
-##    2 3 17 6 5 19 20
-## 2  0 1  1 0 0  0  0
-## 3  0 0  0 1 0  0  0
-## 17 0 0  0 0 0  0  0
-## 6  0 0  0 0 1  1  1
-## 5  0 0  0 0 0  0  0
-## 19 0 0  0 0 0  0  0
-## 20 0 0  0 0 0  0  0
+##    2 12 11 19 20 4 9
+## 2  0  0  0  0  1 0 0
+## 12 0  0  1  1  1 0 0
+## 11 0  0  0  0  0 1 0
+## 19 0  0  0  0  0 0 0
+## 20 0  0  0  0  0 0 0
+## 4  0  0  0  0  0 0 1
+## 9  0  0  0  0  0 0 0
 ## 
 ## $comp[[2]]$level.sizes
-## [1] 1 2 1 3</code></pre>
+## [1] 2 3 1 1</code></pre>
 <p><strong>Example 2</strong></p>
-<pre class="sourceCode r"><code class="sourceCode r">dina.data &lt;-<span class="st"> </span><span class="kw">gen</span>(<span class="st">&quot;dina&quot;</span>, p, <span class="dt">progress =</span> <span class="ot">TRUE</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dina.data &lt;-<span class="st"> </span><span class="kw">gen</span>(<span class="st">&quot;dina&quot;</span>, p, <span class="dt">progress =</span> <span class="ot">TRUE</span>)</code></pre></div>
 <pre><code>## Generate dina from c(&quot;Q&quot;, &quot;M&quot;, &quot;slip&quot;, &quot;guess&quot;)
 ## Generate Q from c(&quot;items&quot;, &quot;concepts&quot;)
 ## Generate M from c(&quot;students&quot;, &quot;skill.space&quot;, &quot;skill.dist&quot;)
@@ -463,7 +480,7 @@ v &lt;-<span class="st"> </span><span class="kw">viz</span>(poks.data$po)</code>
 ## Generate skill.dist from skill.space.size
 ## Generate slip from items
 ## Generate guess from items</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">dina.data</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dina.data</code></pre></div>
 <pre><code>## Activated information in the context:
 ##  [1] &quot;init.vals&quot;        &quot;items&quot;            &quot;concepts&quot;        
 ##  [4] &quot;students&quot;         &quot;min.ntree&quot;        &quot;max.ntree&quot;       
@@ -472,76 +489,76 @@ v &lt;-<span class="st"> </span><span class="kw">viz</span>(poks.data$po)</code>
 ## [13] &quot;M&quot;                &quot;skill.space.size&quot; &quot;skill.space&quot;     
 ## [16] &quot;skill.dist&quot;       &quot;dina&quot;</code></pre>
 <p>As reported by <code>gen</code>, unlike the previous case, <code>M</code> is now generated from three parameters <code>students</code>, <code>skill.space</code>, and <code>skill.dist</code> instead of <code>concept.exp</code> and <code>students</code>. The reason for this particular situation is that, <code>skill.space</code> and <code>skill.dist</code> are formal parameters of DINA model, so they should be used in the process of generating data. Again, we can access this data by referring to component <code>dina</code> of the generated context. Besides the response matrix, <code>dina.data$dina</code> also have another component <code>Q</code>, this is because of the fact that under DINA’s view, a response matrix without its corresponding Q-matrix is incomplete.</p>
-<pre class="sourceCode r"><code class="sourceCode r">dina.data$dina</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dina.data$dina</code></pre></div>
 <pre><code>## $R
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    0    1    0    0    1    0    1    1    1     0     1     0     1
-##  [2,]    1    0    0    0    0    1    0    1    0     1     1     1     0
-##  [3,]    1    1    1    1    0    1    1    0    1     0     0     1     0
-##  [4,]    1    1    0    0    0    0    0    1    1     1     1     0     0
-##  [5,]    0    0    0    0    0    0    0    0    0     0     0     1     0
-##  [6,]    1    1    0    0    0    1    0    0    0     0     0     0     0
-##  [7,]    0    0    0    0    0    0    1    0    0     0     0     0     0
-##  [8,]    0    0    1    1    0    1    1    0    0     0     1     0     0
-##  [9,]    1    0    0    0    0    0    0    0    0     0     0     0     0
-## [10,]    0    1    1    0    1    1    1    1    1     0     1     1     1
-## [11,]    0    0    1    0    0    0    0    0    0     1     1     0     1
-## [12,]    0    0    0    0    0    1    0    1    0     1     0     0     1
-## [13,]    0    1    0    0    1    0    0    0    0     0     0     1     0
-## [14,]    1    1    1    1    1    0    1    1    1     1     0     0     1
-## [15,]    0    0    1    1    1    0    1    1    1     1     1     1     1
-## [16,]    1    1    0    1    0    0    0    0    0     0     0     0     0
-## [17,]    0    0    0    0    1    0    0    0    0     0     0     1     0
-## [18,]    0    1    0    1    0    0    0    1    0     1     0     0     0
-## [19,]    1    1    1    1    1    1    1    0    1     1     1     1     0
-## [20,]    1    1    1    1    1    0    1    1    1     1     0     0     1
+##  [1,]    0    0    1    0    1    1    0    1    0     0     1     1     1
+##  [2,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+##  [3,]    1    0    0    1    0    1    0    0    0     1     0     1     0
+##  [4,]    1    1    1    0    1    1    1    0    1     1     1     1     1
+##  [5,]    0    1    0    1    0    0    0    0    0     0     0     0     0
+##  [6,]    1    0    0    1    0    0    0    0    0     0     0     0     0
+##  [7,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+##  [8,]    1    1    0    0    1    0    0    0    0     0     0     0     0
+##  [9,]    0    0    1    1    1    0    0    1    0     0     0     0     1
+## [10,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+## [11,]    1    0    0    0    0    0    0    0    0     0     0     0     0
+## [12,]    0    1    1    1    1    1    1    1    1     1     0     1     1
+## [13,]    0    0    0    0    0    0    0    0    0     0     0     1     0
+## [14,]    1    1    0    1    1    0    0    1    1     1     1     0     1
+## [15,]    1    0    1    0    0    0    1    0    1     1     1     0     0
+## [16,]    0    1    0    0    0    1    1    0    0     0     1     1     1
+## [17,]    0    0    0    0    0    1    0    0    0     1     0     0     0
+## [18,]    0    1    0    0    0    1    0    0    1     1     0     1     0
+## [19,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+## [20,]    0    1    0    0    1    0    0    0    0     1     0     0     1
 ##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     1     0     1     0     1     0     1
-##  [2,]     0     1     0     1     0     0     0
-##  [3,]     1     1     1     0     1     0     0
-##  [4,]     0     0     0     0     1     1     1
-##  [5,]     0     1     0     0     0     1     1
-##  [6,]     1     1     1     1     0     0     1
-##  [7,]     0     0     0     0     0     0     0
-##  [8,]     0     0     0     0     0     1     1
-##  [9,]     1     0     0     0     0     0     0
-## [10,]     0     1     1     1     1     1     1
-## [11,]     1     0     0     1     0     1     1
-## [12,]     0     0     1     0     1     0     0
-## [13,]     0     0     0     0     0     0     1
-## [14,]     0     1     0     0     1     1     1
-## [15,]     1     1     1     0     1     0     0
-## [16,]     0     0     0     0     0     0     0
-## [17,]     0     0     0     1     0     0     1
-## [18,]     0     0     0     0     1     0     0
-## [19,]     0     1     0     1     1     1     1
-## [20,]     1     1     1     1     1     1     1
+##  [1,]     0     0     1     1     0     1     0
+##  [2,]     0     0     1     0     0     1     0
+##  [3,]     0     1     1     0     1     0     1
+##  [4,]     1     1     1     1     1     1     0
+##  [5,]     0     0     0     0     0     0     0
+##  [6,]     0     1     0     0     0     0     0
+##  [7,]     0     0     0     0     0     0     1
+##  [8,]     0     0     1     0     1     0     1
+##  [9,]     0     1     0     0     1     0     1
+## [10,]     1     1     1     0     1     1     1
+## [11,]     0     0     0     0     0     0     0
+## [12,]     1     1     1     1     1     1     1
+## [13,]     0     0     0     0     0     0     0
+## [14,]     1     0     0     1     1     1     1
+## [15,]     0     0     0     1     0     0     1
+## [16,]     0     0     0     1     1     0     1
+## [17,]     1     1     0     0     1     0     1
+## [18,]     1     1     1     1     1     0     0
+## [19,]     1     0     0     0     0     0     0
+## [20,]     0     0     0     1     1     0     0
 ## 
 ## $Q
 ##       [,1] [,2] [,3] [,4] [,5]
-##  [1,]    0    1    0    1    1
-##  [2,]    1    1    0    0    0
-##  [3,]    1    0    1    1    1
-##  [4,]    1    0    0    0    0
-##  [5,]    1    1    0    0    1
-##  [6,]    0    0    0    1    0
-##  [7,]    0    0    0    0    1
+##  [1,]    1    0    0    1    1
+##  [2,]    0    0    1    1    1
+##  [3,]    1    0    1    1    0
+##  [4,]    1    0    1    0    0
+##  [5,]    1    1    1    0    1
+##  [6,]    1    1    0    1    1
+##  [7,]    1    0    0    0    0
 ##  [8,]    0    0    1    0    1
-##  [9,]    1    0    1    1    0
-## [10,]    1    0    1    1    1
-## [11,]    1    1    0    1    0
+##  [9,]    0    0    1    1    0
+## [10,]    0    0    1    1    1
+## [11,]    1    0    0    0    1
 ## [12,]    1    1    1    1    0
-## [13,]    1    0    1    1    1
-## [14,]    1    0    0    0    1
-## [15,]    1    0    1    1    1
-## [16,]    0    0    1    0    1
-## [17,]    0    1    0    0    1
-## [18,]    0    0    1    0    0
-## [19,]    1    1    0    1    1
-## [20,]    1    1    0    1    0</code></pre>
+## [13,]    0    1    1    1    0
+## [14,]    1    1    1    0    1
+## [15,]    0    1    0    1    1
+## [16,]    1    1    0    1    1
+## [17,]    0    1    1    0    0
+## [18,]    1    1    0    0    0
+## [19,]    1    1    1    1    1
+## [20,]    1    1    0    1    1</code></pre>
 <p><code>gen</code> only allow one model and one context at a time, we can save time generating data across different models and contexts using <code>gen.apply</code>. Setting the argument <code>multiply</code> to <code>TRUE</code> or <code>FALSE</code> decides what kind of matching will be made between models and contexts.</p>
-<pre class="sourceCode r"><code class="sourceCode r">dat<span class="fl">.1</span> &lt;-<span class="st"> </span><span class="kw">gen.apply</span>(ALL.MODELS, <span class="kw">list</span>(<span class="dt">p1 =</span> p,<span class="dt">p2 =</span> p_), <span class="dt">multiply =</span> <span class="ot">FALSE</span>, <span class="dt">n =</span> <span class="dv">5</span>)
-dat<span class="fl">.1</span></code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat<span class="fl">.1</span> &lt;-<span class="st"> </span><span class="kw">gen.apply</span>(ALL.MODELS, <span class="kw">list</span>(<span class="dt">p1 =</span> p,<span class="dt">p2 =</span> p_), <span class="dt">multiply =</span> <span class="ot">FALSE</span>, <span class="dt">n =</span> <span class="dv">5</span>)
+dat<span class="fl">.1</span></code></pre></div>
 <pre><code>##            01      02      03      04      05     
 ## exp.p1     List,62 List,62 List,62 List,62 List,62
 ## irt.p2     List,62 List,62 List,62 List,62 List,62
@@ -553,7 +570,7 @@ dat<span class="fl">.1</span></code></pre>
 ## nmf.dis.p2 List,62 List,62 List,62 List,62 List,62
 ## nmf.com.p1 List,62 List,62 List,62 List,62 List,62
 ## bkt.p2     List,62 List,62 List,62 List,62 List,62</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">dat<span class="fl">.1</span>[<span class="st">&quot;dino.p1&quot;</span>, <span class="dv">3</span>]</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat<span class="fl">.1</span>[<span class="st">&quot;dino.p1&quot;</span>, <span class="dv">3</span>]</code></pre></div>
 <pre><code>## [[1]]
 ## Activated information in the context:
 ##  [1] &quot;init.vals&quot;        &quot;items&quot;            &quot;concepts&quot;        
@@ -562,8 +579,8 @@ dat<span class="fl">.1</span></code></pre>
 ## [10] &quot;slip&quot;             &quot;guess&quot;            &quot;Q&quot;               
 ## [13] &quot;M&quot;                &quot;skill.space.size&quot; &quot;skill.space&quot;     
 ## [16] &quot;skill.dist&quot;       &quot;dino&quot;</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">dat<span class="fl">.2</span> &lt;-<span class="st"> </span><span class="kw">gen.apply</span>(ALL.MODELS, <span class="kw">list</span>(<span class="dt">p1 =</span> p,<span class="dt">p2 =</span> p_), <span class="dt">multiply =</span> <span class="ot">TRUE</span>, <span class="dt">n =</span> <span class="dv">5</span>)
-dat<span class="fl">.2</span></code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat<span class="fl">.2</span> &lt;-<span class="st"> </span><span class="kw">gen.apply</span>(ALL.MODELS, <span class="kw">list</span>(<span class="dt">p1 =</span> p,<span class="dt">p2 =</span> p_), <span class="dt">multiply =</span> <span class="ot">TRUE</span>, <span class="dt">n =</span> <span class="dv">5</span>)
+dat<span class="fl">.2</span></code></pre></div>
 <pre><code>##         p1     p2    
 ## exp     List,5 List,5
 ## irt     List,5 List,5
@@ -575,7 +592,7 @@ dat<span class="fl">.2</span></code></pre>
 ## nmf.dis List,5 List,5
 ## nmf.com List,5 List,5
 ## bkt     List,5 List,5</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">dat<span class="fl">.2</span>[<span class="st">&quot;nmf.com&quot;</span>, <span class="st">&quot;p2&quot;</span>]</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat<span class="fl">.2</span>[<span class="st">&quot;nmf.com&quot;</span>, <span class="st">&quot;p2&quot;</span>]</code></pre></div>
 <pre><code>## [[1]]
 ## [[1]][[1]]
 ## Activated information in the context:
@@ -605,8 +622,8 @@ dat<span class="fl">.2</span></code></pre>
 <div id="learning-the-most-probable-context-from-data-using-learn" class="section level2">
 <h2>Learning the most probable context from data using <code>learn</code></h2>
 <p>Let’s say we want to get the third data generation from the matching between context <code>p1</code> and model <code>poks</code>, and use POKS model to learn from this data.</p>
-<pre class="sourceCode r"><code class="sourceCode r">poks.data &lt;-<span class="st"> </span>dat<span class="fl">.2</span>[<span class="st">&quot;poks&quot;</span>, <span class="st">&quot;p1&quot;</span>][[<span class="dv">1</span>]][[<span class="dv">3</span>]]
-poks.data</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">poks.data &lt;-<span class="st"> </span>dat<span class="fl">.2</span>[<span class="st">&quot;poks&quot;</span>, <span class="st">&quot;p1&quot;</span>][[<span class="dv">1</span>]][[<span class="dv">3</span>]]
+poks.data</code></pre></div>
 <pre><code>## Activated information in the context:
 ##  [1] &quot;init.vals&quot;       &quot;items&quot;           &quot;concepts&quot;       
 ##  [4] &quot;students&quot;        &quot;po&quot;              &quot;avg.success&quot;    
@@ -614,50 +631,50 @@ poks.data</code></pre>
 ## [10] &quot;min.depth&quot;       &quot;max.depth&quot;       &quot;density&quot;        
 ## [13] &quot;min.it.per.tree&quot; &quot;max.it.per.tree&quot; &quot;alpha.c&quot;        
 ## [16] &quot;alpha.p&quot;         &quot;p.min&quot;           &quot;poks&quot;</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">poks.data$poks</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">poks.data$poks</code></pre></div>
 <pre><code>## $R
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    0    0    0    0    0    0    0    1    0     0     0     0     0
-##  [2,]    0    1    1    1    0    0    1    1    0     0     1     0     0
-##  [3,]    0    1    0    0    0    1    1    1    0     0     0     0     0
-##  [4,]    1    1    1    0    0    0    1    0    0     1     1     1     0
-##  [5,]    0    0    1    1    0    0    1    1    0     1     0     1     0
-##  [6,]    0    0    1    1    0    1    1    1    1     1     0     0     0
-##  [7,]    0    0    0    0    1    0    1    1    0     0     0     0     0
-##  [8,]    1    1    1    1    1    1    1    1    1     1     0     1     1
-##  [9,]    0    1    1    0    0    0    1    1    0     1     0     0     0
-## [10,]    0    1    0    1    0    0    1    1    0     0     0     1     0
-## [11,]    0    0    0    1    0    0    0    0    1     0     1     0     1
-## [12,]    1    1    1    1    1    1    1    1    0     1     1     1     1
-## [13,]    1    0    0    0    0    0    0    0    0     0     1     0     0
-## [14,]    1    1    0    1    1    1    1    1    1     0     1     1     1
-## [15,]    0    1    1    1    1    0    1    1    1     1     1     0     1
-## [16,]    1    0    0    0    1    1    0    0    0     0     1     0     0
-## [17,]    1    0    1    0    1    1    1    1    1     0     1     1     1
-## [18,]    0    1    1    1    0    0    1    1    0     1     0     1     0
-## [19,]    1    0    0    0    0    1    0    1    0     0     0     1     0
-## [20,]    0    0    0    1    1    1    0    0    1     0     0     0     0
+##  [1,]    0    0    1    0    1    1    0    1    0     1     1     1     1
+##  [2,]    0    1    1    1    1    1    1    1    1     1     1     1     0
+##  [3,]    0    0    0    0    1    0    0    0    0     0     0     1     0
+##  [4,]    0    1    0    0    0    0    0    0    0     1     0     0     0
+##  [5,]    0    0    0    1    0    0    1    1    0     0     0     1     0
+##  [6,]    1    1    1    0    1    1    1    1    0     0     0     1     1
+##  [7,]    0    0    1    0    1    0    0    0    0     0     0     0     0
+##  [8,]    0    0    0    0    0    0    0    0    0     0     0     1     0
+##  [9,]    0    1    0    0    0    0    0    0    0     0     0     0     0
+## [10,]    1    1    0    1    0    1    1    0    0     1     1     1     1
+## [11,]    0    0    1    0    0    1    0    0    0     1     0     0     1
+## [12,]    0    0    0    0    0    1    0    0    0     1     1     1     0
+## [13,]    0    1    1    1    0    1    1    1    1     1     1     1     1
+## [14,]    1    1    1    1    1    0    0    1    1     1     1     1     1
+## [15,]    0    1    1    1    1    1    0    1    0     1     0     1     1
+## [16,]    0    0    0    0    0    1    1    0    0     1     0     0     0
+## [17,]    0    1    0    0    1    1    1    1    1     1     1     1     1
+## [18,]    1    1    0    1    1    1    1    1    1     1     1     1     1
+## [19,]    0    1    1    1    1    1    1    1    1     1     1     1     1
+## [20,]    0    1    1    1    0    1    1    0    1     1     0     1     1
 ##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     1     0     1     0     1     1     0
-##  [2,]     1     1     1     1     1     1     0
-##  [3,]     1     0     1     1     0     1     1
-##  [4,]     0     0     1     0     0     1     1
-##  [5,]     0     0     1     1     0     1     0
-##  [6,]     1     1     1     0     0     1     1
-##  [7,]     1     0     0     0     1     0     1
-##  [8,]     1     1     1     1     0     1     0
-##  [9,]     0     0     1     1     0     1     0
-## [10,]     0     0     1     0     0     1     0
-## [11,]     0     0     0     0     0     1     0
-## [12,]     0     1     1     1     0     1     1
-## [13,]     1     0     0     0     1     0     0
-## [14,]     1     0     1     1     1     1     1
-## [15,]     1     0     1     1     1     1     0
-## [16,]     1     1     1     1     1     0     0
-## [17,]     1     0     1     1     1     1     1
-## [18,]     1     0     1     1     1     1     1
-## [19,]     1     0     1     0     0     0     0
-## [20,]     1     0     0     0     0     0     1
+##  [1,]     1     1     1     1     1     1     1
+##  [2,]     0     0     0     1     0     0     1
+##  [3,]     1     1     0     0     1     0     0
+##  [4,]     0     0     0     1     0     0     0
+##  [5,]     1     1     0     0     1     0     0
+##  [6,]     1     1     1     0     1     0     1
+##  [7,]     0     0     1     0     0     0     0
+##  [8,]     0     0     0     0     1     1     0
+##  [9,]     0     0     0     0     0     0     1
+## [10,]     1     1     0     0     0     0     1
+## [11,]     1     0     0     0     0     0     0
+## [12,]     1     0     0     0     0     0     0
+## [13,]     1     1     1     1     0     1     1
+## [14,]     0     1     1     1     1     1     1
+## [15,]     0     1     1     1     0     1     1
+## [16,]     1     1     1     0     1     0     0
+## [17,]     1     1     0     1     0     1     0
+## [18,]     1     1     1     1     1     1     0
+## [19,]     1     0     1     1     0     1     0
+## [20,]     0     1     1     1     0     0     1
 ## 
 ## $alpha.c
 ## [1] 0.25
@@ -667,63 +684,63 @@ poks.data</code></pre>
 ## 
 ## $p.min
 ## [1] 0.5</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">learn.poks &lt;-<span class="st"> </span><span class="kw">learn</span>(<span class="st">&quot;poks&quot;</span>, <span class="dt">data =</span> poks.data$poks)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">learn.poks &lt;-<span class="st"> </span><span class="kw">learn</span>(<span class="st">&quot;poks&quot;</span>, <span class="dt">data =</span> poks.data$poks)</code></pre></div>
 <pre><code>## Learning by 'poks' ...</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">learn.poks</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">learn.poks</code></pre></div>
 <pre><code>## Activated information in the context:
 ##  [1] &quot;init.vals&quot;   &quot;items&quot;       &quot;state&quot;       &quot;po&quot;          &quot;or.t&quot;       
 ##  [6] &quot;or.f&quot;        &quot;student.var&quot; &quot;avg.success&quot; &quot;alpha.c&quot;     &quot;alpha.p&quot;    
 ## [11] &quot;p.min&quot;       &quot;poks&quot;</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">learn.poks$po</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">learn.poks$po</code></pre></div>
 <pre><code>##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    0    1    1    0    0    0    1    0    0     1     0     1     1
-##  [2,]    1    0    1    0    1    0    0    0    1     1     0     0     0
-##  [3,]    1    1    0    0    0    1    0    0    1     1     0     0     0
-##  [4,]    0    0    0    0    1    0    0    0    1     1     0     1     0
-##  [5,]    0    1    0    1    0    1    0    1    1     1     0     1     0
-##  [6,]    0    0    1    0    1    0    0    0    0     0     0     0     0
-##  [7,]    1    0    0    0    0    0    0    1    0     0     0     1     0
-##  [8,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-##  [9,]    0    1    1    1    1    0    0    0    0     1     0     0     0
-## [10,]    1    1    1    1    1    0    0    0    1     0     0     0     0
-## [11,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-## [12,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-## [13,]    1    0    0    0    0    1    0    1    0     0     0     1     0
+##  [1,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+##  [2,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+##  [3,]    0    1    0    0    1    1    0    1    0     0     0     0     1
+##  [4,]    0    0    0    0    0    1    0    0    1     0     0     0     0
+##  [5,]    0    0    1    0    0    0    0    0    0     0     0     0     0
+##  [6,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+##  [7,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+##  [8,]    0    0    1    0    0    0    0    0    0     0     0     0     0
+##  [9,]    0    0    0    1    0    0    0    0    0     0     0     0     0
+## [10,]    0    0    0    0    0    0    0    0    0     0     0     1     0
+## [11,]    0    0    0    0    0    0    0    0    0     0     0     1     0
+## [12,]    0    0    0    0    0    0    0    0    0     1     1     0     0
+## [13,]    0    0    0    0    0    0    0    0    0     0     0     0     0
 ## [14,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-## [15,]    0    1    0    0    0    0    0    0    1     0     0     0     0
-## [16,]    0    0    0    1    0    1    0    0    0     0     0     0     1
-## [17,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-## [18,]    1    1    1    1    1    0    0    0    1     1     0     0     0
-## [19,]    1    0    0    0    0    0    0    0    0     0     0     0     0
-## [20,]    0    1    0    0    0    0    1    0    0     0     0     1     0
+## [15,]    1    0    0    0    0    0    0    0    0     0     0     0     1
+## [16,]    0    1    1    0    1    0    0    0    0     0     1     1     0
+## [17,]    0    0    0    0    0    0    0    0    0     0     0     0     1
+## [18,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+## [19,]    0    1    0    0    0    0    0    0    0     0     0     0     1
+## [20,]    0    1    0    0    0    0    0    0    0     0     0     0     1
 ##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     0     0     0     0     1     1     0
-##  [2,]     0     1     0     0     1     0     0
-##  [3,]     1     0     0     0     1     0     0
-##  [4,]     0     0     0     0     1     0     0
-##  [5,]     0     0     0     0     1     0     0
+##  [1,]     0     1     0     0     0     0     0
+##  [2,]     0     0     0     0     0     1     1
+##  [3,]     0     0     1     0     0     1     1
+##  [4,]     0     0     0     0     0     0     0
+##  [5,]     0     0     1     0     0     0     0
 ##  [6,]     0     0     0     0     0     0     0
-##  [7,]     0     0     0     0     0     0     1
+##  [7,]     0     0     0     1     1     0     0
 ##  [8,]     0     0     0     0     0     0     0
-##  [9,]     0     1     0     0     1     0     0
-## [10,]     0     0     0     0     1     0     0
-## [11,]     0     0     0     0     1     0     0
-## [12,]     0     0     0     0     0     0     0
-## [13,]     0     0     1     0     0     0     0
-## [14,]     0     0     0     1     0     0     0
-## [15,]     0     0     0     0     1     0     0
+##  [9,]     0     0     0     0     1     1     0
+## [10,]     0     0     0     0     0     0     0
+## [11,]     1     0     1     0     0     0     0
+## [12,]     1     0     1     1     0     0     0
+## [13,]     0     1     0     1     0     1     1
+## [14,]     0     1     0     0     0     0     0
+## [15,]     1     0     0     0     0     0     1
 ## [16,]     0     0     0     0     0     0     0
-## [17,]     1     0     0     0     0     0     0
-## [18,]     0     1     0     0     0     0     0
-## [19,]     0     1     0     0     0     0     0
-## [20,]     0     0     0     0     0     0     0</code></pre>
+## [17,]     0     0     0     0     1     1     0
+## [18,]     0     0     0     1     0     1     0
+## [19,]     0     0     0     1     1     0     0
+## [20,]     0     1     0     0     0     0     0</code></pre>
 <p>If we want to learn from this same data using DINA model, <code>poks.data$poks</code> cannot be used because components <code>p.min</code>, <code>alpha.p</code>, <code>alpha.c</code> are meaningless to DINA. In order to do the task, one will need to hand-design this data. DINA requires one additional component besides the response matrix: Q-matrix. Normally, Q-matrix is expected to be expert-defined, however this illustration will just simply generate it randomly.</p>
-<pre class="sourceCode r"><code class="sourceCode r">Q &lt;-<span class="st"> </span><span class="kw">get.par</span>(<span class="st">&quot;Q&quot;</span>, p)$value
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Q &lt;-<span class="st"> </span><span class="kw">get.par</span>(<span class="st">&quot;Q&quot;</span>, p)$value
 R &lt;-<span class="st"> </span>poks.data$poks$R
 dina.data &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">R=</span>R,<span class="dt">Q=</span>Q)
-learn.dina &lt;-<span class="st"> </span><span class="kw">learn</span>(<span class="st">&quot;dina&quot;</span>, <span class="dt">data =</span> dina.data)</code></pre>
+learn.dina &lt;-<span class="st"> </span><span class="kw">learn</span>(<span class="st">&quot;dina&quot;</span>, <span class="dt">data =</span> dina.data)</code></pre></div>
 <pre><code>## Learning by 'dina' ...</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">learn.dina</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">learn.dina</code></pre></div>
 <pre><code>## Activated information in the context:
 ##  [1] &quot;init.vals&quot;        &quot;items&quot;            &quot;concepts&quot;        
 ##  [4] &quot;students&quot;         &quot;slip&quot;             &quot;guess&quot;           
@@ -731,7 +748,7 @@ learn.dina &lt;-<span class="st"> </span><span class="kw">learn</span>(<span cla
 ## [10] &quot;skill.space&quot;      &quot;skill.dist&quot;       &quot;concept.exp&quot;     
 ## [13] &quot;dina&quot;</code></pre>
 <p>Here we have a look at two parameters <code>skill.space</code> and <code>skill.dist</code></p>
-<pre class="sourceCode r"><code class="sourceCode r">learn.dina$skill.space</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">learn.dina$skill.space</code></pre></div>
 <pre><code>##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
 ## [1,]    0    1    0    0    0    0    1    1    1     1     0     0     0
 ## [2,]    0    0    1    0    0    0    1    0    0     0     1     1     1
@@ -750,14 +767,14 @@ learn.dina &lt;-<span class="st"> </span><span class="kw">learn</span>(<span cla
 ## [3,]     0     1     1     1     0     1     1     1
 ## [4,]     1     1     1     0     1     1     1     1
 ## [5,]     1     1     0     1     1     1     1     1</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">learn.dina$skill.dist</code></pre>
-<pre><code>##  [1] 2.916395e-02 2.916395e-02 2.916395e-02 2.626001e-02 2.916395e-02
-##  [6] 2.916395e-02 5.298163e-05 1.226434e-23 1.220608e-20 2.916395e-02
-## [11] 2.626001e-02 4.833140e-02 2.916395e-02 2.626001e-02 3.868646e-02
-## [16] 2.916395e-02 4.723692e-39 9.509919e-02 5.298163e-05 4.067673e-19
-## [21] 1.177098e-23 6.973717e-22 1.786416e-31 6.359047e-26 9.465330e-02
-## [26] 3.565170e-45 5.629507e-07 1.061312e-01 1.604323e-18 5.718876e-02
-## [31] 0.000000e+00 2.477115e-01</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">learn.dina$skill.dist</code></pre></div>
+<pre><code>##  [1]  3.941518e-08  3.019000e-02  3.941518e-08  3.941518e-08  3.941518e-08
+##  [6]  3.941518e-08  3.019000e-02  4.367130e-08  3.019000e-02  4.037043e-02
+## [11]  3.931864e-50  3.941518e-08  2.191756e-06  3.559446e-07  1.429766e-13
+## [16]  9.205483e-20  4.925526e-04  3.019000e-02  3.125335e-04  2.050609e-32
+## [21]  4.447005e-01  3.473938e-06  7.139442e-41  1.625240e-42  4.957875e-02
+## [26]  9.427149e-02  1.510906e-01  2.331511e-10  4.642630e-11 9.415793e-167
+## [31]  1.428173e-62  9.841682e-02</code></pre>
 </div>
 <div id="generate-synthetic-data-using-syn" class="section level2">
 <h2>Generate synthetic data using <code>syn</code></h2>
@@ -772,7 +789,7 @@ learn.dina &lt;-<span class="st"> </span><span class="kw">learn</span>(<span cla
 <li><p>Learn the most probable context by using <code>learn</code>.</p></li>
 <li><p>Keep some parameters (the default choice is stored in <code>KEEP</code><a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>) and discard the rest, also allow the user to change parameter <code>students</code>.</p></li>
 </ol>
-<pre class="sourceCode r"><code class="sourceCode r">KEEP</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">KEEP</code></pre></div>
 <pre><code>## $exp
 ## [1] &quot;avg.success&quot; &quot;it.exp&quot;      &quot;student.var&quot;
 ## 
@@ -810,59 +827,59 @@ learn.dina &lt;-<span class="st"> </span><span class="kw">learn</span>(<span cla
 <li>Generate synthetic data from this new context by <code>gen</code></li>
 </ol>
 <p>Now we synthesize <code>dina.data</code> with a new number of student</p>
-<pre class="sourceCode r"><code class="sourceCode r">dina.syn &lt;-<span class="st"> </span><span class="kw">syn</span>(<span class="st">&quot;dina&quot;</span>, <span class="dt">data =</span> dina.data, <span class="dt">students =</span> <span class="dv">12</span>, <span class="dt">n =</span> <span class="dv">10</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dina.syn &lt;-<span class="st"> </span><span class="kw">syn</span>(<span class="st">&quot;dina&quot;</span>, <span class="dt">data =</span> dina.data, <span class="dt">students =</span> <span class="dv">12</span>, <span class="dt">n =</span> <span class="dv">10</span>)</code></pre></div>
 <pre><code>## Learning by 'dina' ...</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">dina.syn$synthetic[[<span class="dv">5</span>]]$dina</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dina.syn$synthetic[[<span class="dv">5</span>]]$dina</code></pre></div>
 <pre><code>## $R
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-##  [1,]    0    0    0    0    0    0    0    0    0     0     0     0
-##  [2,]    1    1    1    1    1    1    1    0    0     0     0     1
-##  [3,]    1    1    0    0    1    0    0    0    0     0     0     1
-##  [4,]    1    1    1    1    1    1    0    0    0     1     0     1
-##  [5,]    1    0    1    1    1    0    1    0    0     0     1     0
-##  [6,]    1    0    0    1    1    1    1    1    1     1     0     1
-##  [7,]    1    0    0    0    0    1    0    1    0     0     0     0
-##  [8,]    1    1    1    1    1    1    1    1    0     0     1     1
-##  [9,]    1    0    0    1    1    0    1    0    0     0     1     1
-## [10,]    1    1    0    0    0    0    0    0    0     0     0     1
-## [11,]    0    0    1    0    0    0    0    0    0     0     0     1
-## [12,]    1    1    1    1    1    0    1    0    1     1     1     1
-## [13,]    0    0    0    0    1    0    0    1    1     0     0     0
-## [14,]    1    1    1    0    1    0    1    1    1     0     0     1
-## [15,]    1    0    1    1    1    0    1    0    0     1     1     1
-## [16,]    0    0    1    0    1    0    0    0    1     0     1     0
-## [17,]    1    1    1    1    1    1    1    1    1     1     0     0
-## [18,]    1    1    1    1    1    1    1    0    0     0     1     0
-## [19,]    0    0    1    0    1    0    1    0    1     0     0     0
-## [20,]    0    0    0    0    0    0    1    1    0     1     0     1
+##  [1,]    1    1    1    0    1    1    1    0    1     1     1     1
+##  [2,]    0    1    1    1    0    1    1    1    1     1     0     1
+##  [3,]    0    0    0    0    0    1    1    1    0     0     1     0
+##  [4,]    0    0    0    0    0    1    0    0    0     0     0     1
+##  [5,]    0    1    0    1    1    1    1    0    0     1     0     1
+##  [6,]    1    1    1    1    1    0    1    0    1     1     0     1
+##  [7,]    0    0    0    0    0    0    0    0    0     0     0     0
+##  [8,]    0    0    0    0    0    0    0    0    0     0     0     0
+##  [9,]    0    0    0    0    0    0    0    0    0     0     0     1
+## [10,]    0    1    0    1    1    0    1    1    0     1     0     1
+## [11,]    0    0    1    0    0    1    0    0    0     0     0     0
+## [12,]    0    1    0    0    0    1    0    0    0     0     1     0
+## [13,]    1    1    1    0    1    1    1    1    0     1     1     1
+## [14,]    1    0    1    1    0    1    1    1    1     1     1     1
+## [15,]    1    1    1    1    1    0    1    1    1     1     0     1
+## [16,]    1    0    0    1    1    0    0    1    0     0     0     1
+## [17,]    1    1    1    0    0    1    1    0    0     1     1     1
+## [18,]    1    1    1    1    1    1    1    1    1     0     1     1
+## [19,]    1    1    1    1    1    1    1    1    1     0     1     1
+## [20,]    1    1    1    1    1    0    1    1    1     1     0     1
 ## 
 ## $Q
 ##       [,1] [,2] [,3] [,4] [,5]
-##  [1,]    0    1    1    0    1
-##  [2,]    1    0    1    0    0
-##  [3,]    0    0    1    0    0
-##  [4,]    0    0    1    0    1
-##  [5,]    0    1    1    1    1
-##  [6,]    0    0    1    1    1
-##  [7,]    1    0    0    1    1
-##  [8,]    1    0    1    1    1
-##  [9,]    1    0    0    1    0
-## [10,]    1    0    1    0    0
-## [11,]    1    1    0    0    0
-## [12,]    0    0    1    1    1
-## [13,]    1    1    1    0    1
-## [14,]    1    1    1    0    1
-## [15,]    0    0    1    1    1
-## [16,]    1    1    1    0    0
-## [17,]    0    1    0    1    1
-## [18,]    0    1    1    0    1
-## [19,]    1    1    1    1    1
-## [20,]    0    1    0    1    0</code></pre>
+##  [1,]    1    0    1    0    0
+##  [2,]    0    0    1    1    1
+##  [3,]    1    1    1    1    1
+##  [4,]    1    1    0    1    1
+##  [5,]    0    0    1    1    0
+##  [6,]    1    0    1    0    0
+##  [7,]    0    0    1    0    1
+##  [8,]    0    1    1    1    1
+##  [9,]    1    1    1    0    0
+## [10,]    0    0    0    1    1
+## [11,]    1    1    1    1    0
+## [12,]    0    1    1    0    0
+## [13,]    0    1    0    1    1
+## [14,]    0    1    0    0    1
+## [15,]    0    0    1    0    1
+## [16,]    1    0    0    0    1
+## [17,]    1    0    1    0    0
+## [18,]    1    1    1    0    0
+## [19,]    0    0    1    1    0
+## [20,]    1    0    0    0    0</code></pre>
 <p>In case the default option is not favoured, <code>syn</code> also allows users to manually specify which parameters to keep through argument <code>keep.pars</code>.</p>
-<pre class="sourceCode r"><code class="sourceCode r">dina.syn &lt;-<span class="st"> </span><span class="kw">syn</span>(<span class="st">&quot;dina&quot;</span>, <span class="dt">data =</span> dina.data, <span class="dt">keep.pars =</span> <span class="kw">c</span>(<span class="st">&quot;Q&quot;</span>, <span class="st">&quot;concept.exp&quot;</span>), <span class="dt">students =</span> <span class="dv">12</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dina.syn &lt;-<span class="st"> </span><span class="kw">syn</span>(<span class="st">&quot;dina&quot;</span>, <span class="dt">data =</span> dina.data, <span class="dt">keep.pars =</span> <span class="kw">c</span>(<span class="st">&quot;Q&quot;</span>, <span class="st">&quot;concept.exp&quot;</span>), <span class="dt">students =</span> <span class="dv">12</span>)</code></pre></div>
 <pre><code>## Learning by 'dina' ...</code></pre>
 <p>However, in this case users take their own risk if the kept parameters (together with the new number of students if <code>students</code> is redefined), form an inconsistent or insufficient set with respect to the specified model. For example, for synthesizing data by DINA model case, if we choose to keep <code>M</code> (which essentially retain the number of students) and define a new number of students, there will be conflict.</p>
-<pre class="sourceCode r"><code class="sourceCode r">dina.syn &lt;-<span class="st"> </span><span class="kw">syn</span>(<span class="st">&quot;dina&quot;</span>, <span class="dt">data =</span> dina.data, <span class="dt">keep.pars =</span> <span class="kw">c</span>(<span class="st">&quot;Q&quot;</span>, <span class="st">&quot;M&quot;</span>), <span class="dt">students =</span> <span class="dv">12</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dina.syn &lt;-<span class="st"> </span><span class="kw">syn</span>(<span class="st">&quot;dina&quot;</span>, <span class="dt">data =</span> dina.data, <span class="dt">keep.pars =</span> <span class="kw">c</span>(<span class="st">&quot;Q&quot;</span>, <span class="st">&quot;M&quot;</span>), <span class="dt">students =</span> <span class="dv">12</span>)</code></pre></div>
 <pre><code>## Learning by 'dina' ...</code></pre>
 <pre><code>## Error in down.stream(filtered.pars): 'students' receives different values at once</code></pre>
 </div>

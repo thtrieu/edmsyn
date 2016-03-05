@@ -19,6 +19,19 @@ respectively, each component of \code{comp} is itself a list with two components
 \description{
 Vizualize POK structure
 }
+\examples{
+# Example: Vizualising Partial Order structure
+# Declare a context where there are 15 students and 20 items
+p <- pars(students = 15, items = 20)
+# Add information that the Partial Order Structure should have depth of 3, two connected components and no transitive links
+p <- pars(p, min.depth = 3, max.depth = 3, min.ntree = 2, max.ntree = 2, trans = FALSE)
+# Generate data to calculate the `po` parameter
+poks.data <- gen("poks", p)
+# Visualise the Partial Order Structure
+v <- viz(poks.data$po)
+# Print the analysed structure
+print(v)
+}
 \author{
 Hoang-Trieu trinh, \email{thtrieu@apcs.vn}
 }
