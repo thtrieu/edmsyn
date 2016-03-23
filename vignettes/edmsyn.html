@@ -11,7 +11,7 @@
 
 <meta name="author" content="Hoang-Trieu Trinh, Behzad Beheshti, Michel C. Desmarais" />
 
-<meta name="date" content="2016-03-05" />
+<meta name="date" content="2016-03-23" />
 
 <title>Educational Data Synthesizer</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title">Educational Data Synthesizer</h1>
 <h4 class="author"><em>Hoang-Trieu Trinh, Behzad Beheshti, Michel C. Desmarais</em></h4>
-<h4 class="date"><em>2016-03-05</em></h4>
+<h4 class="date"><em>2016-03-23</em></h4>
 
 </div>
 
@@ -188,17 +188,17 @@ p_</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">M_</code></pre></div>
 <pre><code>## $value
 ##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-## [1,]    0    0    1    0    0    0    1    0    0     0     0     0     0
-## [2,]    1    0    0    1    1    0    1    1    1     0     1     0     1
-## [3,]    0    1    1    1    1    1    1    0    1     1     1     1     1
-## [4,]    0    0    0    1    0    0    1    1    0     1     0     0     0
-## [5,]    0    0    0    0    0    0    1    1    0     0     0     1     0
+## [1,]    0    1    0    1    0    1    0    1    1     1     0     1     0
+## [2,]    1    1    0    0    0    1    0    0    1     0     0     0     0
+## [3,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+## [4,]    1    0    1    1    0    0    0    0    0     1     0     1     0
+## [5,]    0    1    0    1    0    0    0    0    0     0     0     1     0
 ##      [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-## [1,]     1     0     0     0     0     0     0
-## [2,]     1     1     1     1     1     0     0
+## [1,]     0     0     0     1     0     0     1
+## [2,]     0     1     1     1     1     0     1
 ## [3,]     1     1     1     1     1     1     1
-## [4,]     0     0     0     0     1     0     0
-## [5,]     0     1     0     0     0     0     1
+## [4,]     0     1     1     1     0     0     1
+## [5,]     0     0     0     0     0     0     1
 ## 
 ## $context
 ## Activated information in the context:
@@ -206,8 +206,8 @@ p_</code></pre></div>
 ## [6] &quot;concept.exp&quot;</code></pre>
 <p>As can be seen, the progress involves generating an intermediate parameter called <code>concept.exp</code> before generating <code>M</code>. <code>concept.exp</code> is a vector of the expected mastery rates for 5 concepts in <code>p</code>. By using <code>get.par</code>, we can examine the values of these intermediate generations.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">M_$context$concept.exp</code></pre></div>
-<pre><code>## [1] 0.2912938 0.6893649 0.9533042 0.1827477 0.2361644</code></pre>
-<p>For example, looking at the above <code>concept.exp</code>, it is expected that there is about 29 percent of the students who mastered the first concept in <code>p</code>. In fact, due to the abundant availability of parameters co-existing in a context, generating <code>concept.exp</code> is just one amongst many other ways by which <code>get.par</code> can reach <code>M</code>, the reason why it turns out to be this way will be discussed in later parts.</p>
+<pre><code>## [1] 0.3851075 0.4708634 0.9594220 0.3207966 0.3471159</code></pre>
+<p>For example, looking at the above <code>concept.exp</code>, it is expected that there is about 39 percent of the students who mastered the first concept in <code>p</code>. In fact, due to the abundant availability of parameters co-existing in a context, generating <code>concept.exp</code> is just one amongst many other ways by which <code>get.par</code> can reach <code>M</code>, the reason why it turns out to be this way will be discussed in later parts.</p>
 <p>If we run <code>get.par</code> to obtain <code>M</code> again, in general the result will be different. This is because of the fact that each time doing so, another probabilistic generation will be carried out, thus we receive a different <code>concept.exp</code>, and after that a different <code>M</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">identical</span>(M_$value, <span class="kw">get.par</span>(<span class="st">&quot;M&quot;</span>, p)$value)</code></pre></div>
 <pre><code>## [1] FALSE</code></pre>
@@ -226,21 +226,21 @@ p_</code></pre></div>
 <span class="kw">get.par</span>(<span class="st">&quot;Q&quot;</span>, p_)</code></pre></div>
 <pre><code>## $value
 ##       [,1] [,2] [,3] [,4]
-##  [1,]    1    0    0    1
-##  [2,]    1    0    0    0
-##  [3,]    1    0    0    0
-##  [4,]    1    1    0    0
-##  [5,]    1    1    1    1
-##  [6,]    1    1    0    0
-##  [7,]    1    0    1    1
-##  [8,]    1    0    0    0
-##  [9,]    1    1    1    1
-## [10,]    1    0    1    1
-## [11,]    0    0    1    0
+##  [1,]    0    0    1    0
+##  [2,]    1    1    0    0
+##  [3,]    1    1    1    0
+##  [4,]    0    1    1    0
+##  [5,]    0    1    0    0
+##  [6,]    0    0    0    1
+##  [7,]    1    0    0    0
+##  [8,]    0    0    1    1
+##  [9,]    1    0    1    1
+## [10,]    0    0    1    1
+## [11,]    1    1    1    0
 ## [12,]    1    0    0    1
-## [13,]    1    0    1    0
-## [14,]    0    1    1    1
-## [15,]    1    1    1    1
+## [13,]    0    0    0    1
+## [14,]    0    0    0    1
+## [15,]    1    0    0    1
 ## 
 ## $context
 ## Activated information in the context:
@@ -287,47 +287,47 @@ p_</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">poks.data[[<span class="dv">1</span>]]$poks</code></pre></div>
 <pre><code>## $R
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    0    0    0    0    0    0    1    0    1     0     0     0     0
-##  [2,]    0    0    0    0    0    0    1    0    1     0     1     0     1
-##  [3,]    0    1    0    0    0    0    0    0    0     0     1     0     0
-##  [4,]    0    1    0    0    1    0    0    1    0     1     1     1     0
-##  [5,]    0    1    1    0    0    1    1    0    1     0     0     1     0
-##  [6,]    0    1    0    0    1    1    1    1    0     1     1     1     1
-##  [7,]    0    1    0    0    1    0    0    0    0     0     1     1     1
-##  [8,]    0    1    0    0    0    0    0    0    0     0     1     0     0
-##  [9,]    1    1    1    1    1    1    1    0    1     1     1     1     1
-## [10,]    1    1    1    1    1    0    1    0    1     0     1     1     1
-## [11,]    1    1    0    0    1    1    0    1    1     1     1     1     1
-## [12,]    0    1    0    0    0    0    0    0    0     0     1     0     0
-## [13,]    1    1    0    0    0    0    1    0    1     0     1     1     1
-## [14,]    0    0    0    0    0    0    1    0    1     0     1     0     0
-## [15,]    0    1    0    0    1    1    1    1    1     1     1     1     1
-## [16,]    0    0    0    0    1    1    1    1    1     1     1     1     1
-## [17,]    0    0    0    0    0    0    1    0    0     0     0     0     0
-## [18,]    0    0    0    0    0    0    1    0    1     0     1     0     1
-## [19,]    1    1    1    0    1    1    1    1    1     1     1     1     1
-## [20,]    1    1    1    0    1    1    1    1    1     1     0     1     0
+##  [1,]    0    0    0    1    0    0    0    1    1     0     0     1     1
+##  [2,]    0    1    0    1    0    0    0    1    1     1     1     1     0
+##  [3,]    0    0    0    1    1    0    0    1    1     0     1     0     0
+##  [4,]    0    1    0    0    0    1    0    1    0     1     0     1     1
+##  [5,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+##  [6,]    1    1    0    0    0    0    1    1    0     0     1     0     1
+##  [7,]    1    1    1    1    0    1    1    0    0     0     1     1     1
+##  [8,]    1    0    0    1    1    0    0    1    1     0     1     0     0
+##  [9,]    1    0    0    1    0    0    1    0    1     1     0     0     1
+## [10,]    0    1    1    0    1    0    1    1    0     1     1     1     1
+## [11,]    0    0    0    0    0    0    1    1    0     1     0     0     1
+## [12,]    0    0    1    1    0    1    1    0    0     0     1     1     0
+## [13,]    0    1    1    1    1    0    0    1    1     0     1     1     1
+## [14,]    0    0    1    0    1    0    1    1    0     1     0     1     0
+## [15,]    0    0    0    1    1    1    1    0    0     1     0     1     1
+## [16,]    0    0    1    1    1    1    0    1    1     0     1     1     0
+## [17,]    0    1    1    0    0    0    0    0    0     0     1     1     1
+## [18,]    1    0    1    1    1    1    1    1    1     1     1     0     1
+## [19,]    0    1    1    0    0    1    0    1    0     0     1     0     0
+## [20,]    0    0    1    0    0    1    0    0    1     0     1     0     1
 ##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     0     0     0     0     0     0     0
-##  [2,]     0     1     0     0     0     0     0
-##  [3,]     0     1     0     0     0     0     1
+##  [1,]     0     0     0     1     1     0     1
+##  [2,]     0     1     0     1     1     0     1
+##  [3,]     0     0     0     0     0     0     0
 ##  [4,]     1     1     0     0     0     1     1
-##  [5,]     0     1     1     1     1     0     1
-##  [6,]     1     1     0     1     1     1     1
-##  [7,]     0     1     0     0     0     1     1
-##  [8,]     0     0     0     0     0     0     0
-##  [9,]     1     1     1     0     1     0     1
-## [10,]     1     1     1     1     1     1     1
-## [11,]     1     1     1     1     0     1     1
-## [12,]     0     1     0     0     0     0     0
-## [13,]     1     1     1     0     0     0     1
-## [14,]     0     1     0     1     0     0     0
-## [15,]     1     1     1     1     1     1     1
-## [16,]     1     1     1     1     0     0     1
-## [17,]     0     0     0     0     0     0     0
-## [18,]     1     1     1     0     0     0     0
-## [19,]     1     1     1     1     1     1     1
-## [20,]     0     1     1     1     1     1     1
+##  [5,]     1     1     1     0     1     1     1
+##  [6,]     1     0     1     0     1     1     0
+##  [7,]     0     0     0     0     1     1     0
+##  [8,]     0     1     1     0     0     0     1
+##  [9,]     0     0     0     1     0     0     1
+## [10,]     0     0     0     0     1     0     1
+## [11,]     0     1     0     1     1     1     0
+## [12,]     0     0     1     1     0     1     0
+## [13,]     0     1     0     1     1     0     0
+## [14,]     1     0     1     0     0     1     0
+## [15,]     0     1     1     0     1     1     0
+## [16,]     1     1     1     1     1     0     1
+## [17,]     1     0     0     1     0     0     1
+## [18,]     0     0     0     1     0     1     0
+## [19,]     1     1     1     0     0     0     1
+## [20,]     1     0     0     0     1     1     0
 ## 
 ## $alpha.c
 ## [1] 0.25
@@ -343,47 +343,47 @@ p_</code></pre></div>
 <pre><code>## $value
 ## $value$R
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    0    1    1    1    1    0    0    0    0     1     1     1     1
-##  [2,]    0    1    1    0    1    0    0    0    0     0     1     0     1
-##  [3,]    1    0    0    0    1    1    1    0    0     1     0     1     0
-##  [4,]    0    0    0    0    1    0    0    0    0     0     0     0     1
-##  [5,]    1    1    1    0    1    1    1    1    1     1     0     1     1
-##  [6,]    0    0    1    1    0    1    0    0    0     1     0     1     0
-##  [7,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-##  [8,]    0    1    0    0    1    0    1    1    1     1     0     1     1
-##  [9,]    0    0    1    0    0    0    0    0    0     0     1     0     1
-## [10,]    1    1    1    1    1    1    0    1    0     1     1     1     1
-## [11,]    0    0    1    1    1    1    0    1    1     0     1     0     0
-## [12,]    0    1    0    0    0    0    0    0    0     1     0     0     0
-## [13,]    1    1    1    0    1    0    0    0    0     0     1     1     1
-## [14,]    1    1    1    1    1    1    1    0    1     1     1     1     1
-## [15,]    0    1    1    1    0    1    1    0    0     1     0     1     1
-## [16,]    1    1    1    1    1    0    1    1    1     1     1     1     1
-## [17,]    0    0    0    0    1    0    0    0    0     0     0     0     0
-## [18,]    1    1    1    1    1    0    0    1    0     1     1     1     1
-## [19,]    0    1    1    1    0    0    1    1    0     0     1     0     1
-## [20,]    1    1    0    0    1    0    1    1    1     1     1     1     1
+##  [1,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+##  [2,]    0    0    0    1    0    0    0    1    1     0     1     0     0
+##  [3,]    0    1    0    1    0    0    0    1    0     0     0     0     0
+##  [4,]    0    0    0    1    0    0    1    0    0     0     0     0     0
+##  [5,]    0    0    0    0    0    0    0    0    0     0     1     0     0
+##  [6,]    1    0    0    0    1    0    1    1    0     0     0     1     0
+##  [7,]    0    0    1    0    1    0    1    1    0     0     0     1     0
+##  [8,]    0    0    0    1    1    1    1    1    0     0     1     0     1
+##  [9,]    0    1    0    0    1    0    1    1    1     0     1     0     1
+## [10,]    1    0    0    0    1    0    0    0    0     0     0     0     0
+## [11,]    1    1    1    0    0    0    0    1    0     0     0     0     0
+## [12,]    1    1    1    1    1    1    1    1    0     1     1     0     1
+## [13,]    0    0    0    1    1    1    1    1    0     0     1     0     1
+## [14,]    1    0    0    0    0    0    1    1    0     1     0     0     1
+## [15,]    0    1    0    1    1    1    1    1    0     0     1     0     1
+## [16,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+## [17,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+## [18,]    0    1    0    0    1    0    1    0    0     1     0     0     1
+## [19,]    1    1    0    1    1    1    1    1    1     1     0     0     0
+## [20,]    1    0    1    1    0    1    0    1    1     1     1     0     1
 ##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     0     0     1     1     1     1     0
-##  [2,]     0     0     1     1     1     1     0
-##  [3,]     1     1     1     1     1     1     1
-##  [4,]     0     0     0     0     1     0     0
-##  [5,]     1     0     0     0     1     1     0
-##  [6,]     0     1     1     1     0     0     0
-##  [7,]     0     0     0     0     0     0     0
-##  [8,]     0     0     0     1     0     0     0
-##  [9,]     0     0     0     1     1     0     0
-## [10,]     1     1     1     1     0     1     1
-## [11,]     0     1     0     0     0     1     1
-## [12,]     0     0     0     0     0     0     0
-## [13,]     0     1     1     1     1     1     0
-## [14,]     0     1     1     1     1     1     1
-## [15,]     0     1     1     1     0     0     0
+##  [1,]     0     0     0     0     0     0     0
+##  [2,]     0     1     0     1     1     0     1
+##  [3,]     1     1     1     0     0     0     0
+##  [4,]     1     1     0     0     0     1     0
+##  [5,]     0     0     0     0     0     1     0
+##  [6,]     1     0     1     0     0     1     1
+##  [7,]     1     1     1     0     1     0     0
+##  [8,]     1     1     0     0     0     1     1
+##  [9,]     0     0     1     1     1     1     1
+## [10,]     1     1     0     0     0     1     1
+## [11,]     1     0     0     1     1     1     1
+## [12,]     1     1     0     1     0     1     1
+## [13,]     0     0     0     0     0     0     0
+## [14,]     1     1     0     1     0     1     1
+## [15,]     1     1     0     1     0     1     1
 ## [16,]     1     1     1     1     1     1     1
-## [17,]     0     0     0     0     1     1     0
-## [18,]     0     0     1     1     1     1     0
-## [19,]     0     1     0     1     0     0     0
-## [20,]     1     1     0     1     0     1     1
+## [17,]     1     1     1     1     1     1     1
+## [18,]     0     1     0     1     0     1     1
+## [19,]     1     1     0     0     1     1     0
+## [20,]     1     1     1     0     0     1     0
 ## 
 ## $value$alpha.c
 ## [1] 0.25
@@ -409,67 +409,67 @@ p_</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p &lt;-<span class="st"> </span><span class="kw">pars</span>(p, <span class="dt">min.depth =</span> <span class="dv">3</span>, <span class="dt">max.depth =</span> <span class="dv">3</span>, <span class="dt">min.ntree =</span> <span class="dv">2</span>, <span class="dt">max.ntree =</span> <span class="dv">2</span>, <span class="dt">trans =</span> <span class="ot">FALSE</span>)
 poks.data &lt;-<span class="st"> </span><span class="kw">gen</span>(<span class="st">&quot;poks&quot;</span>, p)
 v &lt;-<span class="st"> </span><span class="kw">viz</span>(poks.data$po)</code></pre></div>
-<p><img src="data:image/png;base64,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" alt /></p>
+<p><img src="data:image/png;base64,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Mn+dP33anGWZTMbXxaNXW/jl2fpN00ybd91gXWb9FXtP/8qaTMY36cTox4w7rXrCn17pWZdtOMhYmfn+kdOOeo50WELoMLO79sqZ2x/+QExPnrbio8fv7Fin3JLdGg9SDgQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEACAgESEAiQgECABAQCJCAQIAGBAAkIBEhAIEDi/wM5GchTWbtOOgAAAABJRU5ErkJggg==" alt /></p>
 <p><code>v</code> contains analysed information about the structure. Its first component is identical to <code>po</code>, the second one is a list with equal number of components to the number of connected components of the structure <code>po</code> represents. Each of these components is in turn a list with first component being the corresponding dependency matrix, and sencond component represents how many items are there on each level of depth.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(v)</code></pre></div>
 <pre><code>## $ks
 ##    1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
-## 1  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  1  0  0  0
-## 2  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  1
-## 3  0 0 0 0 1 0 0 0 0  1  0  0  1  0  0  0  1  1  0  0
-## 4  0 0 0 0 0 0 0 0 1  0  0  0  0  0  0  0  0  0  0  0
+## 1  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 2  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 3  0 0 0 0 0 0 0 1 0  0  0  0  0  0  0  0  1  0  0  0
+## 4  0 0 0 0 0 0 0 0 0  0  0  0  1  0  0  0  0  0  0  0
 ## 5  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 6  0 0 0 0 0 0 0 0 0  0  0  0  0  0  1  0  0  1  0  0
-## 7  0 0 0 0 0 0 0 0 0  1  0  0  0  0  1  0  1  0  0  0
-## 8  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 6  0 0 1 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 7  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 8  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  1  1  0
 ## 9  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 10 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  1  0  0  0  0
-## 11 0 0 0 1 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 12 0 0 0 0 0 0 0 0 0  0  1  0  0  0  0  0  0  0  1  1
-## 13 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 14 0 0 0 0 1 0 0 0 0  1  0  0  1  0  1  0  1  0  0  0
+## 10 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 11 0 0 0 0 0 0 0 0 0  1  0  0  0  0  0  0  0  0  0  0
+## 12 1 0 0 1 0 0 0 0 0  0  1  0  0  0  0  0  0  0  0  0
+## 13 0 1 0 0 1 0 1 0 1  0  0  0  0  0  1  1  0  0  0  0
+## 14 0 0 0 0 0 0 0 0 0  0  1  0  0  0  0  0  0  0  0  0
 ## 15 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 16 0 0 0 0 0 0 0 1 0  0  0  0  0  0  0  0  0  0  0  0
+## 16 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
 ## 17 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 18 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  1  0  0  0  0
+## 18 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
 ## 19 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 20 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 20 0 0 0 0 0 0 0 0 0  0  1  0  0  0  0  0  0  0  0  0
 ## 
 ## $comp
 ## $comp[[1]]
 ## $comp[[1]]$matrix
-##    1 3 6 7 14 5 10 13 15 17 18 16 8
-## 1  0 0 0 0  0 0  0  0  0  1  0  0 0
-## 3  0 0 0 0  0 1  1  1  0  1  1  0 0
-## 6  0 0 0 0  0 0  0  0  1  0  1  0 0
-## 7  0 0 0 0  0 0  1  0  1  1  0  0 0
-## 14 0 0 0 0  0 1  1  1  1  1  0  0 0
-## 5  0 0 0 0  0 0  0  0  0  0  0  0 0
-## 10 0 0 0 0  0 0  0  0  0  0  0  1 0
-## 13 0 0 0 0  0 0  0  0  0  0  0  0 0
-## 15 0 0 0 0  0 0  0  0  0  0  0  0 0
-## 17 0 0 0 0  0 0  0  0  0  0  0  0 0
-## 18 0 0 0 0  0 0  0  0  0  0  0  1 0
-## 16 0 0 0 0  0 0  0  0  0  0  0  0 1
-## 8  0 0 0 0  0 0  0  0  0  0  0  0 0
+##    12 14 20 1 4 11 10 13 2 5 7 9 15 16
+## 12  0  0  0 1 1  1  0  0 0 0 0 0  0  0
+## 14  0  0  0 0 0  1  0  0 0 0 0 0  0  0
+## 20  0  0  0 0 0  1  0  0 0 0 0 0  0  0
+## 1   0  0  0 0 0  0  0  0 0 0 0 0  0  0
+## 4   0  0  0 0 0  0  0  1 0 0 0 0  0  0
+## 11  0  0  0 0 0  0  1  0 0 0 0 0  0  0
+## 10  0  0  0 0 0  0  0  0 0 0 0 0  0  0
+## 13  0  0  0 0 0  0  0  0 1 1 1 1  1  1
+## 2   0  0  0 0 0  0  0  0 0 0 0 0  0  0
+## 5   0  0  0 0 0  0  0  0 0 0 0 0  0  0
+## 7   0  0  0 0 0  0  0  0 0 0 0 0  0  0
+## 9   0  0  0 0 0  0  0  0 0 0 0 0  0  0
+## 15  0  0  0 0 0  0  0  0 0 0 0 0  0  0
+## 16  0  0  0 0 0  0  0  0 0 0 0 0  0  0
 ## 
 ## $comp[[1]]$level.sizes
-## [1] 5 6 1 1
+## [1] 3 3 2 6
 ## 
 ## 
 ## $comp[[2]]
 ## $comp[[2]]$matrix
-##    2 12 11 19 20 4 9
-## 2  0  0  0  0  1 0 0
-## 12 0  0  1  1  1 0 0
-## 11 0  0  0  0  0 1 0
-## 19 0  0  0  0  0 0 0
-## 20 0  0  0  0  0 0 0
-## 4  0  0  0  0  0 0 1
-## 9  0  0  0  0  0 0 0
+##    6 3 8 17 18 19
+## 6  0 1 0  0  0  0
+## 3  0 0 1  1  0  0
+## 8  0 0 0  0  1  1
+## 17 0 0 0  0  0  0
+## 18 0 0 0  0  0  0
+## 19 0 0 0  0  0  0
 ## 
 ## $comp[[2]]$level.sizes
-## [1] 2 3 1 1</code></pre>
+## [1] 1 1 2 2</code></pre>
 <p><strong>Example 2</strong></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dina.data &lt;-<span class="st"> </span><span class="kw">gen</span>(<span class="st">&quot;dina&quot;</span>, p, <span class="dt">progress =</span> <span class="ot">TRUE</span>)</code></pre></div>
 <pre><code>## Generate dina from c(&quot;Q&quot;, &quot;M&quot;, &quot;slip&quot;, &quot;guess&quot;)
@@ -492,70 +492,70 @@ v &lt;-<span class="st"> </span><span class="kw">viz</span>(poks.data$po)</code>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dina.data$dina</code></pre></div>
 <pre><code>## $R
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    0    0    1    0    1    1    0    1    0     0     1     1     1
-##  [2,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-##  [3,]    1    0    0    1    0    1    0    0    0     1     0     1     0
-##  [4,]    1    1    1    0    1    1    1    0    1     1     1     1     1
-##  [5,]    0    1    0    1    0    0    0    0    0     0     0     0     0
-##  [6,]    1    0    0    1    0    0    0    0    0     0     0     0     0
-##  [7,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-##  [8,]    1    1    0    0    1    0    0    0    0     0     0     0     0
-##  [9,]    0    0    1    1    1    0    0    1    0     0     0     0     1
-## [10,]    1    1    1    1    1    1    1    1    1     1     1     1     1
-## [11,]    1    0    0    0    0    0    0    0    0     0     0     0     0
-## [12,]    0    1    1    1    1    1    1    1    1     1     0     1     1
-## [13,]    0    0    0    0    0    0    0    0    0     0     0     1     0
-## [14,]    1    1    0    1    1    0    0    1    1     1     1     0     1
-## [15,]    1    0    1    0    0    0    1    0    1     1     1     0     0
-## [16,]    0    1    0    0    0    1    1    0    0     0     1     1     1
-## [17,]    0    0    0    0    0    1    0    0    0     1     0     0     0
-## [18,]    0    1    0    0    0    1    0    0    1     1     0     1     0
-## [19,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-## [20,]    0    1    0    0    1    0    0    0    0     1     0     0     1
+##  [1,]    1    1    1    0    1    1    1    1    1     1     1     1     1
+##  [2,]    0    1    0    1    1    1    1    0    1     1     1     1     1
+##  [3,]    0    0    0    1    1    0    0    0    0     1     1     1     1
+##  [4,]    1    1    0    0    0    1    0    0    1     1     1     1     0
+##  [5,]    0    1    1    0    0    0    0    1    0     1     1     0     0
+##  [6,]    0    0    0    0    0    0    0    0    0     0     0     1     0
+##  [7,]    0    0    1    1    0    1    1    1    1     1     1     1     1
+##  [8,]    0    0    1    0    0    0    1    1    0     0     0     1     0
+##  [9,]    1    0    1    1    1    0    0    1    0     1     1     1     1
+## [10,]    1    1    1    1    1    1    1    0    1     1     1     1     1
+## [11,]    0    0    1    0    1    0    1    0    0     0     0     0     0
+## [12,]    0    1    1    0    0    0    0    1    0     1     0     0     0
+## [13,]    0    0    0    0    0    1    1    0    0     1     0     1     0
+## [14,]    1    1    1    0    1    1    1    1    0     1     0     0     1
+## [15,]    0    0    0    1    0    0    0    1    1     1     0     0     0
+## [16,]    1    1    0    1    1    1    1    0    0     1     0     0     1
+## [17,]    0    0    0    0    0    0    0    0    1     1     1     0     0
+## [18,]    1    0    0    0    1    1    0    0    1     1     0     0     0
+## [19,]    0    0    1    1    1    0    1    0    1     0     1     0     0
+## [20,]    0    0    0    0    1    1    1    0    1     1     0     0     0
 ##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     0     0     1     1     0     1     0
-##  [2,]     0     0     1     0     0     1     0
-##  [3,]     0     1     1     0     1     0     1
-##  [4,]     1     1     1     1     1     1     0
-##  [5,]     0     0     0     0     0     0     0
-##  [6,]     0     1     0     0     0     0     0
-##  [7,]     0     0     0     0     0     0     1
-##  [8,]     0     0     1     0     1     0     1
-##  [9,]     0     1     0     0     1     0     1
-## [10,]     1     1     1     0     1     1     1
-## [11,]     0     0     0     0     0     0     0
-## [12,]     1     1     1     1     1     1     1
-## [13,]     0     0     0     0     0     0     0
-## [14,]     1     0     0     1     1     1     1
-## [15,]     0     0     0     1     0     0     1
-## [16,]     0     0     0     1     1     0     1
-## [17,]     1     1     0     0     1     0     1
-## [18,]     1     1     1     1     1     0     0
-## [19,]     1     0     0     0     0     0     0
-## [20,]     0     0     0     1     1     0     0
+##  [1,]     1     1     1     1     1     1     1
+##  [2,]     1     0     1     1     1     1     1
+##  [3,]     0     0     0     0     1     0     0
+##  [4,]     1     0     0     0     1     1     0
+##  [5,]     0     0     0     0     0     1     1
+##  [6,]     0     0     1     0     0     0     0
+##  [7,]     1     1     1     0     1     1     1
+##  [8,]     0     0     1     0     1     1     0
+##  [9,]     0     1     1     1     1     1     1
+## [10,]     1     1     1     1     1     1     1
+## [11,]     0     0     1     0     0     0     1
+## [12,]     0     0     1     1     1     1     0
+## [13,]     0     0     0     0     0     1     0
+## [14,]     1     1     1     1     0     1     1
+## [15,]     0     0     0     1     1     1     1
+## [16,]     0     1     1     1     1     1     0
+## [17,]     1     0     0     0     1     0     1
+## [18,]     0     0     0     1     0     0     0
+## [19,]     0     0     0     1     0     1     0
+## [20,]     1     0     1     0     0     0     0
 ## 
 ## $Q
 ##       [,1] [,2] [,3] [,4] [,5]
-##  [1,]    1    0    0    1    1
-##  [2,]    0    0    1    1    1
-##  [3,]    1    0    1    1    0
-##  [4,]    1    0    1    0    0
-##  [5,]    1    1    1    0    1
-##  [6,]    1    1    0    1    1
-##  [7,]    1    0    0    0    0
-##  [8,]    0    0    1    0    1
-##  [9,]    0    0    1    1    0
-## [10,]    0    0    1    1    1
-## [11,]    1    0    0    0    1
-## [12,]    1    1    1    1    0
-## [13,]    0    1    1    1    0
-## [14,]    1    1    1    0    1
-## [15,]    0    1    0    1    1
-## [16,]    1    1    0    1    1
-## [17,]    0    1    1    0    0
-## [18,]    1    1    0    0    0
+##  [1,]    1    0    0    0    0
+##  [2,]    0    0    1    0    0
+##  [3,]    0    0    0    1    0
+##  [4,]    0    0    1    0    0
+##  [5,]    1    0    0    1    0
+##  [6,]    1    0    1    1    0
+##  [7,]    0    1    0    0    0
+##  [8,]    1    0    0    1    1
+##  [9,]    0    0    1    0    1
+## [10,]    1    1    0    0    1
+## [11,]    0    0    0    1    1
+## [12,]    0    0    1    0    1
+## [13,]    0    1    1    0    0
+## [14,]    1    1    0    1    0
+## [15,]    1    0    0    0    1
+## [16,]    1    0    1    0    0
+## [17,]    0    1    1    1    0
+## [18,]    1    1    1    0    0
 ## [19,]    1    1    1    1    1
-## [20,]    1    1    0    1    1</code></pre>
+## [20,]    0    1    0    1    1</code></pre>
 <p><code>gen</code> only allow one model and one context at a time, we can save time generating data across different models and contexts using <code>gen.apply</code>. Setting the argument <code>multiply</code> to <code>TRUE</code> or <code>FALSE</code> decides what kind of matching will be made between models and contexts.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat<span class="fl">.1</span> &lt;-<span class="st"> </span><span class="kw">gen.apply</span>(ALL.MODELS, <span class="kw">list</span>(<span class="dt">p1 =</span> p,<span class="dt">p2 =</span> p_), <span class="dt">multiply =</span> <span class="ot">FALSE</span>, <span class="dt">n =</span> <span class="dv">5</span>)
 dat<span class="fl">.1</span></code></pre></div>
@@ -634,47 +634,47 @@ poks.data</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">poks.data$poks</code></pre></div>
 <pre><code>## $R
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    0    0    1    0    1    1    0    1    0     1     1     1     1
-##  [2,]    0    1    1    1    1    1    1    1    1     1     1     1     0
-##  [3,]    0    0    0    0    1    0    0    0    0     0     0     1     0
-##  [4,]    0    1    0    0    0    0    0    0    0     1     0     0     0
-##  [5,]    0    0    0    1    0    0    1    1    0     0     0     1     0
-##  [6,]    1    1    1    0    1    1    1    1    0     0     0     1     1
-##  [7,]    0    0    1    0    1    0    0    0    0     0     0     0     0
-##  [8,]    0    0    0    0    0    0    0    0    0     0     0     1     0
-##  [9,]    0    1    0    0    0    0    0    0    0     0     0     0     0
-## [10,]    1    1    0    1    0    1    1    0    0     1     1     1     1
-## [11,]    0    0    1    0    0    1    0    0    0     1     0     0     1
-## [12,]    0    0    0    0    0    1    0    0    0     1     1     1     0
-## [13,]    0    1    1    1    0    1    1    1    1     1     1     1     1
-## [14,]    1    1    1    1    1    0    0    1    1     1     1     1     1
-## [15,]    0    1    1    1    1    1    0    1    0     1     0     1     1
-## [16,]    0    0    0    0    0    1    1    0    0     1     0     0     0
-## [17,]    0    1    0    0    1    1    1    1    1     1     1     1     1
-## [18,]    1    1    0    1    1    1    1    1    1     1     1     1     1
-## [19,]    0    1    1    1    1    1    1    1    1     1     1     1     1
-## [20,]    0    1    1    1    0    1    1    0    1     1     0     1     1
+##  [1,]    0    0    1    1    0    0    1    0    0     0     0     0     0
+##  [2,]    0    0    0    0    1    0    1    1    0     0     1     1     0
+##  [3,]    0    0    1    1    1    1    1    0    0     0     0     1     0
+##  [4,]    0    1    1    1    0    0    1    1    0     0     1     1     1
+##  [5,]    1    0    1    1    0    1    0    0    0     0     1     0     0
+##  [6,]    1    0    1    1    1    0    1    1    0     0     1     0     1
+##  [7,]    0    0    1    1    1    1    1    1    1     1     1     1     1
+##  [8,]    0    0    0    0    0    0    0    1    1     0     0     0     0
+##  [9,]    0    0    1    0    0    0    0    1    0     0     0     0     0
+## [10,]    1    1    1    1    1    1    1    0    0     0     1     1     1
+## [11,]    0    1    1    1    0    0    0    0    0     0     0     0     0
+## [12,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+## [13,]    1    0    0    0    0    0    0    1    1     1     0     0     0
+## [14,]    1    0    1    1    1    1    1    1    1     1     1     1     0
+## [15,]    1    0    1    1    1    1    1    1    0     1     1     1     0
+## [16,]    1    0    0    1    1    1    0    1    1     1     1     0     0
+## [17,]    1    1    1    0    1    0    1    1    0     1     1     1     1
+## [18,]    1    0    1    1    0    1    1    1    1     0     1     1     0
+## [19,]    1    0    1    1    1    1    1    1    1     1     1     1     1
+## [20,]    0    0    0    0    0    1    0    0    0     0     1     0     0
 ##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     1     1     1     1     1     1     1
-##  [2,]     0     0     0     1     0     0     1
-##  [3,]     1     1     0     0     1     0     0
-##  [4,]     0     0     0     1     0     0     0
-##  [5,]     1     1     0     0     1     0     0
-##  [6,]     1     1     1     0     1     0     1
-##  [7,]     0     0     1     0     0     0     0
-##  [8,]     0     0     0     0     1     1     0
-##  [9,]     0     0     0     0     0     0     1
-## [10,]     1     1     0     0     0     0     1
-## [11,]     1     0     0     0     0     0     0
-## [12,]     1     0     0     0     0     0     0
-## [13,]     1     1     1     1     0     1     1
-## [14,]     0     1     1     1     1     1     1
-## [15,]     0     1     1     1     0     1     1
-## [16,]     1     1     1     0     1     0     0
-## [17,]     1     1     0     1     0     1     0
-## [18,]     1     1     1     1     1     1     0
-## [19,]     1     0     1     1     0     1     0
-## [20,]     0     1     1     1     0     0     1
+##  [1,]     0     1     0     0     0     0     0
+##  [2,]     0     1     0     0     1     0     1
+##  [3,]     1     0     1     1     0     0     0
+##  [4,]     1     1     0     1     1     1     1
+##  [5,]     0     0     1     0     1     1     0
+##  [6,]     0     1     1     1     1     1     0
+##  [7,]     0     1     0     1     1     1     1
+##  [8,]     0     0     0     1     0     0     0
+##  [9,]     0     0     0     0     0     0     0
+## [10,]     0     1     1     1     1     1     1
+## [11,]     0     1     0     0     0     0     1
+## [12,]     0     0     0     0     1     0     0
+## [13,]     0     1     0     1     1     0     1
+## [14,]     1     1     1     1     1     1     1
+## [15,]     1     1     1     0     1     1     1
+## [16,]     0     0     0     1     0     0     1
+## [17,]     1     1     1     1     1     1     1
+## [18,]     0     1     1     1     1     0     1
+## [19,]     0     0     1     1     1     1     1
+## [20,]     0     0     0     0     1     0     0
 ## 
 ## $alpha.c
 ## [1] 0.25
@@ -693,47 +693,47 @@ poks.data</code></pre></div>
 ## [11] &quot;p.min&quot;       &quot;poks&quot;</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">learn.poks$po</code></pre></div>
 <pre><code>##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-##  [2,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-##  [3,]    0    1    0    0    1    1    0    1    0     0     0     0     1
-##  [4,]    0    0    0    0    0    1    0    0    1     0     0     0     0
-##  [5,]    0    0    1    0    0    0    0    0    0     0     0     0     0
-##  [6,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+##  [1,]    0    0    1    0    0    1    0    0    1     0     1     0     0
+##  [2,]    0    0    0    0    0    0    1    0    0     0     0     0     0
+##  [3,]    1    0    0    0    0    0    0    0    0     0     0     0     0
+##  [4,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+##  [5,]    0    0    0    0    0    1    0    0    0     1     0     0     0
+##  [6,]    0    0    0    0    1    0    0    0    0     1     0     0     0
 ##  [7,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-##  [8,]    0    0    1    0    0    0    0    0    0     0     0     0     0
-##  [9,]    0    0    0    1    0    0    0    0    0     0     0     0     0
-## [10,]    0    0    0    0    0    0    0    0    0     0     0     1     0
-## [11,]    0    0    0    0    0    0    0    0    0     0     0     1     0
-## [12,]    0    0    0    0    0    0    0    0    0     1     1     0     0
-## [13,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-## [14,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-## [15,]    1    0    0    0    0    0    0    0    0     0     0     0     1
-## [16,]    0    1    1    0    1    0    0    0    0     0     1     1     0
-## [17,]    0    0    0    0    0    0    0    0    0     0     0     0     1
+##  [8,]    0    0    0    0    0    0    0    0    1     1     0     0     1
+##  [9,]    1    0    0    0    0    0    0    1    0     1     0     0     0
+## [10,]    0    0    0    0    0    1    0    0    0     0     0     0     0
+## [11,]    1    0    0    1    0    0    0    0    0     0     0     0     0
+## [12,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+## [13,]    0    0    0    0    0    0    0    1    0     1     0     0     0
+## [14,]    0    0    0    0    0    0    1    0    0     0     0     0     0
+## [15,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+## [16,]    0    0    0    0    0    0    0    0    0     0     0     0     1
+## [17,]    0    0    0    1    0    0    0    0    0     0     0     0     0
 ## [18,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-## [19,]    0    1    0    0    0    0    0    0    0     0     0     0     1
-## [20,]    0    1    0    0    0    0    0    0    0     0     0     0     1
+## [19,]    0    0    0    0    0    0    1    0    0     0     0     0     0
+## [20,]    0    0    0    0    1    0    0    0    0     0     0     1     0
 ##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     0     1     0     0     0     0     0
-##  [2,]     0     0     0     0     0     1     1
-##  [3,]     0     0     1     0     0     1     1
-##  [4,]     0     0     0     0     0     0     0
-##  [5,]     0     0     1     0     0     0     0
+##  [1,]     0     0     0     0     0     0     0
+##  [2,]     0     1     0     0     0     0     0
+##  [3,]     0     0     0     0     0     0     0
+##  [4,]     0     0     0     1     0     0     0
+##  [5,]     0     1     0     0     0     0     1
 ##  [6,]     0     0     0     0     0     0     0
-##  [7,]     0     0     0     1     1     0     0
-##  [8,]     0     0     0     0     0     0     0
-##  [9,]     0     0     0     0     1     1     0
+##  [7,]     1     0     0     0     0     1     0
+##  [8,]     0     1     1     0     0     0     0
+##  [9,]     0     0     0     0     0     0     0
 ## [10,]     0     0     0     0     0     0     0
-## [11,]     1     0     1     0     0     0     0
-## [12,]     1     0     1     1     0     0     0
-## [13,]     0     1     0     1     0     1     1
-## [14,]     0     1     0     0     0     0     0
-## [15,]     1     0     0     0     0     0     1
-## [16,]     0     0     0     0     0     0     0
-## [17,]     0     0     0     0     1     1     0
-## [18,]     0     0     0     1     0     1     0
-## [19,]     0     0     0     1     1     0     0
-## [20,]     0     1     0     0     0     0     0</code></pre>
+## [11,]     0     0     0     0     0     1     0
+## [12,]     0     0     0     0     0     0     1
+## [13,]     0     0     1     0     0     0     0
+## [14,]     0     1     0     0     1     1     0
+## [15,]     1     0     0     0     0     0     0
+## [16,]     0     0     0     0     0     1     0
+## [17,]     0     0     0     0     0     0     0
+## [18,]     1     0     0     0     0     1     0
+## [19,]     1     0     0     0     1     0     0
+## [20,]     0     0     0     0     0     0     0</code></pre>
 <p>If we want to learn from this same data using DINA model, <code>poks.data$poks</code> cannot be used because components <code>p.min</code>, <code>alpha.p</code>, <code>alpha.c</code> are meaningless to DINA. In order to do the task, one will need to hand-design this data. DINA requires one additional component besides the response matrix: Q-matrix. Normally, Q-matrix is expected to be expert-defined, however this illustration will just simply generate it randomly.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Q &lt;-<span class="st"> </span><span class="kw">get.par</span>(<span class="st">&quot;Q&quot;</span>, p)$value
 R &lt;-<span class="st"> </span>poks.data$poks$R
@@ -768,13 +768,13 @@ learn.dina &lt;-<span class="st"> </span><span class="kw">learn</span>(<span cla
 ## [4,]     1     1     1     0     1     1     1     1
 ## [5,]     1     1     0     1     1     1     1     1</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">learn.dina$skill.dist</code></pre></div>
-<pre><code>##  [1]  3.941518e-08  3.019000e-02  3.941518e-08  3.941518e-08  3.941518e-08
-##  [6]  3.941518e-08  3.019000e-02  4.367130e-08  3.019000e-02  4.037043e-02
-## [11]  3.931864e-50  3.941518e-08  2.191756e-06  3.559446e-07  1.429766e-13
-## [16]  9.205483e-20  4.925526e-04  3.019000e-02  3.125335e-04  2.050609e-32
-## [21]  4.447005e-01  3.473938e-06  7.139442e-41  1.625240e-42  4.957875e-02
-## [26]  9.427149e-02  1.510906e-01  2.331511e-10  4.642630e-11 9.415793e-167
-## [31]  1.428173e-62  9.841682e-02</code></pre>
+<pre><code>##  [1] 1.760165e-02 6.533511e-09 1.760165e-02 1.760165e-02 1.760165e-02
+##  [6] 3.647389e-04 1.107014e-07 6.533511e-09 6.533511e-09 9.046602e-11
+## [11] 1.760165e-02 4.778015e-06 3.647389e-04 1.760165e-02 7.491514e-03
+## [16] 1.881207e-14 1.107014e-07 1.472245e-01 1.511319e-09 6.533511e-09
+## [21] 3.011163e-85 6.274567e-18 1.159562e-03 9.697987e-02 2.536411e-18
+## [26] 2.387236e-11 6.324320e-12 1.252769e-01 6.996443e-02 1.344001e-01
+## [31] 1.378799e-22 3.111588e-01</code></pre>
 </div>
 <div id="generate-synthetic-data-using-syn" class="section level2">
 <h2>Generate synthetic data using <code>syn</code></h2>
@@ -832,49 +832,49 @@ learn.dina &lt;-<span class="st"> </span><span class="kw">learn</span>(<span cla
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dina.syn$synthetic[[<span class="dv">5</span>]]$dina</code></pre></div>
 <pre><code>## $R
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-##  [1,]    1    1    1    0    1    1    1    0    1     1     1     1
-##  [2,]    0    1    1    1    0    1    1    1    1     1     0     1
-##  [3,]    0    0    0    0    0    1    1    1    0     0     1     0
-##  [4,]    0    0    0    0    0    1    0    0    0     0     0     1
-##  [5,]    0    1    0    1    1    1    1    0    0     1     0     1
-##  [6,]    1    1    1    1    1    0    1    0    1     1     0     1
-##  [7,]    0    0    0    0    0    0    0    0    0     0     0     0
-##  [8,]    0    0    0    0    0    0    0    0    0     0     0     0
-##  [9,]    0    0    0    0    0    0    0    0    0     0     0     1
-## [10,]    0    1    0    1    1    0    1    1    0     1     0     1
-## [11,]    0    0    1    0    0    1    0    0    0     0     0     0
-## [12,]    0    1    0    0    0    1    0    0    0     0     1     0
-## [13,]    1    1    1    0    1    1    1    1    0     1     1     1
-## [14,]    1    0    1    1    0    1    1    1    1     1     1     1
-## [15,]    1    1    1    1    1    0    1    1    1     1     0     1
-## [16,]    1    0    0    1    1    0    0    1    0     0     0     1
-## [17,]    1    1    1    0    0    1    1    0    0     1     1     1
-## [18,]    1    1    1    1    1    1    1    1    1     0     1     1
-## [19,]    1    1    1    1    1    1    1    1    1     0     1     1
-## [20,]    1    1    1    1    1    0    1    1    1     1     0     1
+##  [1,]    0    0    0    1    1    1    0    1    0     1     1     0
+##  [2,]    1    0    0    1    0    1    1    1    1     1     1     1
+##  [3,]    1    1    1    1    1    0    1    1    1     0     0     1
+##  [4,]    1    1    1    0    1    1    0    1    1     1     1     0
+##  [5,]    0    1    1    0    1    1    0    1    0     0     1     0
+##  [6,]    0    1    1    0    1    1    0    1    1     1     1     0
+##  [7,]    1    1    1    1    1    1    1    1    1     1     1     1
+##  [8,]    0    0    0    0    1    0    0    1    0     0     0     0
+##  [9,]    1    0    0    0    1    0    0    0    0     0     0     0
+## [10,]    1    1    1    1    1    1    1    1    1     1     1     1
+## [11,]    0    1    1    0    0    1    0    0    0     1     0     0
+## [12,]    0    0    0    0    0    0    0    1    0     0     0     0
+## [13,]    1    1    0    1    0    1    0    1    0     0     0     0
+## [14,]    1    1    1    1    1    1    0    1    1     1     1     1
+## [15,]    1    1    1    1    1    1    1    1    1     0     1     1
+## [16,]    0    1    0    0    1    1    1    1    0     1     0     0
+## [17,]    1    1    1    0    1    1    1    1    1     1     1     1
+## [18,]    1    1    1    0    1    1    1    1    1     0     1     1
+## [19,]    0    1    1    1    1    1    1    1    1     1     1     1
+## [20,]    0    0    0    0    0    0    0    1    0     0     1     0
 ## 
 ## $Q
 ##       [,1] [,2] [,3] [,4] [,5]
-##  [1,]    1    0    1    0    0
-##  [2,]    0    0    1    1    1
-##  [3,]    1    1    1    1    1
-##  [4,]    1    1    0    1    1
-##  [5,]    0    0    1    1    0
-##  [6,]    1    0    1    0    0
-##  [7,]    0    0    1    0    1
-##  [8,]    0    1    1    1    1
-##  [9,]    1    1    1    0    0
-## [10,]    0    0    0    1    1
-## [11,]    1    1    1    1    0
-## [12,]    0    1    1    0    0
-## [13,]    0    1    0    1    1
-## [14,]    0    1    0    0    1
-## [15,]    0    0    1    0    1
-## [16,]    1    0    0    0    1
-## [17,]    1    0    1    0    0
-## [18,]    1    1    1    0    0
-## [19,]    0    0    1    1    0
-## [20,]    1    0    0    0    0</code></pre>
+##  [1,]    0    0    0    1    1
+##  [2,]    0    0    0    1    1
+##  [3,]    1    1    0    0    0
+##  [4,]    1    1    1    1    1
+##  [5,]    0    1    1    0    1
+##  [6,]    1    1    1    1    0
+##  [7,]    0    0    0    1    1
+##  [8,]    0    1    0    1    0
+##  [9,]    0    0    1    1    1
+## [10,]    0    0    1    0    1
+## [11,]    0    1    1    1    0
+## [12,]    1    1    1    1    0
+## [13,]    1    0    0    0    0
+## [14,]    1    0    1    0    1
+## [15,]    1    1    1    0    1
+## [16,]    1    1    0    0    0
+## [17,]    0    0    0    0    1
+## [18,]    1    0    1    0    1
+## [19,]    1    1    0    1    1
+## [20,]    0    0    0    0    1</code></pre>
 <p>In case the default option is not favoured, <code>syn</code> also allows users to manually specify which parameters to keep through argument <code>keep.pars</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dina.syn &lt;-<span class="st"> </span><span class="kw">syn</span>(<span class="st">&quot;dina&quot;</span>, <span class="dt">data =</span> dina.data, <span class="dt">keep.pars =</span> <span class="kw">c</span>(<span class="st">&quot;Q&quot;</span>, <span class="st">&quot;concept.exp&quot;</span>), <span class="dt">students =</span> <span class="dv">12</span>)</code></pre></div>
 <pre><code>## Learning by 'dina' ...</code></pre>

@@ -29,13 +29,14 @@ print.context <- function(x){
   print(names(x)[which(sapply(x,is.null)==0)])
 }
 
-toStr <- function(x, max){
+to.str <- function(x, max){
   if (max<10) r <- toString(x)
   else
     r <- (paste0(paste(sapply(1:log(max,10),function(x)"0"),collapse=""),x))
   return(paste0("0",r))
 }
 
+# return which candidate is most likely to produce target
 which.closest <- function(target, candidates){
   ref <- STRUCTURE[[target]]$tell
   which.max(
@@ -44,7 +45,8 @@ which.closest <- function(target, candidates){
     }))
 }
 
-compat <- function(val,tel){
+# return if the value of a node and an info propagated to this node is compatible
+compat <- function(val,tel){ 
   if (class(tel) == "min") return(all(tel <= val))
   if (class(tel) == "max") return(all(tel >= val))
   if (class(tel) == "numeric") return(max(abs(val-tel)) < 1e-10)
@@ -891,7 +893,7 @@ assemble.structure <- function(){
     odds.t <- PToOdds(condp.t)
     odds.f <- PToOdds(condp.f)
     state=odds
-    #  or <- list(t=odds.t/odds, f=odds.f/odds) # something to try (doesn't get exactly same result)
+    # or <- list(t=odds.t/odds, f=odds.f/odds) # something to try (doesn't get exactly same result)
     # Start computing interaction test based on approximation of SE of log.odds.ratio : \sqrt(\sum_i 1/n_i)
     log.odds.ratio <- log((ft[,,1] * ft[,,4])/(ft[,,2] * ft[,,3]))
     log.odds.se <- sqrt((1/ft[,,1] + 1/ft[,,2] + 1/ft[,,3] + 1/ft[,,4]))
@@ -1016,7 +1018,7 @@ assemble.structure <- function(){
     guess <- matrix(0,items, students)
     for (i in 1:items){
       for (j in 1:students){
-        cat(paste0("\tItem ",toStr(i,items)," Student ", toStr(j,students),"\n"))
+        cat(paste0("\tItem ",to.str(i,items)," Student ", to.str(j,students),"\n"))
         learn <- binaryHMMLearn(R[i,j,])
         probInitS[i,j] <- learn$probInitS
         L[i,j] <- learn$L
@@ -1048,7 +1050,6 @@ assemble.structure <- function(){
   Q.M.2.nmf.con <- function(x){QMConGen(x[[1]],x[[2]])}
   Q.M.2.nmf.dis <- function(x){QMDisGen(x[[1]],x[[2]])}
   Q.M.2.nmf.com <- function(x){QMComGen(x[[1]],x[[2]])}
-  #Q.S.2.lin.pes <- function(x){QSLinPesGen(x[[1]],x[[2]])}
   Q.S.2.lin.avg <- function(x){QSLinAvgGen(x[[1]],x[[2]])}
   stvar.stu.state.or.po.2.poks <- function(x){
     Gen.Synthetic.POKS.OR(x[[1]],x[[2]],x[[3]],x[[4]],x[[5]],x[[6]],x[[7]],x[[8]],x[[9]])}
@@ -1184,25 +1185,28 @@ assemble.structure <- function(){
   init.vals. <- root.
 
   # root nodes with predefined default values initialized only when needed
-  trans. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["trans"]]}))
-  bkt.guess.st.var. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["bkt.guess.st.var"]]}))
-  bkt.slip.st.var. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["bkt.slip.st.var"]]}))
-  S.st.var. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["S.st.var"]]}))
-  L.st.var. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["L.st.var"]]}))
-  abi.mean. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["abi.mean"]]}))
-  abi.sd. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["abi.sd"]]}))
-  alpha.c. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["alpha.c"]]}))
-  alpha.p. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["alpha.p"]]}))
-  p.min. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["p.min"]]}))
-  bkt.mod. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["bkt.mod"]]}))
-  min.ntree. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["min.ntree"]]}))
-  min.depth. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["min.depth"]]}))
-  min.it.per.tree. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["min.it.per.tree"]]}))
-  density. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["density"]]}))
-  per.item. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["per.item"]]}))
-  avg.success. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["avg.success"]]}))
-  student.var. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["student.var"]]}))
-  time. <- list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][["time"]]}))
+  root.factory <- function(name){
+    list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][[name]]}))
+  }
+  trans. <-            root.factory("trans")
+  bkt.guess.st.var. <- root.factory("bkt.guess.st.var")
+  bkt.slip.st.var. <-  root.factory("bkt.slip.st.var")
+  S.st.var. <-         root.factory("S.st.var")
+  L.st.var. <-         root.factory("L.st.var")
+  abi.mean. <-         root.factory("abi.mean")
+  abi.sd. <-           root.factory("abi.sd")
+  alpha.c. <-          root.factory("alpha.c")
+  alpha.p. <-          root.factory("alpha.p")
+  p.min. <-            root.factory("p.min")
+  bkt.mod. <-          root.factory("bkt.mod")
+  min.ntree. <-        root.factory("min.ntree")
+  min.depth. <-        root.factory("min.depth")
+  min.it.per.tree. <-  root.factory("min.it.per.tree")
+  density. <-          root.factory("density")
+  per.item. <-         root.factory("per.item")
+  avg.success. <-      root.factory("avg.success")
+  student.var. <-      root.factory("student.var")
+  time. <-             root.factory("time")
 
   #--------------------------------------------------------------------------+
   # leaf nodes, correspond to a dataset in regard of the respective model    |
@@ -1223,7 +1227,6 @@ assemble.structure <- function(){
                    nmf.dis.2.Q.M.conexp, list(Q.M.2.nmf.dis))
   nmf.com. <- list(c("Q","M","concept.exp"), list(c("Q","M")),
                    nmf.com.2.Q.M.conexp, list(Q.M.2.nmf.com))
-  #lin.pes. <- list(NULL, list(c("Q","S")), NULL, list(Q.S.2.lin.pes))
   lin.avg. <- list(c("Q","S"), list(c("Q","S")),
                    lin.avg.2.Q.S, list(Q.S.2.lin.avg))
   poks. <- list(c("student.var","avg.success","state","or.t","or.f","po","alpha.c","alpha.p","p.min"),
@@ -1316,33 +1319,21 @@ assemble.structure <- function(){
                      n.row.col.cvar.rmean, list(rmn, rmean.n.cvar.2.mat))
   order. <- list(c("time","items"), list(c("time","items")),
                  order.2.time.items, list(time.items.2.order))
-  r <-
-    list(exp = exp., irt = irt., poks = poks., dina = dina.,
-         dino = dino., nmf.con = nmf.con.,
-         nmf.com = nmf.com., nmf.dis = nmf.dis.,
-         #lin.pes
-         lin.avg = lin.avg., bkt = bkt., abi.mean = abi.mean., abi.sd = abi.sd.,
-         dis = dis., dif = dif., abi = abi., st.exp = st.exp., it.exp = it.exp.,
-         state = state., avg.success = avg.success.,
-         student.var = student.var., po = po., or.t = or.t., or.f = or.f.,
-         alpha.p = alpha.p., alpha.c = alpha.c., p.min = p.min.,
-         items = items., students = students., concepts = concepts.,
-         slip = slip., guess = guess.,
-         Q = Q., S = S., M = M., L = L.,
-         S.st.var = S.st.var., S.con.exp = S.con.exp.,
-         L.st.var = L.st.var., L.con.exp = L.con.exp.,
-         skill.space.size = skill.space.size., skill.space = skill.space.,
-         skill.dist = skill.dist., concept.exp = concept.exp.,
-         bkt.slip = bkt.slip., bkt.guess = bkt.guess.,
-         bkt.slip.it.exp = bkt.slip.it.exp., bkt.slip.st.var = bkt.slip.st.var.,
-         bkt.guess.it.exp = bkt.guess.it.exp., bkt.guess.st.var = bkt.guess.st.var.,
-         time = time., bkt.mod = bkt.mod.,
-         per.item = per.item., order = order.,
-         min.ntree = min.ntree., max.ntree = max.ntree., min.depth = min.depth.,
-         max.depth = max.depth., min.it.per.tree = min.it.per.tree., trans = trans.,
-         max.it.per.tree = max.it.per.tree., density = density.,
-         init.vals = init.vals.)
+  
+  # Assemble all nodes into a single structure named 'r'
+  all.nodes <- as.list(environment())
+  all.names <- names(all.nodes)
+  r <- list()
+  for (i in 1:length(all.names)) {
+    name.i <- all.names[i]
+    l <- nchar(name.i)
+    dot <- substr(name.i,l,l)
+    if (dot == ".") {
+      r[substr(name.i,1,l-1)] <- all.nodes[i]
+    }
+  }
   sapply(1:length(r), function(x){names(r[[x]]) <<- c("tell","gen","f.tell","f.gen")})
+  
   return(r)
 }
 
@@ -1406,7 +1397,7 @@ INTEGER <- c(DEFINITE,
 #-----------------------------------------------------------------------------+
 # argument pars stands for a list of all parameters across all models         |
 # It is meant to be produced and updated by the function pars()               |
-# down.stream(), and upstream() are general purpose functions                 |
+# down.stream(), and up.stream() are general purpose functions                |
 # that will be used as building blocks for functions at user-interface level  |
 #-----------------------------------------------------------------------------+
 
@@ -1478,7 +1469,7 @@ down.stream <- function(pars){
 #
 # This function takes the available parameters and generate higher
 # level parameters in a tailored direction so that a specified
-# target can be reach, also detects conflicts due to inactivated but required default values.
+# target can be reached, also detects conflicts due to inactivated but required default values.
 #
 # param target a character string indicates the target's name
 # param pars an object of \code{context} class describes all available information in current context
@@ -1993,13 +1984,13 @@ gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
   # name all the contexts
   if (is.null(names(pars)))
     names(pars) <- sapply(1:length(pars), function(x){
-      paste0("p",toStr(x,length(pars)))
+      paste0("p",to.str(x,length(pars)))
     })
   else{
     anony.context <- which(names(pars) == "")
     num.ac <- length(anony.context)
     names(pars)[anony.context] <- sapply(1:num.ac, function(x){
-      paste0("p",toStr(x,num.ac))
+      paste0("p",to.str(x,num.ac))
     })
   }
   
@@ -2011,7 +2002,7 @@ gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
     )
     #if (length(pars) == 1) result <- t(result)
     #print(dim(result)
-    rownames(result) <- sapply(1:n, function(x){toStr(x,n)})
+    rownames(result) <- sapply(1:n, function(x){to.str(x,n)})
     
     suppressWarnings(
       colnames(result) <- mapply(function(x,y){
