@@ -1,4 +1,4 @@
-# edmsyn, a package that synthesizes data
+# edmsyn, a package that synthesizes educational data
 # Copyright (C) 2015  Hoang-Trieu Trinh
 # 
 # This program is free software: you can redistribute it and/or modify
@@ -263,7 +263,6 @@ assemble.structure <- function(){
   QMComGen <- function(Q, M){
     list(R=randGen((Q/rowSums(Q)) %*% M), concepts = nrow(M))
   }
-  #QSLinPesGen <- function(Q,S){P<-sapply(1:ncol(S),function(s){sapply(1:nrow(Q),function(i){min((Q[i,]*S[,s])[(Q[i,])>0])})});list(R=randGen(P=P),concepts=nrow(S))}
   QSLinAvgGen<- function(Q,S){
     list(R=randGen(sqrt(QSAvgGenR2(Q = Q,S = S))), concepts = nrow(S))
   }
@@ -1160,17 +1159,17 @@ assemble.structure <- function(){
 
   #===================================================================================
   # Definition of node.i has the following syntax:
-  # node.i <- list(S, L, fs, fl)
+  # node.i <- list(S, L, fS, fL)
   # Where S is a set of nodes that can be infered from node.i
   # and L = list(set.of.nodes.1, set.of.nodes.2, ...)
   # set.of.nodes.k is a minimal set of nodes that can sufficiently generate node.i
-  # and fs is a function that maps from node.i to S
-  # and fl is a list of functions that map respective sets in L to node.i
+  # and fS is a function that maps from node.i to S
+  # and fL is a list of functions that map respective sets in L to node.i
   #
   # e.g.
-  # state. <- list(c("items"), list(c("po","items")), fs, fl)
-  # then node state can be generated from po and items by fs
-  # and items can be infered from state by fl
+  # state. <- list(c("items"), list(c("po","items")), fS, fL)
+  # then node state can be generated from po and items by fL
+  # and items can be infered from state by fS
   #===================================================================================
 
   #------------+
@@ -1345,7 +1344,8 @@ assemble.structure <- function(){
 # @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 # @seealso \code{assemble.structure}
 # @export
-STRUCTURE <- assemble.structure()
+STRUCTURE.ORIGINAL <- assemble.structure()
+STRUCTURE <- STRUCTURE.ORIGINAL
 
 #===========+
 # CONSTANTS |
@@ -1736,8 +1736,10 @@ init <- function(student.var = 1/12, avg.success = 0.5, time = 50L,
                  min.ntree = 1L, min.depth = 0L, min.it.per.tree = 1L,
                  per.item = FALSE, bkt.mod = "dina", density = 0.5,
                  alpha.c = 0.25, alpha.p = 0.25, p.min = 0.5,
-                 abi.mean = 0, abi.sd = 1, trans = TRUE){
-  as.list(environment())
+                 abi.mean = 0, abi.sd = 1, trans = TRUE, ...){
+  r <- as.list(match.call())
+  r[[1]] <- NULL
+  return(r)
 }
 
 #' @export
@@ -2083,6 +2085,7 @@ learn <- function(model, data){
 #' @details 
 #' This function is essentially a wrapper of function \code{learn} and \code{gen}, 
 #' where in between it eliminates all parameters that are not indicated in \code{keep.pars} in the learned context.
+#' you are also given the option of changing the number of students.
 #' @seealso \code{learn}, \code{gen}, \code{KEEP}
 #' @export
 syn <- function(model, data, keep.pars = keep(model),
