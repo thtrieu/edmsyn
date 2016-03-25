@@ -1511,7 +1511,11 @@ up.stream <- function(target, pars, target.base = TRUE, progress = FALSE){
       return(FALSE)
     }
     if (length(avail) == 1) pick <- avail
-    else { #criterion: pick the most usage first, available second, the most likely to be learned from target last
+    else { 
+      # criterion: 
+        # pick the most usage first, 
+        # available second, 
+        # the most likely to be learned from target last
       if (target.base == FALSE | (target.base == TRUE & node.name == target)){
         ratio.avail <- rep(0,length(avail))
         ratio.usage <- ratio.avail
@@ -2095,4 +2099,103 @@ syn <- function(model, data, keep.pars = keep(model),
   filtered.pars[keep.pars] <- learned.pars[keep.pars]
   filtered.pars <- down.stream(filtered.pars)
   list(data = data, synthetic = gen(model, filtered.pars, n = n, progress))
+}
+
+edmtree.fetch = function(node.name){
+  r <- STRUCTURE[[node.name]]
+  warning(paste0("'",node.name,"' is not found in current tree, NULL returned"))
+  return(r)
+}
+
+edmtree.remove = function(node.name){
+  temp = STRUCTURE[[node.name]]
+  STRUCTURE[[node.name]] <- NULL
+  temp
+}
+
+edmtree.check = function(node.name, node.val){
+  if (class(node.val) != 'list') stop('node.val must be a list')
+  if (length(node.val) != 4) stop('list node.val must have length of 4')
+  names(node.val) <- c('tell', 'gen', 'f.tell', 'f.gen')
+  
+  names.struct = names(STRUCTURE)
+  check.avail = function(s){
+    for (i in 1:length(s)) 
+      if (!(s[i] %in% names.struct)) stop(paste0("node '",s[i],"' is not available"))
+  }
+  
+  if (class(node.val$tell) != 'character')  stop('tell must be a set of node names')
+  check.avail(node.val$tell)
+  
+  if (class(node.val$gen) != 'list') stop('gen must be a list')
+  for (i in 1:length(node.val$gen)){
+    gen.i <- node.val$gen[[i]]
+    if (class(gen.i) != 'character') stop('gen must be a list of character sets')
+    check.avail(gen.i)
+  }
+  
+  # down stream regulariser
+  if (class(node.val$f.tell) != 'function') stop('f.tell must be a function')
+  if (length(formals(node.val$f.tell)) != 1) stop('f.tell have one argument')
+  new.f.tell <- function(l){ 
+    # A function wrapper to better debug output size of f.tell at run-time,
+    # Any error inside this scope is run-time error, 
+    # and thus, must announce the node.name to the user.
+    f.tell.r <- node.val$f.tell(l)
+    if (class(f.tell.r) != 'list') 
+      stop(paste0("node '",node.name,"' : f.tell did not return a list as expected"))
+    if (length(f.tell.r) != length(node.val$tell))
+      stop(paste0("node '",node.name,"' : f.tell did not return a list with length ",
+                  length(node.val$tell)," - size of tell"))
+    return(f.tell.r)
+  }
+  node.val$f.tell <- new.f.tell
+  
+  if (class(node.val$f.gen) != 'list') stop('f.gen must be a list')
+  # up stream regulariser
+  for (i in 1:length(node.val$f.gen)){
+    f.gen.i <- node.val$f.gen[[i]]
+    if (class(f.gen.i) != 'function') stop('f.gen must be a list of functions')
+    if (length(formals(f.gen.i)) != length(node.val$gen[[i]])) 
+      stop(paste0("number of arguments of f.gen[[",i,"]] must match the size of gen[[",i,"]]"))
+    new.f.gen.i <- function(l){
+      f.tell.r <- do.call(f.gen.i, l)
+    }
+    node.val$f.gen[[i]] <- new.f.gen.i
+  }
+  
+  return(node.val)
+}
+
+edmtree.add = function(node.name, tell, gen, f.tell, f.gen){
+  node.val <- list(tell, gen, f.tell, f.gen)
+  STRUCTURE[[node.name]] <- edmtree.check(node.name, node.val)
+  edmtree.fetch(node.name)
+}
+
+edmtree.replace = function(node.name, tell = NULL, gen = NULL, 
+                           f.tell = NULL, f.gen = NULL){
+  node.val <- edmtree.fetch(node.name)
+  if (!is.null(tell)) node.val$tell <- tell
+  if (!is.null(gen)) node.val$gen <- gen
+  if (!is.null(f.tell)) node.val$f.tell <- f.tell
+  if (!is.null(f.gen)) node.val$f.gen <- f.gen
+  STRUCTURE[[node.name]] <- edmtree.check(node.name, node.val)
+  edmtree.fetch(node.name)
+}
+
+emdtree.clear = function(){
+  warning('to reload a pre-built content, please use edmtree.load()')
+  STRUCTURE <<- list()
+  return(TRUE)
+}
+
+edmtree.dump = function(){
+  return(STRUCTURE)
+}
+
+edmtree.load = function(tree = NULL){
+  if (is.null(tree)) STRUCTURE <<- STRUCTURE.ORIGINAL
+  else STRUCTURE <<- tree
+  return(TRUE)
 }
