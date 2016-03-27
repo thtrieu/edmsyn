@@ -1741,8 +1741,7 @@ init <- function(student.var = 1/12, avg.success = 0.5, time = 50L,
                  per.item = FALSE, bkt.mod = "dina", density = 0.5,
                  alpha.c = 0.25, alpha.p = 0.25, p.min = 0.5,
                  abi.mean = 0, abi.sd = 1, trans = TRUE, ...){
-  r <- as.list(match.call())
-  r[[1]] <- NULL
+  r <- as.list(environment())
   return(r)
 }
 
