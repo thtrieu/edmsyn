@@ -1561,10 +1561,9 @@ up.stream <- function(target, pars, target.base = TRUE, progress = FALSE){
   }
 
   success <- check.track(target)
-  if (success == FALSE){
-    message(paste0("Cannot reach '", target,"' since '", miss, "' is missing"))
-    return(pars)
-  }
+  if (success == FALSE)
+    stop(paste0("Cannot reach '", target,"' since '", miss, "' is missing"))
+    
   else{
     dummy <- follow(target)
     new.pars <- down.stream(new.pars)
