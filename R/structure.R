@@ -1316,7 +1316,7 @@ assemble.structure <- function(){
                     list(c("items","students"),c("bkt.slip.it.exp","students","bkt.slip.st.var")),
                     n.row.col.cvar.rmean, list(rmn, rmean.n.cvar.2.mat))
   bkt.guess. <- list(c("items","students","bkt.guess.st.var","bkt.guess.it.exp"),
-                     list(c("items","students"),c("blt.guess.it.exp","students","bkt.guess.st.var")),
+                     list(c("items","students"),c("bkt.guess.it.exp","students","bkt.guess.st.var")),
                      n.row.col.cvar.rmean, list(rmn, rmean.n.cvar.2.mat))
   order. <- list(c("time","items"), list(c("time","items")),
                  order.2.time.items, list(time.items.2.order))
@@ -1324,17 +1324,17 @@ assemble.structure <- function(){
   # Assemble all nodes into a single structure named 'r'
   all.nodes <- as.list(environment())
   all.names <- names(all.nodes)
-  r <- list()
+  r <- new.env()
   for (i in 1:length(all.names)) {
     name.i <- all.names[i]
     l <- nchar(name.i)
     dot <- substr(name.i,l,l)
     if (dot == ".") {
-      r[substr(name.i,1,l-1)] <- all.nodes[i]
+      node.i <- all.nodes[[i]]
+      names(node.i) <- c('tell','gen','f.tell','f.gen')
+      assign(substr(name.i,1,l-1), node.i, envir = r)
     }
   }
-  sapply(1:length(r), function(x){names(r[[x]]) <<- c("tell","gen","f.tell","f.gen")})
-  
   return(r)
 }
 
@@ -1433,9 +1433,9 @@ down.stream <- function(pars){
     for (i in 1:length(curr)){
       var.name <- curr[i]
       var.val <- pars[[var.name]]
-      child.names <- STRUCTURE[[var.name]][[1]]
+      child.names <- get(var.name, envir = STRUCTURE)[[1]] #STRUCTURE[[var.name]][[1]]
       if (is.null(child.names)) next
-      child.val <- STRUCTURE[[var.name]][[3]](var.val)
+      child.val <- get(var.name, envir = STRUCTURE)[[3]](var.val) #STRUCTURE[[var.name]][[3]](var.val)
 
       child.not.null <- which(sapply(child.val, function(x){is.null(x)})==0)
       child.names <- child.names[child.not.null]
@@ -1497,7 +1497,7 @@ up.stream <- function(target, pars, target.base = TRUE, progress = FALSE){
   check.track <- function(node.name){
 
     if (!is.null(new.pars[[node.name]])) return(TRUE)
-    gen.methods <- STRUCTURE[[node.name]]$gen
+    gen.methods <- get(node.name, envir=STRUCTURE)$gen #STRUCTURE[[node.name]]$gen
     if (is.null(unlist(gen.methods))) {
       if (is.null(miss)) miss <<- node.name
       return(FALSE)
@@ -1544,7 +1544,7 @@ up.stream <- function(target, pars, target.base = TRUE, progress = FALSE){
     return(TRUE)
   }
   follow <- function(node.name){
-    node <- STRUCTURE[[node.name]]
+    node <- get(node.name, envir=STRUCTURE) #STRUCTURE[[node.name]]
     pick <- track[[node.name]]
     if (!is.null(pick)){ #which means, node already has a value
       gen.method <- node$gen[[pick]]
@@ -2102,27 +2102,31 @@ syn <- function(model, data, keep.pars = keep(model),
   list(data = data, synthetic = gen(model, filtered.pars, n = n, progress))
 }
 
+#' @export
 edmtree.fetch = function(node.name){
-  r <- STRUCTURE[[node.name]]
-  warning(paste0("'",node.name,"' is not found in current tree, NULL returned"))
+  r <- get(node.name, envir = STRUCTURE) #STRUCTURE[[node.name]]
+  if (is.null(r))
+    stop(paste0("'",node.name,"' is not found in current tree"))
   return(r)
 }
 
+#' @export
 edmtree.remove = function(node.name){
-  temp = STRUCTURE[[node.name]]
-  STRUCTURE[[node.name]] <- NULL
+  temp = get(node.name, envir = STRUCTURE) #STRUCTURE[[node.name]]
+  if (is.null(temp))
+    stop(paste0("'",node.name,"' is not found in current tree"))
+  else assign(node.name, NULL, envir=STRUCTURE) #STRUCTURE[[node.name]] <<- NULL
   temp
 }
 
+# @export
 edmtree.check = function(node.name, node.val){
-  if (class(node.val) != 'list') stop('node.val must be a list')
-  if (length(node.val) != 4) stop('list node.val must have length of 4')
-  names(node.val) <- c('tell', 'gen', 'f.tell', 'f.gen')
   
   names.struct = names(STRUCTURE)
   check.avail = function(s){
     for (i in 1:length(s)) 
-      if (!(s[i] %in% names.struct)) stop(paste0("node '",s[i],"' is not available"))
+      if (!(s[i] %in% names.struct)) 
+        stop(paste0("node '",s[i],"' is not found in current tree"))
   }
   
   if (class(node.val$tell) != 'character')  stop('tell must be a set of node names')
@@ -2144,10 +2148,10 @@ edmtree.check = function(node.name, node.val){
     # and thus, must announce the node.name to the user.
     f.tell.r <- node.val$f.tell(l)
     if (class(f.tell.r) != 'list') 
-      stop(paste0("node '",node.name,"' : f.tell did not return a list as expected"))
+      stop(paste0("node '",node.name,"' : f.tell did not return a list"))
     if (length(f.tell.r) != length(node.val$tell))
       stop(paste0("node '",node.name,"' : f.tell did not return a list with length ",
-                  length(node.val$tell)," - size of tell"))
+                  length(node.val$tell)," (size of tell)"))
     return(f.tell.r)
   }
   node.val$f.tell <- new.f.tell
@@ -2168,12 +2172,16 @@ edmtree.check = function(node.name, node.val){
   return(node.val)
 }
 
+#' @export
 edmtree.add = function(node.name, tell, gen, f.tell, f.gen){
   node.val <- list(tell, gen, f.tell, f.gen)
-  STRUCTURE[[node.name]] <- edmtree.check(node.name, node.val)
+  names(node.val) <- c('tell', 'gen', 'f.tell', 'f.gen')
+  assign(node.name, edmtree.check(node.name, node.val), envir=STRUCTURE)
+  #STRUCTURE[[node.name]] <<- edmtree.check(node.name, node.val)
   edmtree.fetch(node.name)
 }
 
+#' @export
 edmtree.replace = function(node.name, tell = NULL, gen = NULL, 
                            f.tell = NULL, f.gen = NULL){
   node.val <- edmtree.fetch(node.name)
@@ -2181,22 +2189,25 @@ edmtree.replace = function(node.name, tell = NULL, gen = NULL,
   if (!is.null(gen)) node.val$gen <- gen
   if (!is.null(f.tell)) node.val$f.tell <- f.tell
   if (!is.null(f.gen)) node.val$f.gen <- f.gen
-  STRUCTURE[[node.name]] <- edmtree.check(node.name, node.val)
+  assign(node.name, edmtree.check(node.name, node.val), envir=STRUCTURE)
+  #STRUCTURE[[node.name]] <<- edmtree.check(node.name, node.val)
   edmtree.fetch(node.name)
 }
 
-emdtree.clear = function(){
-  warning('to reload a pre-built content, please use edmtree.load()')
-  STRUCTURE <<- list()
-  return(TRUE)
+#' @export
+edmtree.clear = function(){
+  rm(list=names(STRUCTURE), envir=STRUCTURE)
 }
 
+#' @export
 edmtree.dump = function(){
   return(STRUCTURE)
 }
 
+#' @export
 edmtree.load = function(tree = NULL){
-  if (is.null(tree)) STRUCTURE <<- STRUCTURE.ORIGINAL
-  else STRUCTURE <<- tree
-  return(TRUE)
+  if (is.null(tree)) new.tree <- STRUCTURE.ORIGINAL
+  edmtree.clear()
+  for (i in names(new.tree))
+    assign(i, get(i, envir = new.tree), envir = STRUCTURE)
 }

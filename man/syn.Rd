@@ -33,6 +33,7 @@ This function synthesize a given data under the assumptions of a given model
 \details{
 This function is essentially a wrapper of function \code{learn} and \code{gen}, 
 where in between it eliminates all parameters that are not indicated in \code{keep.pars} in the learned context.
+you are also given the option of changing the number of students.
 }
 \examples{
 # Let us make up some data to synthesize
