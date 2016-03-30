@@ -20,7 +20,7 @@ pars(old.pars = NULL, init.vals = init(), dis = NULL, dif = NULL,
   bkt.slip.it.exp = NULL, bkt.slip.st.var = NULL, bkt.guess.it.exp = NULL,
   bkt.guess.st.var = NULL, irt = NULL, exp = NULL, dina = NULL,
   dino = NULL, nmf.con = NULL, nmf.dis = NULL, nmf.com = NULL,
-  lin.avg = NULL, poks = NULL, bkt = NULL)
+  lin.avg = NULL, poks = NULL, bkt = NULL, ...)
 }
 \arguments{
 \item{old.pars}{an object of \code{context} class describe the context that needed to be updated,

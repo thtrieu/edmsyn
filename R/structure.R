@@ -1433,9 +1433,9 @@ down.stream <- function(pars){
     for (i in 1:length(curr)){
       var.name <- curr[i]
       var.val <- pars[[var.name]]
-      child.names <- get(var.name, envir = STRUCTURE)[[1]] #STRUCTURE[[var.name]][[1]]
+      child.names <- edmtree.fetch(var.name)$tell #STRUCTURE[[var.name]][[1]]
       if (is.null(child.names)) next
-      child.val <- get(var.name, envir = STRUCTURE)[[3]](var.val) #STRUCTURE[[var.name]][[3]](var.val)
+      child.val <- get(var.name, envir = STRUCTURE)$f.tell(var.val) #STRUCTURE[[var.name]][[3]](var.val)
 
       child.not.null <- which(sapply(child.val, function(x){is.null(x)})==0)
       child.names <- child.names[child.not.null]
@@ -1865,28 +1865,35 @@ pars <- function(old.pars = NULL,
                  bkt.guess.it.exp = NULL, bkt.guess.st.var = NULL,
                  irt = NULL, exp = NULL, dina = NULL, dino = NULL,
                  nmf.con = NULL, nmf.dis = NULL, nmf.com = NULL,
-                 lin.avg = NULL, poks = NULL, bkt = NULL){
+                 lin.avg = NULL, poks = NULL, bkt = NULL, ...){
   new.pars <- NULL #return this.
   if (!is.null(old.pars)) {
     if (!identical(class(old.pars),c("context")))
-      stop("'old.pars' is not an object of the 'context' class")
+      stop("'old.pars' must be an object of the 'context' class")
     new.pars <- old.pars
-    update <- as.list(environment())
-    update <- update[3:length(update)]
-    update <- update[which(sapply(update,is.null) == 0)]
-    new.pars[names(update)] <- update
+    update <- as.list(match.call())
+    if (length(update) > 2)
+      update <- update[3:length(update)] # first component is [[1]] = 'pars', second $old.pars
+    else update <- list()
+    new.pars[names(update)] <- update # something in update can be NULL
+    new.pars <- new.pars[which(sapply(new.pars,is.null) == 0)] # eliminate the NULLs
+    if (is.null(new.pars$init.vals)) new.pars$init.vals = init() # user accidentally delete init.vals
   }
   else {
-    new.pars <- as.list(environment())
-    new.pars <- new.pars[3:length(new.pars)]
-    new.pars <- new.pars[names(new.pars)[which(sapply(new.pars,is.null)==0)]]
-    class(new.pars) <- c("context")
+    new.pars <- as.list(match.call())
+    if (length(new.pars) > 1)
+      new.pars <- new.pars[2:length(new.pars)]
+    else new.pars <- list()
+    new.pars <- new.pars[which(sapply(new.pars,is.null) == 0)]
+    if (is.null(new.pars$init.vals)) new.pars$init.vals = init() # user accidentally delete init.vals
   }
   
   sapply(INTEGER, function(x){
     if (!is.null(new.pars[[x]]))
       new.pars[[x]] <<- as.integer(new.pars[[x]])
   })
+  
+  class(new.pars) <- c("context")
   down.stream(new.pars)
 }
 
