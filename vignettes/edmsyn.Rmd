@@ -38,22 +38,22 @@ edmsyn::ALL.MODELS
 
 ## Class `context` and function `pars()`
 
-Since some of the parameters are shared between different models, `edmsyn` did not regard the collection of all parameters from 10 models separately, but jointly as different aspects describing a single instance of reality. For example, the vector of discrimination factors of all items is a parameter belongs to the IRT-2pl model, which is not the case for the parameter Q-matrix, however, `edmsyn` introduces the class `context` where these two parameters co-exist in a single object and can be utilized according to user purpose.
+Since some of the parameters are shared between different models, `edmsyn` did not regard the collection of all parameters from 10 models separately, but jointly as different aspects describing a single instance of reality. For example, the vector of discrimination factors of all items is a parameter belongs to the IRT-2pl model, which is not the case for the parameter Q-matrix, however, `edmsyn` introduces the class `context` where these two parameters can co-exist in a single object and can be utilized according to user purpose.
 
 Function `pars()` produce an object of class `context`.
 
 ```{r create_context}
 p <- pars(students = 15, items = 20)
 class(p)
-names(p)
 ```
-As we can see, there are collectively 62 parameters in a single context, see `?pars` for the description of them. By the assignment `p <- pars(students = 20, items = 20)` there is currently no other information in the context `p` except  `students`, `items`, and `init.vals`.
+
+By the assignment `p <- pars(students = 20, items = 20)` there is currently no other information in the context `p` except  `students`, `items`, and `init.vals`.
 
 ```{r print_p}
 print(p)
 ```
 
-`init.vals` is the component that is available (activated) in any `context` object, it is a list containing the default values for some of the parameters. Whenever one of these parameters is needed without user idicated input, the corresponding value will be loaded into the `context`.
+`p` - a `context` object, is essentially a `list` object with different components. `init.vals` is the component that is always available (activated) in any `context` object, it is a list containing the default values for some of the parameters. Whenever one of these parameters is needed without user idicated input, the corresponding value will be loaded into the `context`.
 
 ```{r init_vals}
 names(p$init.vals)
@@ -94,7 +94,7 @@ In short, the introduction of class `context` and function `pars` is mostly for 
 - An user is working across many different models with some shared parameters.
 - An user wants to study data generation from different sufficient sets of parameters. Without having to use many functions to handle each case separately, he/she will only need a function to deal with objects of a single class `context`.
 
-## Get a parameter from a context by `get.par`
+## Get the value of a parameter from a context by `get.par`
 
 We can access to components of a `context` object just like accessing to components of a list. `edmsyn` provides an alternative approach to this by the function `get.par`
 

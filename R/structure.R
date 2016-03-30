@@ -28,7 +28,7 @@ class.context <- function(x){
 #' @export
 print.context <- function(x){
   cat("Activated information in the context:\n")
-  print(names(x)[which(sapply(x,is.null)==0)])
+  print(names(x))
 }
 
 to.str <- function(x, max){
@@ -1879,6 +1879,7 @@ pars <- function(old.pars = NULL,
   else {
     new.pars <- as.list(environment())
     new.pars <- new.pars[3:length(new.pars)]
+    new.pars <- new.pars[names(new.pars)[which(sapply(new.pars,is.null)==0)]]
     class(new.pars) <- c("context")
   }
   
