@@ -1497,7 +1497,7 @@ up.stream <- function(target, pars, target.base = TRUE, progress = FALSE){
   check.track <- function(node.name){
 
     if (!is.null(new.pars[[node.name]])) return(TRUE)
-    gen.methods <- get(node.name, envir=STRUCTURE)$gen #STRUCTURE[[node.name]]$gen
+    gen.methods <- edmtree.fetch(node.name)$gen #STRUCTURE[[node.name]]$gen
     if (is.null(unlist(gen.methods))) {
       if (is.null(miss)) miss <<- node.name
       return(FALSE)
@@ -1741,7 +1741,7 @@ init <- function(student.var = 1/12, avg.success = 0.5, time = 50L,
                  min.ntree = 1L, min.depth = 0L, min.it.per.tree = 1L,
                  per.item = FALSE, bkt.mod = "dina", density = 0.5,
                  alpha.c = 0.25, alpha.p = 0.25, p.min = 0.5,
-                 abi.mean = 0, abi.sd = 1, trans = TRUE, ...){
+                 abi.mean = 0, abi.sd = 1, trans = FALSE, ...){
   r <- as.list(environment())
   return(r)
 }
@@ -2141,13 +2141,20 @@ edmtree.check = function(node.name, node.val){
   # down stream regulariser
   if (class(node.val$f.tell) != 'function') stop('f.tell must be a function')
   if (length(formals(node.val$f.tell)) != 1) stop('f.tell have one argument')
+  f <- node.val$f.tell
   new.f.tell <- function(l){ 
     # A function wrapper to better debug output size of f.tell at run-time,
     # Any error inside this scope is run-time error, 
     # and thus, must announce the node.name to the user.
-    f.tell.r <- node.val$f.tell(l)
-    if (class(f.tell.r) != 'list') 
-      stop(paste0("node '",node.name,"' : f.tell did not return a list"))
+    f.tell.r <- f(l)
+    if (class(f.tell.r) != 'list')
+        if (length(tell) > 1)
+          stop(paste0("node '",node.name,"' : f.tell did not return a list"))
+        else {
+          warning(paste0("node '",node.name,"' : f.tell did not return a list, coerced to list of length 1"))
+          f.tell.r <- list(f.tell.r)
+        }
+      
     if (length(f.tell.r) != length(node.val$tell))
       stop(paste0("node '",node.name,"' : f.tell did not return a list with length ",
                   length(node.val$tell)," (size of tell)"))
@@ -2157,27 +2164,40 @@ edmtree.check = function(node.name, node.val){
   
   if (class(node.val$f.gen) != 'list') stop('f.gen must be a list')
   # up stream regulariser
+  f.gen.copy = node.val$f.gen # to avoid infinite recursion
   for (i in 1:length(node.val$f.gen)){
     f.gen.i <- node.val$f.gen[[i]]
     if (class(f.gen.i) != 'function') stop('f.gen must be a list of functions')
     if (length(formals(f.gen.i)) != length(node.val$gen[[i]])) 
       stop(paste0("number of arguments of f.gen[[",i,"]] must match the size of gen[[",i,"]]"))
-    new.f.gen.i <- function(l){
-      f.tell.r <- do.call(f.gen.i, l)
-    }
-    node.val$f.gen[[i]] <- new.f.gen.i
   }
+  gen.len <- length(f.gen.copy)
+  fix.gen <- function(l){ 
+    # recursion creates a sequence of enviroments
+    # to trap the value of l, 
+    # because otherwise - a loop is used, then l will always == gen.len at runtime
+    if (l > gen.len) return()
+    node.val$f.gen[[l]] <<- function(x){ do.call(f.gen.copy[[l]],x) }
+    fix.gen(l+1)
+  }
+  fix.gen(1)
   
   return(node.val)
 }
 
 #' @export
 edmtree.add = function(node.name, tell, gen, f.tell, f.gen){
-  node.val <- list(tell, gen, f.tell, f.gen)
-  names(node.val) <- c('tell', 'gen', 'f.tell', 'f.gen')
-  assign(node.name, edmtree.check(node.name, node.val), envir=STRUCTURE)
-  #STRUCTURE[[node.name]] <<- edmtree.check(node.name, node.val)
-  edmtree.fetch(node.name)
+  if (node.name %in% names(STRUCTURE)) {
+    warning("'",node.name,"' is already in the tree, replacement is used instead of addition")
+    edmtree.replace(node.name, tell, gen, f.tell, f.gen)
+  }
+  else {
+    node.val <- list(tell, gen, f.tell, f.gen)
+    names(node.val) <- c('tell', 'gen', 'f.tell', 'f.gen')
+    assign(node.name, edmtree.check(node.name, node.val), envir=STRUCTURE)
+    #STRUCTURE[[node.name]] <<- edmtree.check(node.name, node.val)
+    #edmtree.fetch(node.name)
+  }
 }
 
 #' @export
@@ -2190,7 +2210,7 @@ edmtree.replace = function(node.name, tell = NULL, gen = NULL,
   if (!is.null(f.gen)) node.val$f.gen <- f.gen
   assign(node.name, edmtree.check(node.name, node.val), envir=STRUCTURE)
   #STRUCTURE[[node.name]] <<- edmtree.check(node.name, node.val)
-  edmtree.fetch(node.name)
+  #edmtree.fetch(node.name)
 }
 
 #' @export

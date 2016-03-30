@@ -127,7 +127,7 @@ identical(M_$value, get.par("M", p)$value)
 
 `get.par` can detect whether there is enough information to generate the required parameters. For example, Q-matrix needs the number of concepts to be defined, without the number of concepts, there is no way Q-matrix can be derived.
 
-```{r get.par_Q_need_concept}
+```{r get.par_Q_need_concept, error=TRUE}
 p_ <- pars(students = 20, items = 15)
 get.par("Q", p_)
 ```
