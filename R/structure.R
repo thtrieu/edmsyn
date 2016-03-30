@@ -1551,11 +1551,14 @@ up.stream <- function(target, pars, target.base = TRUE, progress = FALSE){
       if (identical(gen.method,"init.vals"))
         new.pars[[node.name]] <<- node$f.gen[[1]](list(new.pars$init.vals))
       else {
-        dummy <- sapply(gen.method, follow) #this is a dummy variable 
-        if (fill == TRUE & is.null(new.pars[[node.name]]))
-          new.pars[[node.name]] <<- node$f.gen[[pick]](new.pars[gen.method])
+        dummy <- sapply(gen.method, follow) # this is a dummy variable 
+        if (fill == TRUE & is.null(new.pars[[node.name]])){
+          arg <- new.pars[gen.method] 
+          names(arg) <- NULL # to avoid redundant args in the next function call 
+          new.pars[[node.name]] <<- node$f.gen[[pick]](arg)
+        }
       }
-      if (fill == TRUE) trace[[node.name]] <<- gen.method #if fill==TRUE trace[]
+      if (fill == TRUE) trace[[node.name]] <<- gen.method # if fill==TRUE trace[]
     }
     return(NULL)
   }
@@ -2103,10 +2106,9 @@ syn <- function(model, data, keep.pars = keep(model),
 
 #' @export
 edmtree.fetch = function(node.name){
-  r <- get(node.name, envir = STRUCTURE) #STRUCTURE[[node.name]]
-  if (is.null(r))
+  if (!(node.name %in% names(STRUCTURE)))
     stop(paste0("'",node.name,"' is not found in current tree"))
-  return(r)
+  get(node.name, envir = STRUCTURE) #STRUCTURE[[node.name]]
 }
 
 #' @export
@@ -2173,9 +2175,10 @@ edmtree.check = function(node.name, node.val){
   }
   gen.len <- length(f.gen.copy)
   fix.gen <- function(l){ 
-    # recursion creates a sequence of enviroments
-    # to trap the value of l, 
-    # because otherwise - a loop is used, then l will always == gen.len at runtime
+    # recursion creates a sequence of different enviroments
+    # to trap the values of l, 
+    # because otherwise - when a loop is used, 
+    # then l will always == gen.len at runtime
     if (l > gen.len) return()
     node.val$f.gen[[l]] <<- function(x){ do.call(f.gen.copy[[l]],x) }
     fix.gen(l+1)
