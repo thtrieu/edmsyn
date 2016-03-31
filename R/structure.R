@@ -1426,7 +1426,7 @@ INTEGER <- c(DEFINITE,
 # export
 down.stream <- function(pars){
   curr <- names(pars)[which(sapply(pars,is.null) == 0)]
-
+  
   # breadth-first propagating
   while(length(curr) > 0){
     new <- NULL
@@ -1888,12 +1888,21 @@ pars <- function(old.pars = NULL,
     if (is.null(new.pars$init.vals)) new.pars$init.vals = init() # user accidentally delete init.vals
   }
   
+  # Execute the calls, if any
+  if ("" %in% names(new.pars)) stop('Unnamed parameter(s) found')
+  for (i in 1:length(new.pars))
+    if (class(new.pars[[i]]) == "call"){
+      call.i <- as.list(new.pars[[i]])
+      new.pars[[i]] <- do.call(as.character(call.i[[1]]),call.i[2:length(call.i)])
+    }
+  class(new.pars) <- c("context")
+  
+  # Make sure integers are integers
   sapply(INTEGER, function(x){
     if (!is.null(new.pars[[x]]))
       new.pars[[x]] <<- as.integer(new.pars[[x]])
   })
   
-  class(new.pars) <- c("context")
   down.stream(new.pars)
 }
 
@@ -2153,21 +2162,22 @@ edmtree.check = function(node.name, node.val){
   if (length(formals(node.val$f.tell)) != 1) stop('f.tell have one argument')
   f <- node.val$f.tell
   new.f.tell <- function(l){ 
-    # A function wrapper to better debug output size of f.tell at run-time,
-    # Any error inside this scope is run-time error, 
+    # A function wrapper to better debug the output size of f.tell at run-time,
+    # Any error inside this scope is run-time error,
     # and thus, must announce the node.name to the user.
     f.tell.r <- f(l)
-    if (class(f.tell.r) != 'list')
-        if (length(tell) > 1)
-          stop(paste0("node '",node.name,"' : f.tell did not return a list"))
-        else {
-          warning(paste0("node '",node.name,"' : f.tell did not return a list, coerced to list of length 1"))
-          f.tell.r <- list(f.tell.r)
-        }
+    if (class(f.tell.r) != 'list') 
+      if (length(node.val$tell) == 1){
+        warning(paste0("node '",node.name,"' : f.tell did not return a list, coerced to list of length 1"))
+        f.tell.r <- list(f.tell.r)
+      }
+      else {
+        stop(paste0("node '",node.name,"' : f.tell did not return a list as expected"))
+      }
       
     if (length(f.tell.r) != length(node.val$tell))
       stop(paste0("node '",node.name,"' : f.tell did not return a list with length ",
-                  length(node.val$tell)," (size of tell)"))
+                  length(node.val$tell)," (size of tell) as expected"))
     return(f.tell.r)
   }
   node.val$f.tell <- new.f.tell
@@ -2183,13 +2193,13 @@ edmtree.check = function(node.name, node.val){
   }
   gen.len <- length(f.gen.copy)
   fix.gen <- function(l){ 
-    # recursion creates a sequence of different enviroments
-    # to trap the values of l, 
-    # because otherwise - when a loop is used, 
-    # then l will always == gen.len at runtime
-    if (l > gen.len) return()
+    if (l > gen.len) return() # recursion base
     node.val$f.gen[[l]] <<- function(x){ do.call(f.gen.copy[[l]],x) }
     fix.gen(l+1)
+    # recursion creates a sequence of different enviroments
+    # to trap the values of l, 
+    # because otherwise - when a loop is used with l being the iterator, 
+    # then l will always == gen.len at runtime
   }
   fix.gen(1)
   
