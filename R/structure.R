@@ -1867,35 +1867,29 @@ pars <- function(old.pars = NULL,
                  nmf.con = NULL, nmf.dis = NULL, nmf.com = NULL,
                  lin.avg = NULL, poks = NULL, bkt = NULL, ...){
   new.pars <- NULL #return this.
-  if (!is.null(old.pars)) {
+  
+  # Deal with the dots
+  built.ins <- as.list(environment())
+  calls <- names(as.list(match.call()))
+  calls <- calls[2:length(calls)] # eliminate the name 'pars'
+  dots <- list(...)
+  dots.names <- names(dots)
+  if (length(dots.names) != length(unique(dots.names)))
+    stop('Repeating arguments found in the expansion')
+  all.val <- append(built.ins,dots)
+  calls.val <- all.val[calls]
+  
+  if (!is.null(old.pars)) { # if this is an updating
     if (!identical(class(old.pars),c("context")))
       stop("'old.pars' must be an object of the 'context' class")
     new.pars <- old.pars
-    update <- as.list(match.call())
-    if (length(update) > 2)
-      update <- update[3:length(update)] # first component is [[1]] = 'pars', second $old.pars
-    else update <- list()
-    new.pars[names(update)] <- update # something in update can be NULL
-    new.pars <- new.pars[which(sapply(new.pars,is.null) == 0)] # eliminate the NULLs
-    if (is.null(new.pars$init.vals)) new.pars$init.vals = init() # user accidentally delete init.vals
+    update <- calls.val[2:length(calls.val)] # first component is $old.pars
+    new.pars[names(update)] <- update # note that something in update can be NULL
   }
-  else {
-    new.pars <- as.list(match.call())
-    if (length(new.pars) > 1)
-      new.pars <- new.pars[2:length(new.pars)]
-    else new.pars <- list()
-    new.pars <- new.pars[which(sapply(new.pars,is.null) == 0)]
-    if (is.null(new.pars$init.vals)) new.pars$init.vals = init() # user accidentally delete init.vals
-  }
+  else new.pars <- calls.val # if this is a brand new context
   
-  # Execute the calls, if any
-  if ("" %in% names(new.pars)) stop('Unnamed parameter(s) found')
-  for (i in 1:length(new.pars))
-    if (class(new.pars[[i]]) == "call"){
-      call.i <- as.list(new.pars[[i]])
-      new.pars[[i]] <- do.call(as.character(call.i[[1]]),call.i[2:length(call.i)])
-    }
-  class(new.pars) <- c("context")
+  new.pars <- new.pars[which(sapply(new.pars,is.null) == 0)] # eliminate the NULLs
+  if (is.null(new.pars$init.vals)) new.pars$init.vals = init() # user accidentally delete init.vals
   
   # Make sure integers are integers
   sapply(INTEGER, function(x){
@@ -1903,6 +1897,8 @@ pars <- function(old.pars = NULL,
       new.pars[[x]] <<- as.integer(new.pars[[x]])
   })
   
+  # Infer all other obtainable info
+  class(new.pars) <- c("context")
   down.stream(new.pars)
 }
 
