@@ -31,6 +31,19 @@ print.context <- function(x){
   print(names(x))
 }
 
+#' @export
+class.init <- function(x){
+  print("init")
+}
+
+#' @export
+print.init <- function(x){
+  for(i in 1:length(names(x))){
+    cat(paste0(names(x)[[i]],'\n'))
+    print(get(names(x)[[i]],envir=x))
+  }
+}
+
 to.str <- function(x, max){
   if (max<10) r <- toString(x)
   else
@@ -1737,15 +1750,63 @@ viz <- function(po){
   return(po)
 }
 
+INITIALS <- new.env()
+asin <- function(node.name, val){
+  assign(node.name, val, envir = INITIALS)
+}
+asin('student.var', 1/12)
+asin('avg.success', 0.5)
+asin('time', 50L)
+asin('S.st.var', 1/12)
+asin('L.st.var', 1/12)
+asin('bkt.slip.st.var', 1/12)
+asin('bkt.guess.st.var', 1/12)
+asin('min.ntree', 1L)
+asin('min.depth', 0L)
+asin('min.it.per.tree', 1L)
+asin('per.item', FALSE)
+asin('bkt.mod', 'dina')
+asin('density', 0.5)
+asin('alpha.c', 0.25)
+asin('alpha.p', 0.25)
+asin('p.min', 0.5)
+asin('abi.mean', 0)
+asin('abi.sd', 1)
+asin('trans', FALSE)
+
+#=======================================+
+# Environment containing initial values |
+#=======================================+
+
 #' @export
-init <- function(student.var = 1/12, avg.success = 0.5, time = 50L,
-                 S.st.var = 1/12, L.st.var = 1/12,
-                 bkt.slip.st.var = 1/12, bkt.guess.st.var = 1/12,
-                 min.ntree = 1L, min.depth = 0L, min.it.per.tree = 1L,
-                 per.item = FALSE, bkt.mod = "dina", density = 0.5,
-                 alpha.c = 0.25, alpha.p = 0.25, p.min = 0.5,
-                 abi.mean = 0, abi.sd = 1, trans = FALSE, ...){
-  r <- as.list(environment())
+init <- function(student.var = NULL, avg.success = NULL, time = NULL,
+                 S.st.var = NULL, L.st.var = NULL,
+                 bkt.slip.st.var = NULL, bkt.guess.st.var = NULL,
+                 min.ntree = NULL, min.depth = NULL, min.it.per.tree = NULL,
+                 per.item = NULL, bkt.mod = NULL, density = NULL,
+                 alpha.c = NULL, alpha.p = NULL, p.min = NULL,
+                 abi.mean = NULL, abi.sd = NULL, trans = NULL, ...){
+  built.ins <- as.list(environment())
+  calls <- names(as.list(match.call()))
+  calls <- calls[2:length(calls)] # eliminate the name 'init'
+  dots <- list(...)
+  dots.names <- names(dots)
+  if (length(dots.names) != length(unique(dots.names)))
+    stop('Repeating arguments found')
+  all.val <- append(built.ins,dots)
+  calls.val <- all.val[calls]
+  
+  r <- INITIALS
+  if (length(calls.val) > 0)
+    for(i in 1:length(calls.val))
+      if (calls[[i]] %in% names(STRUCTURE)){
+        if (!is.null(calls.val[[i]])) # some of calls.val is NULL, ignore them
+          assign(calls[[i]],calls.val[[i]], envir = r)
+      }
+      else
+        stop("'",calls[[i]],"' is not found in current tree")
+  
+  class(r) <- 'init'
   return(r)
 }
 
@@ -1875,7 +1936,7 @@ pars <- function(old.pars = NULL,
   dots <- list(...)
   dots.names <- names(dots)
   if (length(dots.names) != length(unique(dots.names)))
-    stop('Repeating arguments found in the expansion')
+    stop('Repeating arguments found')
   all.val <- append(built.ins,dots)
   calls.val <- all.val[calls]
   
@@ -2118,14 +2179,14 @@ syn <- function(model, data, keep.pars = keep(model),
 }
 
 #' @export
-edmtree.fetch = function(node.name){
+edmtree.fetch <- function(node.name){
   if (!(node.name %in% names(STRUCTURE)))
     stop(paste0("'",node.name,"' is not found in current tree"))
   get(node.name, envir = STRUCTURE) #STRUCTURE[[node.name]]
 }
 
 #' @export
-edmtree.remove = function(node.name){
+edmtree.remove <- function(node.name){
   temp = get(node.name, envir = STRUCTURE) #STRUCTURE[[node.name]]
   if (is.null(temp))
     stop(paste0("'",node.name,"' is not found in current tree"))
@@ -2133,20 +2194,39 @@ edmtree.remove = function(node.name){
   temp
 }
 
+
 # @export
-edmtree.check = function(node.name, node.val){
+edmtree.check <- function(node.name, node.val) {
   
-  names.struct = names(STRUCTURE)
-  check.avail = function(s){
+  # node to check is currently not detected to be 
+  # either a root or a root with init val
+  root <- FALSE
+  init <- FALSE
+  
+  names.struct <- names(STRUCTURE)
+  check.avail <- function(s){
     for (i in 1:length(s)) 
       if (!(s[i] %in% names.struct)) 
-        stop(paste0("node '",s[i],"' is not found in current tree"))
+        stop(paste0("'",s[i],"' is not found in current tree"))
   }
   
-  if (class(node.val$tell) != 'character')  stop('tell must be a set of node names')
-  check.avail(node.val$tell)
+  if (class(node.val$tell) != 'character'){  
+    if (is.null(node.val$tell)){ 
+      message(paste0("'",node.name,"' appears to be a root node"))
+      root <- TRUE
+    }
+    else
+      stop('tell must be a set of node names')
+  }
+  else
+    check.avail(node.val$tell)
   
   if (class(node.val$gen) != 'list') stop('gen must be a list')
+  
+  # root. <- list(NULL, list(NULL), NULL, list(NULL))
+  # list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][[name]]}))
+  
+  
   for (i in 1:length(node.val$gen)){
     gen.i <- node.val$gen[[i]]
     if (class(gen.i) != 'character') stop('gen must be a list of character sets')
@@ -2180,7 +2260,7 @@ edmtree.check = function(node.name, node.val){
   
   if (class(node.val$f.gen) != 'list') stop('f.gen must be a list')
   # up stream regulariser
-  f.gen.copy = node.val$f.gen # to avoid infinite recursion
+  f.gen.copy <- node.val$f.gen # to avoid infinite recursion
   for (i in 1:length(node.val$f.gen)){
     f.gen.i <- node.val$f.gen[[i]]
     if (class(f.gen.i) != 'function') stop('f.gen must be a list of functions')
@@ -2203,7 +2283,7 @@ edmtree.check = function(node.name, node.val){
 }
 
 #' @export
-edmtree.add = function(node.name, tell, gen, f.tell, f.gen){
+edmtree.add <- function(node.name, tell, gen, f.tell, f.gen){
   if (node.name %in% names(STRUCTURE)) {
     warning("'",node.name,"' is already in the tree, replacement is used instead of addition")
     edmtree.replace(node.name, tell, gen, f.tell, f.gen)
@@ -2218,7 +2298,7 @@ edmtree.add = function(node.name, tell, gen, f.tell, f.gen){
 }
 
 #' @export
-edmtree.replace = function(node.name, tell = NULL, gen = NULL, 
+edmtree.replace <- function(node.name, tell = NULL, gen = NULL, 
                            f.tell = NULL, f.gen = NULL){
   node.val <- edmtree.fetch(node.name)
   if (!is.null(tell)) node.val$tell <- tell
@@ -2231,17 +2311,17 @@ edmtree.replace = function(node.name, tell = NULL, gen = NULL,
 }
 
 #' @export
-edmtree.clear = function(){
+edmtree.clear <- function(){
   rm(list=names(STRUCTURE), envir=STRUCTURE)
 }
 
 #' @export
-edmtree.dump = function(){
+edmtree.dump <- function(){
   return(STRUCTURE)
 }
 
 #' @export
-edmtree.load = function(tree = NULL){
+edmtree.load <- function(tree = NULL){
   if (is.null(tree)) new.tree <- STRUCTURE.ORIGINAL
   edmtree.clear()
   for (i in names(new.tree))
