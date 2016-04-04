@@ -32,8 +32,8 @@ print.context <- function(x){
 }
 
 #' @export
-class.init <- function(x){
-  print("init")
+class.default <- function(x){
+  print("default")
 }
 
 #' @export
@@ -1196,11 +1196,11 @@ assemble.structure <- function(){
   items. <- root.
   students. <- root.
   concepts. <- root.
-  init.vals. <- root.
+  default.vals. <- root.
 
   # root nodes with predefined default values initialized only when needed
   root.factory <- function(name){
-    list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][[name]]}))
+    list(NULL, list(c("default.vals")), NULL, list(function(x){x[[1]][[name]]}))
   }
   trans. <-            root.factory("trans")
   bkt.guess.st.var. <- root.factory("bkt.guess.st.var")
@@ -1561,8 +1561,8 @@ up.stream <- function(target, pars, target.base = TRUE, progress = FALSE){
     pick <- track[[node.name]]
     if (!is.null(pick)){ #which means, node already has a value
       gen.method <- node$gen[[pick]]
-      if (identical(gen.method,"init.vals"))
-        new.pars[[node.name]] <<- node$f.gen[[1]](list(new.pars$init.vals))
+      if (identical(gen.method,"default.vals"))
+        new.pars[[node.name]] <<- node$f.gen[[1]](list(new.pars$default.vals))
       else {
         dummy <- sapply(gen.method, follow) # this is a dummy variable 
         if (fill == TRUE & is.null(new.pars[[node.name]])){
@@ -1778,8 +1778,43 @@ asin('trans', FALSE)
 # Environment containing initial values |
 #=======================================+
 
+#' Create an R environment that contains default values for root parameters
+#' 
+#' @param student.var variance of student expected success rate
+#' @param avg.success mean value of the response matrix
+#' @param time the number of time steps for sequential data
+#' @param S.st.var variance of student expected success rates of the skill matrix
+#' @param L.st.var variance of student expected success rates of Learning Transition matrix
+#' @param bkt.guess.st.var variance of expected values of students in Guess vector of BKT model
+#' @param bkt.slip.st.var variance of expected values of students in Slip vector of BKT model
+#' @param min.ntree minimum number of connected components of the partial order structure of items
+#' @param min.depth minimum depth of the connected components of the partial order structure of items
+#' @param min.it.per.tree minimum number of items per each connected component of the partial order structure
+#' @param per.item a boolean value indicates if the students can improve after taking each item
+#' @param bkt.mod a character string indicates which model governs the generating process for sequential data
+#' @param density a real value between 0 and 1, indicates the connection density of the partial order structure of items
+#' @param alpha.c parameter for learning by POKS model, see reference
+#' @param alpha.p parameter for learning by POKS model, see reference
+#' @param p.min p-value for interaction test while constructing POK structure
+#' @param abi.mean mean value of the student abilities vector
+#' @param abi.sd standard deviation of the student abilities vector
+#' @param trans a boolean value indicates if transitive links are allowed in the partial order structure of items
+#' @return an environment containing all default values of the specified parameters
+#' @examples
+#' # Example: 
+#' # Declare a context where there are 15 students and 20 items
+#' p <- pars(students = 15, items = 20)
+#' # Add information that the Partial Order Structure should have depth of 3, two connected components and no transitive links
+#' p <- pars(p, min.depth = 3, max.depth = 3, min.ntree = 2, max.ntree = 2, trans = FALSE)
+#' # Generate data to calculate the `po` parameter
+#' poks.data <- gen("poks", p)
+#' # Visualise the Partial Order Structure
+#' v <- viz(poks.data$po)
+#' # Print the analysed structure
+#' print(v)
+#' @author Hoang-Trieu trinh, \email{thtrieu@@apcs.vn}
 #' @export
-init <- function(student.var = NULL, avg.success = NULL, time = NULL,
+default <- function(student.var = NULL, avg.success = NULL, time = NULL,
                  S.st.var = NULL, L.st.var = NULL,
                  bkt.slip.st.var = NULL, bkt.guess.st.var = NULL,
                  min.ntree = NULL, min.depth = NULL, min.it.per.tree = NULL,
@@ -1788,7 +1823,7 @@ init <- function(student.var = NULL, avg.success = NULL, time = NULL,
                  abi.mean = NULL, abi.sd = NULL, trans = NULL, ...){
   built.ins <- as.list(environment())
   calls <- names(as.list(match.call()))
-  calls <- calls[2:length(calls)] # eliminate the name 'init'
+  calls <- calls[2:length(calls)] # eliminate the name 'default'
   dots <- list(...)
   dots.names <- names(dots)
   if (length(dots.names) != length(unique(dots.names)))
@@ -1806,7 +1841,7 @@ init <- function(student.var = NULL, avg.success = NULL, time = NULL,
       else
         stop("'",calls[[i]],"' is not found in current tree")
   
-  class(r) <- 'init'
+  class(r) <- 'default'
   return(r)
 }
 
@@ -1825,7 +1860,7 @@ keep <- function(model){
 #'
 #' @param old.pars an object of \code{context} class describe the context that needed to be updated,
 #' leave this parameter \code{NULL} if a new context is needed.
-#' @param init.vals a list contains initial values for some parameters in the context, by default it is initialized by function \code{init}
+#' @param default.vals an environment contains default values for some parameters in the context, by default it is initialized by function \code{default}
 #' @param dis a vector of discrimination values for each item
 #' @param dif a vector of difficulty values for each item
 #' @param abi a vector of ability values for each student
@@ -1847,12 +1882,12 @@ keep <- function(model){
 #' @param trans a boolean value indicates if transitive links are allowed in \code{po}
 #' @param min.depth minimum depth of the connected components of \code{po}
 #' @param max.depth maximum depth of the connected components of \code{po}
-#' @param density density of \code{po}
+#' @param density a real value between 0 and 1, indicates the connection density of \code{po}
 #' @param min.it.per.tree minimum number of items per each connected component of \code{po}
 #' @param max.it.per.tree maxinum number of items per each connected component of \code{po} 
 #' @param alpha.c parameter for learning by POKS model, see reference
 #' @param alpha.p parameter for learning by POKS model, see reference
-#' @param p.min p-value for interation test while constructing POK structure
+#' @param p.min p-value for interaction test while constructing POK structure
 #' @param slip a vector of slip factor for each item
 #' @param guess a vector of guess factor for each item
 #' @param per.item a boolean value indicates if the students can improve after taking each item
@@ -1862,9 +1897,9 @@ keep <- function(model){
 #' @param M Skill mastery matrix with size\code{concepts} times \code{students}
 #' @param L Learn matrix indicates the transition probabilities for \code{M} matrix
 #' @param bkt.mod a character string indicates which model governs the generating process for sequential data
-#' @param S.st.var variance of student expected success rates for matrix \code{S}
+#' @param S.st.var variance of student expected success rates of matrix \code{S}
 #' @param S.con.exp a vector of expected success rate for each concept in matrix \code{S}
-#' @param L.st.var variance of student expected success rates for matrix \code{L}
+#' @param L.st.var variance of student expected success rates of matrix \code{L}
 #' @param L.con.exp a vector of expected success rate for each concept in matrix \code{L}
 #' @param skill.space.size size of the skill space
 #' @param skill.space a matrix with size \code{concepts} times \code{skill.space.size}
@@ -1872,7 +1907,7 @@ keep <- function(model){
 #' @param concept.exp a vector of expected mastery rate for each concept
 #' @param bkt.slip a matrix of size \code{items} times \code{students} indicates slip factor for each combination of one item and one student
 #' @param bkt.guess a matrix of size \code{items} times \code{students} indicates slip factor for each combination of one item and one student
-#' @param time the length in time for sequential data
+#' @param time the number of time steps for sequential data
 #' @param bkt.slip.it.exp a vector of expected value for each item in \code{bkt.slip}
 #' @param bkt.slip.st.var variance of expected values of students in \code{bkt.slip}
 #' @param bkt.guess.it.exp a vector of expected value for each item in \code{bkt.guess}
@@ -1904,7 +1939,7 @@ keep <- function(model){
 #' @export
 
 pars <- function(old.pars = NULL,
-                 init.vals = init(),
+                 default.vals = default(),
                  dis = NULL, dif = NULL, abi = NULL,
                  abi.mean = NULL, abi.sd = NULL,
                  st.exp = NULL, it.exp = NULL,
@@ -1950,7 +1985,7 @@ pars <- function(old.pars = NULL,
   else new.pars <- calls.val # if this is a brand new context
   
   new.pars <- new.pars[which(sapply(new.pars,is.null) == 0)] # eliminate the NULLs
-  if (is.null(new.pars$init.vals)) new.pars$init.vals = init() # user accidentally delete init.vals
+  if (is.null(new.pars$default.vals)) new.pars$default.vals = default() # user accidentally delete default.vals
   
   # Make sure integers are integers
   sapply(INTEGER, function(x){
@@ -2224,7 +2259,7 @@ edmtree.check <- function(node.name, node.val) {
   if (class(node.val$gen) != 'list') stop('gen must be a list')
   
   # root. <- list(NULL, list(NULL), NULL, list(NULL))
-  # list(NULL, list(c("init.vals")), NULL, list(function(x){x[[1]][[name]]}))
+  # list(NULL, list(c("default.vals")), NULL, list(function(x){x[[1]][[name]]}))
   
   
   for (i in 1:length(node.val$gen)){
