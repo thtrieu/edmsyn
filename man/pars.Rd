@@ -4,7 +4,7 @@
 \alias{pars}
 \title{Create or update a context}
 \usage{
-pars(old.pars = NULL, init.vals = init(), dis = NULL, dif = NULL,
+pars(old.pars = NULL, default.vals = default(), dis = NULL, dif = NULL,
   abi = NULL, abi.mean = NULL, abi.sd = NULL, st.exp = NULL,
   it.exp = NULL, items = NULL, concepts = NULL, students = NULL,
   state = NULL, po = NULL, or.t = NULL, or.f = NULL,
@@ -26,7 +26,7 @@ pars(old.pars = NULL, init.vals = init(), dis = NULL, dif = NULL,
 \item{old.pars}{an object of \code{context} class describe the context that needed to be updated,
 leave this parameter \code{NULL} if a new context is needed.}
 
-\item{init.vals}{a list contains initial values for some parameters in the context, by default it is initialized by function \code{init}}
+\item{default.vals}{an environment contains default values for some parameters in the context, by default it is initialized by function \code{default}}
 
 \item{dis}{a vector of discrimination values for each item}
 
@@ -70,7 +70,7 @@ leave this parameter \code{NULL} if a new context is needed.}
 
 \item{max.depth}{maximum depth of the connected components of \code{po}}
 
-\item{density}{density of \code{po}}
+\item{density}{a real value between 0 and 1, indicates the connection density of \code{po}}
 
 \item{min.it.per.tree}{minimum number of items per each connected component of \code{po}}
 
@@ -80,7 +80,7 @@ leave this parameter \code{NULL} if a new context is needed.}
 
 \item{alpha.p}{parameter for learning by POKS model, see reference}
 
-\item{p.min}{p-value for interation test while constructing POK structure}
+\item{p.min}{p-value for interaction test while constructing POK structure}
 
 \item{slip}{a vector of slip factor for each item}
 
@@ -100,11 +100,11 @@ leave this parameter \code{NULL} if a new context is needed.}
 
 \item{bkt.mod}{a character string indicates which model governs the generating process for sequential data}
 
-\item{S.st.var}{variance of student expected success rates for matrix \code{S}}
+\item{S.st.var}{variance of student expected success rates of matrix \code{S}}
 
 \item{S.con.exp}{a vector of expected success rate for each concept in matrix \code{S}}
 
-\item{L.st.var}{variance of student expected success rates for matrix \code{L}}
+\item{L.st.var}{variance of student expected success rates of matrix \code{L}}
 
 \item{L.con.exp}{a vector of expected success rate for each concept in matrix \code{L}}
 
@@ -120,7 +120,7 @@ leave this parameter \code{NULL} if a new context is needed.}
 
 \item{bkt.guess}{a matrix of size \code{items} times \code{students} indicates slip factor for each combination of one item and one student}
 
-\item{time}{the length in time for sequential data}
+\item{time}{the number of time steps for sequential data}
 
 \item{bkt.slip.it.exp}{a vector of expected value for each item in \code{bkt.slip}}
 

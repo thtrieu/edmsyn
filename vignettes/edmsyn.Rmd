@@ -47,17 +47,18 @@ p <- pars(students = 15, items = 20)
 class(p)
 ```
 
-By the assignment `p <- pars(students = 20, items = 20)` there is currently no other information in the context `p` except  `students`, `items`, and `init.vals`.
+By the assignment `p <- pars(students = 20, items = 20)` there is currently no other information in the context `p` except  `students`, `items`, and `default.vals`.
 
 ```{r print_p}
 print(p)
 ```
 
-`p` - a `context` object, is essentially a `list` object with different components. `init.vals` is the component that is always available (activated) in any `context` object, it is a list containing the default values for some of the parameters. Whenever one of these parameters is needed without user idicated input, the corresponding value will be loaded into the `context`.
+`p` - a `context` object, is essentially a `list` object with different components. `default.vals` is the component that is always available (activated) in any `context` object, it is an environment containing the default values for some of the parameters. Whenever one of these parameters is needed without user idicated input, the corresponding value will be fetched from `default.vals`  and then loaded into the `context`.
 
 ```{r init_vals}
-names(p$init.vals)
-p$init.vals$avg.success
+class(p$default.vals)
+names(p$default.vals)
+p$default.vals$avg.success
 p$avg.success
 ```
 
@@ -65,17 +66,20 @@ At some point in the future, if data need to be generated from `p` by a model th
 
 We can change these default values by using the `init` function
 ```{r change_init}
-p_ <- pars(init.vals = init(avg.success = 0.6))
-p_$init.vals$avg.success
+p_ <- pars(default.vals = default(avg.success = 0.6))
+p_$default.vals$avg.success
 ```
 
-Function `pars` can also be used to update an available `context`, for example, we can change the number of students in `p` from 15 to 20, and add the _number of concepts_ information into `p`
+Function `pars` can also be used to update an available `context`, for example, we can change the number of students in `p` from 15 to 20, add the _number of concepts_ information into `p`, and delete the _number of items_ information.
 ```{r pars_update}
-p <- pars(p, concepts = 5, students = 20)
+p <- pars(p, concepts = 5, students = 20, items = NULL)
+p
+# Recover items = 20 for later use
+p <- pars(p, items = 20)
 p
 ```
 
-`pars` also automatically figures out obtainable parameters at lower level whenever a parameter is activated. For example, dimensions of `M` imply the number of concepts and the number of students. Thus, if a context is supplied with `M`, `concepts` and `students` (and some other obtainable parameters) are activated.
+`pars` also automatically figures out obtainable parameters at lower level whenever a parameter is activated. For example, dimensions of `M` imply the number of concepts and the number of students. Thus, if a context is supplied with `M`, parameters `concepts` and `students` (and some other obtainable parameters) are activated.
 
 ```{r lower_level_activated}
 p_ <- pars(M = matrix(1, 7, 30))
@@ -91,8 +95,8 @@ p <- pars(p, Q = matrix(1,30,5))
 
 In short, the introduction of class `context` and function `pars` is mostly for convenience in the following cases:
 
-- An user is working across many different models with some shared parameters.
-- An user wants to study data generation from different sufficient sets of parameters. Without having to use many functions to handle each case separately, he/she will only need a function to deal with objects of a single class `context`.
+- A user is working across many different models with some shared parameters.
+- A user wants to study data generation from different sufficient sets of parameters. Without having to use many functions to handle each case separately, he/she will only need a function to deal with objects of a single class `context`.
 
 ## Get the value of a parameter from a context by `get.par`
 
