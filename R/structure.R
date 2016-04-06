@@ -2097,7 +2097,7 @@ gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
 
   result <- NULL #return this
   if (identical(class(pars),c("context"))) pars <- list(pars)
-  else if (class(pars) != "list") stop(paste0("Invalid context"))
+  else if (class(pars) != "list") stop(paste0("Invalid type of argument pars"))
 
   # name all the contexts
   if (is.null(names(pars)))
@@ -2118,10 +2118,7 @@ gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
         gen(x, y, n = n, progress)
       },models, pars))
     )
-    #if (length(pars) == 1) result <- t(result)
-    #print(dim(result)
     rownames(result) <- sapply(1:n, function(x){to.str(x,n)})
-    
     suppressWarnings(
       colnames(result) <- mapply(function(x,y){
         paste(x,y,sep=".")
@@ -2229,14 +2226,44 @@ edmtree.remove <- function(node.name){
   temp
 }
 
+# @export
+edmtree.check.root < function(node.name, node.val){
+  # root. <- list(NULL, list(NULL), NULL, list(NULL))
+  # list(NULL, list(c("default.vals")), NULL, list(function(x){x[[1]][[name]]}))
+}
 
 # @export
 edmtree.check <- function(node.name, node.val) {
   
-  # node to check is currently not detected to be 
-  # either a root or a root with init val
+  # First check if node.name is root,
+  # If it is, both tell and f.tell are coerced to NULL
+  # If it is without default, both gen and f.gen are corced to list(NULL)
+  # Else, i.e. it is root but with default initialisation, proceed like normal.
   root <- FALSE
-  init <- FALSE
+  if (is.null(node.val$tell) || is.null(node.val$f.tell)){ 
+    message(paste0("'",node.name,"' appears to be a root node"))
+    root <- TRUE
+    if (!is.null(node.val$tell)){
+      warning('tell is not NULL, automatically set it to NULL')
+      node.val$tell <- NULL
+    }
+    if (!is.null(node.val$f.tell)){
+      warning('f.tell is not NULL, automatically set it to NULL')
+      node.val$f.tell <- NULL
+    }
+    if ((node.val$gen == list(NULL)) || (node.val$f.gen == list(NULL))){
+      message(paste0("'",node.name,"' appears to have no default initialization"))
+      if (node.val$gen != list(NULL)){
+        warning('gen is not list(NULL), automatically set it to list(NULL)')
+        node.val$gen <- list(NULL)
+      }
+      if (node.val$f.gen != list(NULL)){
+        warning('f.gen is not list(NULL), automatically set it to list(NULL)')
+        node.val$f.gen <- list(NULL)
+      }
+      return(node.val)
+    }
+  }
   
   names.struct <- names(STRUCTURE)
   check.avail <- function(s){
@@ -2245,53 +2272,42 @@ edmtree.check <- function(node.name, node.val) {
         stop(paste0("'",s[i],"' is not found in current tree"))
   }
   
-  if (class(node.val$tell) != 'character'){  
-    if (is.null(node.val$tell)){ 
-      message(paste0("'",node.name,"' appears to be a root node"))
-      root <- TRUE
-    }
-    else
-      stop('tell must be a set of node names')
-  }
-  else
+  if (!root){
+    if (class(node.val$tell) != 'character') stop('tell must be a set of node names')
     check.avail(node.val$tell)
+    
+    # down stream regulariser
+    if (class(node.val$f.tell) != 'function') stop('f.tell must be a function')
+    if (length(formals(node.val$f.tell)) != 1) stop('f.tell have one argument')
+    f <- node.val$f.tell
+    new.f.tell <- function(l){ 
+      # A function wrapper to better debug the output size of f.tell at run-time,
+      # Any error inside this scope is run-time error,
+      # and thus, must announce the node.name to the user.
+      f.tell.r <- f(l)
+      if (class(f.tell.r) != 'list') 
+        if (length(node.val$tell) == 1){
+          warning(paste0("node '",node.name,"' : f.tell did not return a list, coerced to list of length 1"))
+          f.tell.r <- list(f.tell.r)
+        }
+        else {
+          stop(paste0("node '",node.name,"' : f.tell did not return a list as expected"))
+        }
+        
+      if (length(f.tell.r) != length(node.val$tell))
+        stop(paste0("node '",node.name,"' : f.tell did not return a list with length ",
+                    length(node.val$tell)," (size of tell) as expected"))
+      return(f.tell.r)
+    }
+    node.val$f.tell <- new.f.tell
+  }
   
   if (class(node.val$gen) != 'list') stop('gen must be a list')
-  
-  # root. <- list(NULL, list(NULL), NULL, list(NULL))
-  # list(NULL, list(c("default.vals")), NULL, list(function(x){x[[1]][[name]]}))
-  
-  
   for (i in 1:length(node.val$gen)){
     gen.i <- node.val$gen[[i]]
     if (class(gen.i) != 'character') stop('gen must be a list of character sets')
     check.avail(gen.i)
   }
-  
-  # down stream regulariser
-  if (class(node.val$f.tell) != 'function') stop('f.tell must be a function')
-  if (length(formals(node.val$f.tell)) != 1) stop('f.tell have one argument')
-  f <- node.val$f.tell
-  new.f.tell <- function(l){ 
-    # A function wrapper to better debug the output size of f.tell at run-time,
-    # Any error inside this scope is run-time error,
-    # and thus, must announce the node.name to the user.
-    f.tell.r <- f(l)
-    if (class(f.tell.r) != 'list') 
-      if (length(node.val$tell) == 1){
-        warning(paste0("node '",node.name,"' : f.tell did not return a list, coerced to list of length 1"))
-        f.tell.r <- list(f.tell.r)
-      }
-      else {
-        stop(paste0("node '",node.name,"' : f.tell did not return a list as expected"))
-      }
-      
-    if (length(f.tell.r) != length(node.val$tell))
-      stop(paste0("node '",node.name,"' : f.tell did not return a list with length ",
-                  length(node.val$tell)," (size of tell) as expected"))
-    return(f.tell.r)
-  }
-  node.val$f.tell <- new.f.tell
   
   if (class(node.val$f.gen) != 'list') stop('f.gen must be a list')
   # up stream regulariser
@@ -2318,7 +2334,8 @@ edmtree.check <- function(node.name, node.val) {
 }
 
 #' @export
-edmtree.add <- function(node.name, tell, gen, f.tell, f.gen){
+edmtree.add <- function(node.name, tell = NULL, gen = list(NULL), 
+                        f.tell = NULL, f.gen = list(NULL)){
   if (node.name %in% names(STRUCTURE)) {
     warning("'",node.name,"' is already in the tree, replacement is used instead of addition")
     edmtree.replace(node.name, tell, gen, f.tell, f.gen)
