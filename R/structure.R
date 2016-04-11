@@ -2227,12 +2227,6 @@ edmtree.remove <- function(node.name){
 }
 
 # @export
-edmtree.check.root < function(node.name, node.val){
-  # root. <- list(NULL, list(NULL), NULL, list(NULL))
-  # list(NULL, list(c("default.vals")), NULL, list(function(x){x[[1]][[name]]}))
-}
-
-# @export
 edmtree.check <- function(node.name, node.val) {
   
   # First check if node.name is root by looking at
@@ -2276,16 +2270,16 @@ edmtree.check <- function(node.name, node.val) {
         # note that being calculated from a node X's default value is different from 
         # calculated from X's run-time value
         # this is unnecessary since a function of pre-defined constants is also a pre-defined constant
-        # edmsyn allows it anyway, with a warning ofcourse.
+        # edmsyn allows this case anyway, with a warning ofcourse.
         if (func || lfunc){
-          warning("'",node.name,"' appears to have a default value that relies on other current default values")
-          warning("default value of '",node.name,"' is calculated now and will not change in the future")
+          warning("'",node.name,"' appears to have a default value that relies on other default values")
+          warning("note that default value of '",node.name,"' is calculated right now and will not change in the future")
           if (lfunc && length(node.val$f.gen) > 1){
             warning("f.gen of '",node.name,"' has more than one component, only the first one is taken")
             node.val$f.gen <- node.val$f.gen[[1]]
           }
           if (length(formals(node.val$f.gen)) != 1)
-            stop("f.gen of '",node.name,"' must have one argument being the value of default()")
+            stop("f.gen of '",node.name,"' must have one and only one argument")
           node.default <- node.val$f.gen(default())
         # Case 1b. this default value is a constant
         # which is the case for all base roots with default values.
@@ -2296,10 +2290,8 @@ edmtree.check <- function(node.name, node.val) {
         asin(node.name, node.default)
         node.val$f.gen <- list(function(x){x[[1]][[node.name]]})
       # Case 2. This default value does rely on some run-time values
-      # This case is NOT ALLOWED
-      } else {
-        stop("'",node.name,"' appears to have a default value that relies on one or more run-time values")
-      }
+      } else
+        message("'",node.name,"' appears to have a default value that relies on one or more run-time values")
     }
   }
   
