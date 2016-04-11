@@ -2235,10 +2235,13 @@ edmtree.check.root < function(node.name, node.val){
 # @export
 edmtree.check <- function(node.name, node.val) {
   
-  # First check if node.name is root,
-  # If it is, both tell and f.tell are coerced to NULL
-  # If it is without default, both gen and f.gen are corced to list(NULL)
-  # Else, i.e. it is root but with default initialisation, proceed like normal.
+  # First check if node.name is root by looking at
+  # whether tell or f.tell is NULL
+  # If yes, both tell and f.tell is forced to NULL
+  # Next, check if it is without default, by looking at 
+  # whether gen or f.gen is list(NULL)
+  # If yes, both gen and f.gen are corced to list(NULL) and node.val is returned
+  # Else, i.e. it is root but with default initialisation, proceed like normal
   root <- FALSE
   if (is.null(node.val$tell) || is.null(node.val$f.tell)){ 
     message(paste0("'",node.name,"' appears to be a root node"))
@@ -2262,6 +2265,41 @@ edmtree.check <- function(node.name, node.val) {
         node.val$f.gen <- list(NULL)
       }
       return(node.val)
+    } else {
+      # This is when node is a root with default value
+      # Case 1. this default value does not rely on any run-time value
+      if (node.val$gen == "default.vals" || identical(node.val$gen, list('default.vals'))){
+        node.val$gen <- list("default.vals")
+        func <- class(node.val$f.gen) == "function"
+        lfun <- class(node.val$f.gen) == "list" && node.val$f.gen[[1]] == "func"
+        # Case 1a. this default value is calculated from other default values,
+        # note that being calculated from a node X's default value is different from 
+        # calculated from X's run-time value
+        # this is unnecessary since a function of pre-defined constants is also a pre-defined constant
+        # edmsyn allows it anyway, with a warning ofcourse.
+        if (func || lfunc){
+          warning("'",node.name,"' appears to have a default value that relies on other current default values")
+          warning("default value of '",node.name,"' is calculated now and will not change in the future")
+          if (lfunc && length(node.val$f.gen) > 1){
+            warning("f.gen of '",node.name,"' has more than one component, only the first one is taken")
+            node.val$f.gen <- node.val$f.gen[[1]]
+          }
+          if (length(formals(node.val$f.gen)) != 1)
+            stop("f.gen of '",node.name,"' must have one argument being the value of default()")
+          node.default <- node.val$f.gen(default())
+        # Case 1b. this default value is a constant
+        # which is the case for all base roots with default values.
+        } else {
+          message("'",node.name,"' appears to have a constant default value")
+          node.default <- node.val$f.gen
+        }
+        asin(node.name, node.default)
+        node.val$f.gen <- list(function(x){x[[1]][[node.name]]})
+      # Case 2. This default value does rely on some run-time values
+      # This case is NOT ALLOWED
+      } else {
+        stop("'",node.name,"' appears to have a default value that relies on one or more run-time values")
+      }
     }
   }
   
