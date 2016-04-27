@@ -14,11 +14,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-# a minor change
 #=======================+
 # Sub-Routine functions |
 #=======================+
+
+#--------------------+
+# overloaded methods |
+#--------------------+
 
 #' @export
 class.context <- function(x){
@@ -37,13 +39,57 @@ class.default <- function(x){
 }
 
 #' @export
-print.init <- function(x){
+print.default <- function(x){
   for(i in 1:length(names(x))){
     cat(paste0(names(x)[[i]],'\n'))
     print(get(names(x)[[i]],envir=x))
   }
 }
 
+#' @export
+class.min <- function(x){
+  print("less.equal")
+}
+
+#' @export
+print.min <- function(x){
+  print(x)
+}
+
+#' @export
+class.max <- function(x){
+  print("greater.equal")
+}
+
+#' @export
+print.max <- function(x){
+  print(x)
+}
+
+#' @export
+class.mins <- function(x){
+  print("less.strict")
+}
+
+#' @export
+print.mins <- function(x){
+  print(x)
+}
+
+#' @export
+class.maxs <- function(x){
+  print("greater.strict")
+}
+
+#' @export
+print.maxs <- function(x){
+  print(x)
+}
+
+#-----------------------------------+
+# down.stream and up.stream helpers |
+#-----------------------------------+
+# to string with leading zeros
 to.str <- function(x, max){
   if (max<10) r <- toString(x)
   else
@@ -64,8 +110,75 @@ which.closest <- function(target, candidates){
 compat <- function(val,tel){ 
   if (class(tel) == "min") return(all(tel <= val))
   if (class(tel) == "max") return(all(tel >= val))
+  if (class(tel) == "mins") return(all(tel < val))
+  if (class(tel) == "maxs") return(all(tel > val))
   if (class(tel) == "numeric") return(max(abs(val-tel)) < 1e-10)
   else return(identical(val,tel))
+}
+
+#================+
+# f.tell helpers |
+#================+
+
+#--------------+
+# List wrapper |
+#--------------+
+listwrap <- function(func){
+  wrapper <- function(args){
+    list(func(args))
+  }
+}
+
+#--------------------------+
+# TELL: strictly less than |
+#--------------------------+
+min.bound.strict <- function(x){
+  r <- x
+  class(r) <- "mins"
+  r
+}
+#' @export
+less.strict <- function(x){
+  min.bound.strict(x)
+}
+
+#-----------------------------+
+# TELL: strictly greater than |
+#-----------------------------+
+max.bound.strict <- function(x){
+  r <- x
+  class(r) <- "maxs"
+  r
+}
+#' @export
+greater.strict <- function(x){
+  max.bound.strict(x)
+}
+
+#-----------------------------+
+# TELL: less than or equal to |
+#-----------------------------+
+min.bound.max <- function(x){
+  r <- x
+  class(r) <- "min"
+  r
+}
+#' @export
+less.equal <- function(x){
+  min.bound.max(x)
+}
+
+#--------------------------------+
+# TELL: greater than or equal to |
+#--------------------------------+
+max.bound.min <- function(x){
+  r <- x
+  class(r) <- "max"
+  r
+}
+#' @export
+greater.equal <- function(x){
+  max.bound.min(x)
 }
 
 #===========+
@@ -1162,14 +1275,7 @@ assemble.structure <- function(){
   mean.length.var <- function(x){list(mean(x),length(x),var(x))}
   n.row.col.cvar.rmean <- function(x){list(nrow(x),ncol(x),var(colMeans(x)),rowMeans(x))}
   skspsize.min.con <- function(x){
-    r <- ceiling(log(x,2))
-    class(r) <- "min"
-    list(r)
-  }
-  max.bound.min <- function(x){
-    r <- x
-    class(r) <- "max"
-    list(r)
+    list(less.equal(ceiling(log(x,2))))
   }
 
   #===================================================================================
@@ -1282,11 +1388,11 @@ assemble.structure <- function(){
   it.exp. <- list(c("avg.success","items"), list(c("avg.success","items")),
                   mean.length, list(mean.n.2.vec))
   max.ntree. <- list(c("min.ntree"), list(c("items")),
-                     max.bound.min, list(function(x){x[[1]]}))
+                     listwrap(greater.equal), list(function(x){x[[1]]}))
   max.depth. <- list(c("min.depth"), list(c("items")),
-                     max.bound.min, list(function(x) {x[[1]]-1}))
+                     listwrap(greater.equal), list(function(x) {x[[1]]-1}))
   max.it.per.tree. <- list(c("min.it.per.tree"), list(c("items")),
-                           max.bound.min, list(function(x) {x[[1]]}))
+                           listwrap(greater.equal), list(function(x) {x[[1]]}))
 
   dis. <- list(c("items"), list(c("items")),
                length.l, list(rn))
@@ -1394,11 +1500,12 @@ KEEP <- list(exp = c("avg.success","it.exp","student.var"),
                      "bkt.guess.st.var","bkt.guess.it.exp",
                      "time","order","per.item","Q"))
 
+# Everything that is integer but not min/max, is definite (see below)
 # @export
 DEFINITE <- c("items","students","concepts","time","skill.space.size")
 
 # @export
-BOUND.CLASSES <- c("min", "max")
+BOUND.CLASSES <- c("min", "max", "mins", "maxs")
 
 # @export
 INTEGER <- c(DEFINITE,
@@ -2219,15 +2326,33 @@ edmtree.fetch <- function(node.name){
 
 #' @export
 edmtree.remove <- function(node.name){
-  temp = get(node.name, envir = STRUCTURE) #STRUCTURE[[node.name]]
+  temp = get(node.name, envir = STRUCTURE)
   if (is.null(temp))
     stop(paste0("'",node.name,"' is not found in current tree"))
-  else assign(node.name, NULL, envir=STRUCTURE) #STRUCTURE[[node.name]] <<- NULL
+  else {
+    remove(node.name, envir=STRUCTURE)
+    for (name in names(STRUCTURE)) {
+      node.i <- edmtree.fetch(name)
+      if (name %in% node.i$tell) {
+        #TODO
+      }
+      for (i in 1:length(node.i$gen)) {
+        method.i <- node.i$gen[[i]]
+        if (name %in% method.i){
+          #TODO
+        }
+      }
+    }
+  }
   temp
 }
 
 # @export
-edmtree.check <- function(node.name, node.val) {
+# User input when adding/replacing a node can be flexible (aka messy)
+# edmtree.check will regularise these kind of input into standard format,
+# add func wrappers where needed, and modify ALL.MODELS, INTEGER, DEFINITE
+# whenever applicable
+edmtree.check <- function(node.name, node.val, integer, data) {
   
   # First check if node.name is root by looking at
   # whether tell or f.tell is NULL
@@ -2240,22 +2365,24 @@ edmtree.check <- function(node.name, node.val) {
   if (is.null(node.val$tell) || is.null(node.val$f.tell)){ 
     message(paste0("'",node.name,"' appears to be a root node"))
     root <- TRUE
+    # when root is checked (root == TRUE), that is when
+    # tell and f.tell is done being proccessed
     if (!is.null(node.val$tell)){
-      warning('tell is not NULL, automatically set it to NULL')
+      warning('tell is not NULL, force it to NULL')
       node.val$tell <- NULL
     }
     if (!is.null(node.val$f.tell)){
-      warning('f.tell is not NULL, automatically set it to NULL')
+      warning('f.tell is not NULL, force it to NULL')
       node.val$f.tell <- NULL
     }
     if ((node.val$gen == list(NULL)) || (node.val$f.gen == list(NULL))){
       message(paste0("'",node.name,"' appears to have no default initialization"))
       if (node.val$gen != list(NULL)){
-        warning('gen is not list(NULL), automatically set it to list(NULL)')
+        warning('gen is not list(NULL), force it to list(NULL)')
         node.val$gen <- list(NULL)
       }
       if (node.val$f.gen != list(NULL)){
-        warning('f.gen is not list(NULL), automatically set it to list(NULL)')
+        warning('f.gen is not list(NULL), force it to list(NULL)')
         node.val$f.gen <- list(NULL)
       }
       return(node.val)
@@ -2302,6 +2429,10 @@ edmtree.check <- function(node.name, node.val) {
         stop(paste0("'",s[i],"' is not found in current tree"))
   }
   
+  # Check if this node belong to bound classes
+  bound <- FALSE
+  
+  # if node is root, tell and f.tell is already regularised
   if (!root){
     if (class(node.val$tell) != 'character') stop('tell must be a set of node names')
     check.avail(node.val$tell)
@@ -2310,24 +2441,33 @@ edmtree.check <- function(node.name, node.val) {
     if (class(node.val$f.tell) != 'function') stop('f.tell must be a function')
     if (length(formals(node.val$f.tell)) != 1) stop('f.tell have one argument')
     f <- node.val$f.tell
-    new.f.tell <- function(l){ 
-      # A function wrapper to better debug the output size of f.tell at run-time,
-      # Any error inside this scope is run-time error,
-      # and thus, must announce the node.name to the user.
-      f.tell.r <- f(l)
-      if (class(f.tell.r) != 'list') 
-        if (length(node.val$tell) == 1){
-          warning(paste0("node '",node.name,"' : f.tell did not return a list, coerced to list of length 1"))
-          f.tell.r <- list(f.tell.r)
-        }
-        else {
-          stop(paste0("node '",node.name,"' : f.tell did not return a list as expected"))
-        }
-        
-      if (length(f.tell.r) != length(node.val$tell))
-        stop(paste0("node '",node.name,"' : f.tell did not return a list with length ",
-                    length(node.val$tell)," (size of tell) as expected"))
-      return(f.tell.r)
+    bound.min <- identical(f, less.equal)
+    bound.mins <- identical(f, less.strict)
+    bound.max <- identical(f, greater.equal)
+    bound.maxs <- identical(f, greater.strict)
+    if (bound.min || bound.mins || bound.max || bound.maxs){
+      new.f.tell <- listwrap(f)
+      bound <- TRUE
+    } else {
+      new.f.tell <- function(l){ 
+        # A function wrapper to better debug the output size of f.tell at run-time,
+        # Any error inside this scope is run-time error,
+        # and thus, must announce the node.name to the user.
+        f.tell.r <- f(l)
+        if (class(f.tell.r) != 'list') 
+          if (length(node.val$tell) == 1){
+            warning(paste0("node '",node.name,"' : f.tell did not return a list, coerced to list of length 1"))
+            f.tell.r <- list(f.tell.r)
+          }
+          else {
+            stop(paste0("node '",node.name,"' : f.tell did not return a list as expected"))
+          }
+          
+        if (length(f.tell.r) != length(node.val$tell))
+          stop(paste0("node '",node.name,"' : f.tell did not return a list with length ",
+                      length(node.val$tell)," (size of tell) as expected"))
+        return(f.tell.r)
+      }
     }
     node.val$f.tell <- new.f.tell
   }
@@ -2360,36 +2500,56 @@ edmtree.check <- function(node.name, node.val) {
   }
   fix.gen(1)
   
+  # To this point, edmtree.check is successful, it's time
+  # to check if there is any changes to make to INTEGER or DEFINITE
+  if (integer && !(node.name %in% INTEGER))
+    INTEGER <- c(INTEGER, node.name)
+  if (!integer && (node.name %in% INTEGER))
+    INTEGER <- INTEGER[-c(which(INTEGER == node.name))]
+  if (data && !(node.name %in% ALL.MODELS))
+    ALL.MODELS <- c(ALL.MODELS, node.name)
+  if (!data && (node.name %in% ALL.MODELS))
+    ALL.MODELS <- ALL.MODELS[-c(which(ALL.MODELS == node.name))]
+  if (integer && !bound && !(node.name %in% DEFINITE)) { 
+    # not bound, but integer -> definite
+    DEFINITE <- c(DEFINITE, node.name)
+  }
+  if ((!integer || bound) && (node.name %in% DEFINITE)) { 
+    # not integer, or bound -> !definite
+    DEFINITE <- DEFINITE[-c(which(DEFINITE == node.name))]
+  }
   return(node.val)
 }
 
 #' @export
 edmtree.add <- function(node.name, tell = NULL, gen = list(NULL), 
-                        f.tell = NULL, f.gen = list(NULL)){
+                        f.tell = NULL, f.gen = list(NULL), 
+                        integer = FALSE, data = FALSE){
   if (node.name %in% names(STRUCTURE)) {
     warning("'",node.name,"' is already in the tree, replacement is used instead of addition")
-    edmtree.replace(node.name, tell, gen, f.tell, f.gen)
+    edmtree.replace(node.name, tell, gen, f.tell, f.gen, integer, data)
   }
   else {
     node.val <- list(tell, gen, f.tell, f.gen)
     names(node.val) <- c('tell', 'gen', 'f.tell', 'f.gen')
-    assign(node.name, edmtree.check(node.name, node.val), envir=STRUCTURE)
-    #STRUCTURE[[node.name]] <<- edmtree.check(node.name, node.val)
-    #edmtree.fetch(node.name)
+    assign(node.name, edmtree.check(node.name, node.val, integer), envir=STRUCTURE)
   }
 }
 
 #' @export
 edmtree.replace <- function(node.name, tell = NULL, gen = NULL, 
-                           f.tell = NULL, f.gen = NULL){
+                           f.tell = NULL, f.gen = NULL, 
+                           integer = NULL, data = NULL){
   node.val <- edmtree.fetch(node.name)
   if (!is.null(tell)) node.val$tell <- tell
   if (!is.null(gen)) node.val$gen <- gen
   if (!is.null(f.tell)) node.val$f.tell <- f.tell
   if (!is.null(f.gen)) node.val$f.gen <- f.gen
-  assign(node.name, edmtree.check(node.name, node.val), envir=STRUCTURE)
-  #STRUCTURE[[node.name]] <<- edmtree.check(node.name, node.val)
-  #edmtree.fetch(node.name)
+  int <- node.name %in% integer
+  dat <- node.name %in% ALL.MODELS
+  if (!is.null(integer)) int <- integer
+  if (!is.null(data)) dat <- data
+  assign(node.name, edmtree.check(node.name, node.val, int, dat), envir=STRUCTURE)
 }
 
 #' @export
