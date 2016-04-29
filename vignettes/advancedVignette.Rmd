@@ -503,7 +503,7 @@ toys.syn <- syn('toy', toys[[2]]$toy,
 Now that you have everything needed to fully manipulate the internal structure of `edmsyn`, it is time to move on working with the whole structure (as oppose to working with nodes and edges like before). The first thing to know is that, each time `library(edmsyn)` is executed, the original `edmsyn` graphical structure (without `foo`, `bar`, `toy`, etc) will be restored and everything we have built so far is lost. Thus, occasionally saving the modified structure is important.
 
 ```{r dump}
-toy.tree <- edmtree.dump()
+toy.save <- edmtree.dump()
 ```
 
 Assume a different situation where no part of the current structure is needed, you will manually build a whole new structure from scratch. This case, the first thing to do is to clear out all nodes
@@ -516,7 +516,7 @@ edmtree.fetch('M')
 
 Lastly, you can always restore a saved structure
 ```{r load_tree, error = TRUE}
-edmtree.load(toy.tree)
+edmtree.load(toy.save)
 gen('toy', pars(M = M))
 gen('bkt', pars(students = 15, items = 20))
 # Leave the argument part empty
