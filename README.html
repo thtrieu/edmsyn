@@ -216,17 +216,17 @@ p_</code></pre>
 <pre class="r"><code>M_</code></pre>
 <pre><code>## $value
 ##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-## [1,]    0    1    0    1    1    1    0    1    0     1     1     0     1
-## [2,]    1    0    1    0    0    0    0    0    0     1     1     0     0
-## [3,]    1    1    1    1    1    1    1    1    1     1     1     1     1
-## [4,]    1    0    1    0    1    1    1    1    0     1     1     0     1
-## [5,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+## [1,]    0    1    0    1    1    1    0    0    1     1     1     1     1
+## [2,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+## [3,]    0    0    0    0    0    0    0    0    0     1     0     0     0
+## [4,]    0    0    1    1    1    1    1    1    0     1     1     1     1
+## [5,]    0    0    1    0    0    1    0    0    0     1     1     1     0
 ##      [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-## [1,]     0     1     0     0     1     0     1
-## [2,]     0     0     0     0     0     0     0
-## [3,]     1     1     1     0     1     1     1
-## [4,]     0     1     1     1     1     1     1
-## [5,]     0     0     0     0     0     0     0
+## [1,]     0     0     1     1     0     0     1
+## [2,]     1     1     1     1     1     1     1
+## [3,]     1     1     0     0     0     0     0
+## [4,]     0     1     0     1     1     1     1
+## [5,]     0     0     1     1     0     1     1
 ## 
 ## $context
 ## Activated information in the context:
@@ -234,8 +234,8 @@ p_</code></pre>
 ## [5] &quot;concept.exp&quot;  &quot;M&quot;</code></pre>
 <p>As can be seen, the progress involves generating an intermediate parameter called <code>concept.exp</code> before generating <code>M</code>. <code>concept.exp</code> is a vector of the expected mastery rates for 5 concepts in <code>p</code>. By using <code>get.par</code>, we can examine the values of these intermediate generations.</p>
 <pre class="r"><code>M_$context$concept.exp</code></pre>
-<pre><code>## [1] 0.55 0.20 0.95 0.75 0.00</code></pre>
-<p>For example, looking at the above <code>concept.exp</code>, it is expected that there is about 55 percent of the students who mastered the first concept in <code>p</code>. In fact, due to the abundant availability of parameters co-existing in a context, generating <code>concept.exp</code> is just one amongst many other ways by which <code>get.par</code> can reach <code>M</code>, the reason why it turns out to be this way will be discussed in later parts.</p>
+<pre><code>## [1] 0.60 1.00 0.15 0.75 0.45</code></pre>
+<p>For example, looking at the above <code>concept.exp</code>, it is expected that there is about 60 percent of the students who mastered the first concept in <code>p</code>. In fact, due to the abundant availability of parameters co-existing in a context, generating <code>concept.exp</code> is just one amongst many other ways by which <code>get.par</code> can reach <code>M</code>, the reason why it turns out to be this way will be discussed in later parts.</p>
 <p>If we run <code>get.par</code> to obtain <code>M</code> again, in general the result will be different. This is because of the fact that each time doing so, another probabilistic generation will be carried out, thus we receive a different <code>concept.exp</code>, and after that a different <code>M</code>.</p>
 <pre class="r"><code>identical(M_$value, get.par(&quot;M&quot;, p)$value)</code></pre>
 <pre><code>## [1] FALSE</code></pre>
@@ -248,21 +248,21 @@ get.par(&quot;Q&quot;, p_)</code></pre>
 get.par(&quot;Q&quot;, p_)</code></pre>
 <pre><code>## $value
 ##       [,1] [,2] [,3] [,4]
-##  [1,]    0    0    0    1
-##  [2,]    1    1    0    0
-##  [3,]    0    1    1    1
+##  [1,]    0    0    1    1
+##  [2,]    1    0    1    1
+##  [3,]    1    0    1    1
 ##  [4,]    1    1    0    1
-##  [5,]    0    1    0    1
-##  [6,]    1    1    1    0
-##  [7,]    0    0    1    0
-##  [8,]    1    1    0    1
-##  [9,]    0    1    1    0
-## [10,]    0    1    1    0
-## [11,]    0    1    1    0
-## [12,]    1    1    0    1
-## [13,]    1    1    1    0
-## [14,]    0    0    1    1
-## [15,]    0    1    0    0
+##  [5,]    1    1    0    1
+##  [6,]    0    0    1    1
+##  [7,]    1    1    1    0
+##  [8,]    1    1    1    1
+##  [9,]    1    0    1    0
+## [10,]    0    0    0    1
+## [11,]    1    1    1    0
+## [12,]    0    0    0    1
+## [13,]    0    1    0    0
+## [14,]    0    1    1    0
+## [15,]    0    0    1    0
 ## 
 ## $context
 ## Activated information in the context:
@@ -309,47 +309,47 @@ get.par(&quot;Q&quot;, p_)</code></pre>
 <pre class="r"><code>poks.data[[1]]$poks</code></pre>
 <pre><code>## $R
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    0    0    1    1    1    1    1    1    0     0     1     1     0
-##  [2,]    1    0    0    1    1    1    1    1    0     0     0     1     0
-##  [3,]    0    1    0    1    1    1    1    1    0     0     1     1     1
-##  [4,]    0    1    0    0    1    1    1    1    0     0     1     1     0
-##  [5,]    0    0    0    1    1    1    1    1    0     0     1     1     0
-##  [6,]    0    0    0    1    1    1    1    1    0     0     1     1     0
-##  [7,]    1    0    0    1    1    1    1    1    0     0     1     1     0
-##  [8,]    1    0    0    0    0    0    1    0    0     0     0     0     0
-##  [9,]    1    1    1    1    1    1    1    0    0     0     1     1     1
-## [10,]    0    0    0    1    1    1    1    1    0     0     1     1     0
-## [11,]    0    0    1    0    0    0    0    0    1     1     1     1     1
-## [12,]    1    1    1    1    1    1    1    1    1     0     1     1     1
-## [13,]    1    1    1    1    1    1    1    1    1     1     1     1     1
-## [14,]    1    0    0    0    1    1    1    0    0     0     1     1     1
-## [15,]    1    1    1    1    1    1    0    1    1     1     0     0     0
-## [16,]    0    1    1    1    1    1    1    1    0     0     1     1     1
-## [17,]    0    0    0    1    1    1    1    1    0     0     1     1     0
-## [18,]    0    1    1    1    1    1    1    1    1     0     1     1     1
-## [19,]    0    1    0    1    1    1    1    1    1     1     0     0     0
-## [20,]    0    1    0    0    1    1    0    1    0     0     0     0     0
+##  [1,]    1    0    0    0    0    1    0    0    1     1     1     1     0
+##  [2,]    0    0    0    0    0    0    1    0    0     1     1     0     1
+##  [3,]    0    1    1    1    0    0    1    1    1     1     1     1     0
+##  [4,]    1    1    1    1    0    1    1    1    1     1     1     1     1
+##  [5,]    1    1    0    1    1    1    1    0    1     1     0     0     1
+##  [6,]    0    1    0    0    1    0    1    0    1     1     0     1     1
+##  [7,]    0    0    1    1    0    1    1    1    1     0     0     1     0
+##  [8,]    1    1    1    1    1    1    1    1    0     1     1     1     1
+##  [9,]    1    1    1    0    0    0    1    0    0     1     0     0     0
+## [10,]    0    1    1    1    1    1    1    1    1     1     0     1     1
+## [11,]    1    1    1    1    0    1    1    0    1     1     1     1     1
+## [12,]    0    1    1    1    0    1    0    1    0     1     1     1     0
+## [13,]    1    1    1    1    0    1    1    1    1     1     1     1     1
+## [14,]    0    1    0    1    0    0    0    0    0     1     1     0     0
+## [15,]    0    0    1    1    0    0    1    1    0     0     0     0     0
+## [16,]    1    0    1    1    0    1    0    1    1     1     1     0     0
+## [17,]    1    0    1    1    1    1    1    1    1     1     1     1     1
+## [18,]    0    0    1    1    1    1    1    0    1     0     0     1     1
+## [19,]    0    0    0    1    1    1    0    0    0     0     1     0     0
+## [20,]    0    0    0    1    0    1    1    1    0     1     1     1     0
 ##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     1     1     1     0     1     1     0
-##  [2,]     1     0     0     0     1     1     0
-##  [3,]     1     1     1     0     1     1     1
-##  [4,]     0     0     0     0     1     1     0
-##  [5,]     0     0     0     0     1     1     0
-##  [6,]     0     0     1     0     1     1     0
-##  [7,]     0     0     0     0     1     1     0
-##  [8,]     1     0     0     0     0     0     0
-##  [9,]     1     0     1     0     1     1     1
-## [10,]     1     0     1     0     1     1     1
-## [11,]     0     0     1     0     0     1     0
-## [12,]     1     1     1     0     1     1     1
-## [13,]     1     0     1     0     1     1     0
-## [14,]     1     0     1     0     0     0     0
-## [15,]     1     1     1     1     1     1     0
-## [16,]     1     1     1     0     1     1     1
-## [17,]     1     0     1     0     1     1     0
-## [18,]     1     1     1     1     1     1     1
-## [19,]     1     1     1     0     1     1     1
-## [20,]     0     0     0     0     1     1     0
+##  [1,]     0     1     0     0     1     1     0
+##  [2,]     0     1     0     1     0     0     1
+##  [3,]     1     0     0     0     0     0     1
+##  [4,]     1     0     1     1     0     1     1
+##  [5,]     1     0     0     0     0     0     1
+##  [6,]     1     1     1     0     1     1     0
+##  [7,]     1     1     1     0     0     1     1
+##  [8,]     1     1     1     1     1     1     1
+##  [9,]     1     1     0     1     1     1     1
+## [10,]     1     1     1     1     0     1     1
+## [11,]     1     1     0     0     1     1     1
+## [12,]     0     1     0     0     1     1     1
+## [13,]     1     1     1     1     0     1     1
+## [14,]     1     1     0     0     0     0     1
+## [15,]     1     0     0     0     1     1     0
+## [16,]     1     1     1     0     0     0     0
+## [17,]     1     1     0     1     1     1     1
+## [18,]     0     1     1     1     0     0     1
+## [19,]     0     0     1     1     0     1     1
+## [20,]     0     0     1     0     0     0     0
 ## 
 ## $alpha.c
 ## [1] 0.25
@@ -365,47 +365,47 @@ get.par(&quot;Q&quot;, p_)</code></pre>
 <pre><code>## $value
 ## $value$R
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    1    1    1    1    1    1    0    1    1     1     1     0     1
-##  [2,]    0    0    0    0    0    0    0    1    0     0     0     0     0
-##  [3,]    0    0    0    0    1    0    0    0    0     0     0     0     0
-##  [4,]    0    1    1    0    1    1    1    1    1     1     1     1     1
-##  [5,]    0    0    1    0    0    0    1    0    1     0     0     0     0
-##  [6,]    1    1    1    1    1    1    1    1    0     1     1     1     1
-##  [7,]    0    0    0    0    0    0    0    0    0     1     0     0     1
-##  [8,]    0    1    1    1    0    1    1    1    1     1     1     0     1
-##  [9,]    1    1    1    1    1    1    1    1    1     1     1     1     1
-## [10,]    1    1    1    1    1    1    0    1    1     1     1     0     1
-## [11,]    1    1    1    1    1    1    1    1    1     1     1     0     1
-## [12,]    1    0    1    1    0    0    0    0    0     1     0     0     1
-## [13,]    1    1    1    1    1    1    0    1    1     1     1     0     1
-## [14,]    0    1    1    0    1    1    1    1    1     1     1     0     1
-## [15,]    0    0    0    1    1    1    0    0    1     1     1     1     0
-## [16,]    0    0    0    0    0    1    1    0    0     0     0     1     0
-## [17,]    0    0    0    0    0    0    0    0    1     0     1     0     0
-## [18,]    0    1    1    0    1    1    1    1    1     1     1     0     1
-## [19,]    1    1    1    1    1    1    1    1    1     1     1     1     1
-## [20,]    1    1    0    1    1    1    1    0    1     1     1     1     1
+##  [1,]    0    0    0    0    1    0    0    1    0     0     1     0     0
+##  [2,]    1    0    1    0    0    1    0    1    0     1     0     1     1
+##  [3,]    1    1    1    1    1    0    1    1    1     1     1     1     1
+##  [4,]    1    1    1    1    1    1    1    1    1     1     1     0     1
+##  [5,]    1    0    1    1    1    0    0    1    1     1     0     1     1
+##  [6,]    0    0    1    0    0    0    0    1    0     1     0     1     1
+##  [7,]    1    1    1    1    1    1    1    1    1     1     1     0     1
+##  [8,]    1    1    1    1    1    1    1    1    1     1     1     0     1
+##  [9,]    1    0    1    1    0    0    0    1    0     0     0     0     1
+## [10,]    0    0    0    0    0    0    0    1    0     0     0     0     1
+## [11,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+## [12,]    1    1    1    1    1    0    1    1    1     1     1     1     1
+## [13,]    0    0    0    1    0    0    0    0    0     0     0     0     0
+## [14,]    1    1    1    1    1    0    1    1    1     1     1     1     1
+## [15,]    0    0    1    1    1    1    0    1    1     1     0     1     1
+## [16,]    0    0    1    0    0    0    0    1    0     1     0     1     1
+## [17,]    1    1    1    1    1    1    1    0    1     1     1     0     0
+## [18,]    0    1    1    1    1    1    0    0    0     0     1     1     1
+## [19,]    1    0    0    0    1    1    1    1    0     0     1     0     0
+## [20,]    0    0    1    0    1    1    0    0    0     0     1     0     0
 ##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     1     1     1     1     1     0     1
-##  [2,]     0     0     0     0     0     0     1
-##  [3,]     1     0     0     1     0     0     0
-##  [4,]     1     0     1     1     0     0     1
-##  [5,]     0     0     0     0     0     0     0
-##  [6,]     1     1     1     1     0     1     1
-##  [7,]     1     0     0     0     0     0     0
-##  [8,]     1     1     1     1     0     0     1
-##  [9,]     1     1     1     1     1     1     1
-## [10,]     1     1     1     1     1     0     1
-## [11,]     1     1     1     1     1     1     1
-## [12,]     0     1     1     1     1     0     0
-## [13,]     1     1     1     1     1     0     1
-## [14,]     0     1     0     0     0     0     1
-## [15,]     1     1     0     1     1     1     0
-## [16,]     0     0     0     0     0     0     0
-## [17,]     0     0     1     0     0     0     0
-## [18,]     0     1     0     1     0     0     1
-## [19,]     1     1     1     1     1     1     1
-## [20,]     0     1     1     1     1     0     1
+##  [1,]     0     0     0     0     0     0     0
+##  [2,]     1     1     0     0     1     0     1
+##  [3,]     1     1     0     0     0     1     1
+##  [4,]     1     1     0     1     1     1     1
+##  [5,]     1     1     0     0     0     1     1
+##  [6,]     1     1     0     0     0     1     1
+##  [7,]     1     1     1     1     0     0     1
+##  [8,]     1     1     1     1     1     1     1
+##  [9,]     1     0     0     0     1     1     1
+## [10,]     0     0     0     0     0     0     1
+## [11,]     1     1     1     1     0     1     1
+## [12,]     1     1     1     1     0     1     1
+## [13,]     0     0     0     0     0     1     1
+## [14,]     1     1     1     1     0     1     1
+## [15,]     1     1     0     0     1     1     1
+## [16,]     1     0     0     0     0     0     1
+## [17,]     1     1     0     0     0     0     1
+## [18,]     1     1     1     1     1     1     0
+## [19,]     0     0     1     0     0     0     1
+## [20,]     0     0     0     0     0     0     1
 ## 
 ## $value$alpha.c
 ## [1] 0.25
@@ -431,67 +431,67 @@ get.par(&quot;Q&quot;, p_)</code></pre>
 <pre class="r"><code>p &lt;- pars(p, min.depth = 3, max.depth = 3, min.ntree = 2, max.ntree = 2, trans = FALSE)
 poks.data &lt;- gen(&quot;poks&quot;, p)
 v &lt;- viz(poks.data$po)</code></pre>
-<p><img src="data:image/png;base64,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uv7DzjPj5PzdG6derH1VD7fpu92NQXc/e+JwwKPjqx+bz7FF3BKrzXty9/PnTpb6zhl9OmjrFhKgyZPNozMO0E3vgv1x/v6jGe9949dwJLZjstSrdx4+vh/Pzmlr2tYtJkD/V1cvvn/uwscevxbg2s57597+cJZfFbU9AgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJD5G7QTAZTsb1BwAAAAAElFTkSuQmCC" title alt width="576" /></p>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABIAAAASACAMAAACwdsZoAAADAFBMVEUAAAABAQECAgIDAwMEBAQFBQUGBgYHBwcICAgJCQkKCgoLCwsMDAwNDQ0ODg4PDw8QEBARERESEhITExMUFBQVFRUWFhYXFxcYGBgZGRkaGhobGxscHBwdHR0eHh4fHx8gICAhISEiIiIjIyMkJCQlJSUmJiYnJycoKCgpKSkqKiorKyssLCwtLS0uLi4vLy8wMDAxMTEyMjIzMzM0NDQ1NTU2NjY3Nzc4ODg5OTk6Ojo7Ozs8PDw9PT0+Pj4/Pz9AQEBBQUFCQkJDQ0NERERFRUVGRkZHR0dISEhJSUlKSkpLS0tMTExNTU1OTk5PT09QUFBRUVFSUlJTU1NUVFRVVVVWVlZXV1dYWFhZWVlaWlpbW1tcXFxdXV1eXl5fX19gYGBhYWFiYmJjY2NkZGRlZWVmZmZnZ2doaGhpaWlqampra2tsbGxtbW1ubm5vb29wcHBxcXFycnJzc3N0dHR1dXV2dnZ3d3d4eHh5eXl6enp7e3t8fHx9fX1+fn5/f3+AgICBgYGCgoKDg4OEhISFhYWGhoaHh4eIiIiJiYmKioqLi4uMjIyNjY2Ojo6Pj4+QkJCRkZGSkpKTk5OUlJSVlZWWlpaXl5eYmJiZmZmampqbm5ucnJydnZ2enp6fn5+goKChoaGioqKjo6OkpKSlpaWmpqanp6eoqKipqamqqqqrq6usrKytra2urq6vr6+wsLCxsbGysrKzs7O0tLS1tbW2tra3t7e4uLi5ubm6urq7u7u8vLy9vb2+vr6/v7/AwMDBwcHCwsLDw8PExMTFxcXGxsbHx8fIyMjJycnKysrLy8vMzMzNzc3Ozs7Pz8/Q0NDR0dHS0tLT09PU1NTV1dXW1tbX19fY2NjZ2dna2trb29vc3Nzd3d3e3t7f39/g4ODh4eHi4uLj4+Pk5OTl5eXm5ubn5+fo6Ojp6enq6urr6+vs7Ozt7e3u7u7v7+/w8PDx8fHy8vLz8/P09PT19fX29vb39/f4+Pj5+fn6+vr7+/v8/Pz9/f3+/v7////isF19AAAACXBIWXMAAB2HAAAdhwGP5fFlAAAgAElEQVR4nO3dd4AkZZ3/8WcXFpYggoAgKkYUAwbMooKCCKbTQ70zx8Pz5PDOn+n0FM+EWTGDAZEzHCayArssywY2zOa8w+6wOc/m2TAz3b/O/VR+qurp/lZXvV9/7Pb0dHU/01X96aqn6vs8qgwAQpR0AwAUFwEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwBBEAMAQRADAEEQAwB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viqw2VB9wTtOa7X45NBep/Ia5wZ1yyOan5ATwwsq9s1yLNf6S0/o9HdYLwZQ1dnOAEp4rdSBq2vXt6tjP2m+5+P23eitKUzqPSD3c4z+8DH19+SSmBOFF0fSt6j0m3oQ/EOM+nDn+t3y5toYzSdfF31q27Hg4PvH1xp85LsjL8pxvuCGy+ozN/xj5NezY7kkf2kyvRpAtgxPue6rP7gz+aQ6WTQy+9qvfvsPaaYryr2kb9G+qdd+8/em5yl8rbnh6mvuMBxtTrfn1p9+5Zrb4sy40rDpd9/65u/iVwWm/0vNFD2AAAgigACIIYAAiCGAAIgS683NAAAEYklEQVQhgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIghgACIIYAAiCGAAIj5/0R+mhgoYYF9AAAAAElFTkSuQmCC" title alt width="576" /></p>
 <p><code>v</code> contains analysed information about the structure. Its first component is identical to <code>po</code>, the second one is a list with equal number of components to the number of connected components of the structure <code>po</code> represents. Each of these components is in turn a list with first component being the corresponding dependency matrix, and sencond component represents how many items are there on each level of depth.</p>
 <pre class="r"><code>print(v)</code></pre>
 <pre><code>## $ks
 ##    1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
-## 1  0 0 0 1 1 1 1 1 0  0  0  0  0  0  0  0  0  0  0  0
-## 2  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  1  0  0  1  0
-## 3  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  1  0  0  0
-## 4  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 5  0 0 0 0 0 0 0 0 0  0  0  1  0  0  0  0  0  0  0  0
-## 6  0 0 0 0 0 0 0 0 0  0  0  1  0  0  0  0  0  0  0  0
-## 7  0 0 0 0 0 0 0 0 0  0  0  1  0  0  0  0  0  0  0  0
-## 8  0 0 0 0 0 0 0 0 0  0  0  1  0  0  1  0  0  0  0  0
-## 9  0 0 0 0 1 0 1 0 0  0  0  0  0  1  0  0  0  0  0  0
-## 10 0 0 0 0 0 0 0 0 0  0  0  1  0  0  0  0  0  0  0  0
-## 11 0 0 0 0 0 0 0 0 0  0  0  0  1  0  0  0  0  0  0  0
-## 12 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 13 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  1  0  0
+## 1  0 0 1 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 2  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 3  0 0 0 1 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 4  0 1 0 0 1 0 1 0 0  0  0  0  0  1  0  0  0  1  0  0
+## 5  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 6  0 0 0 0 0 0 0 0 0  0  1  0  0  0  0  0  0  0  0  1
+## 7  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 8  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 9  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 10 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 11 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 12 0 0 0 0 0 0 0 0 0  1  0  0  0  0  0  1  0  0  1  0
+## 13 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
 ## 14 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 15 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 16 0 0 0 0 1 1 0 1 0  0  0  0  0  0  0  0  0  0  0  1
-## 17 0 0 0 0 0 0 0 0 0  0  0  0  1  0  0  0  0  0  0  0
+## 15 0 0 0 0 0 0 0 0 0  0  1  0  0  0  0  0  0  0  0  0
+## 16 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
+## 17 0 0 0 0 0 0 0 1 1  0  0  0  1  0  0  0  0  0  1  0
 ## 18 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 19 0 0 0 0 0 0 0 0 0  1  0  0  0  1  0  0  0  0  0  0
+## 19 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
 ## 20 0 0 0 0 0 0 0 0 0  0  0  1  0  0  0  0  0  0  0  0
 ## 
 ## $comp
 ## $comp[[1]]
 ## $comp[[1]]$matrix
-##    2 1 9 16 19 4 5 6 7 8 10 14 20 12 15
-## 2  0 0 0  1  1 0 0 0 0 0  0  0  0  0  0
-## 1  0 0 0  0  0 1 1 1 1 1  0  0  0  0  0
-## 9  0 0 0  0  0 0 1 0 1 0  0  1  0  0  0
-## 16 0 0 0  0  0 0 1 1 0 1  0  0  1  0  0
-## 19 0 0 0  0  0 0 0 0 0 0  1  1  0  0  0
-## 4  0 0 0  0  0 0 0 0 0 0  0  0  0  0  0
-## 5  0 0 0  0  0 0 0 0 0 0  0  0  0  1  0
-## 6  0 0 0  0  0 0 0 0 0 0  0  0  0  1  0
-## 7  0 0 0  0  0 0 0 0 0 0  0  0  0  1  0
-## 8  0 0 0  0  0 0 0 0 0 0  0  0  0  1  1
-## 10 0 0 0  0  0 0 0 0 0 0  0  0  0  1  0
-## 14 0 0 0  0  0 0 0 0 0 0  0  0  0  0  0
-## 20 0 0 0  0  0 0 0 0 0 0  0  0  0  1  0
-## 12 0 0 0  0  0 0 0 0 0 0  0  0  0  0  0
-## 15 0 0 0  0  0 0 0 0 0 0  0  0  0  0  0
+##    1 3 4 2 5 7 14 18
+## 1  0 1 0 0 0 0  0  0
+## 3  0 0 1 0 0 0  0  0
+## 4  0 0 0 1 1 1  1  1
+## 2  0 0 0 0 0 0  0  0
+## 5  0 0 0 0 0 0  0  0
+## 7  0 0 0 0 0 0  0  0
+## 14 0 0 0 0 0 0  0  0
+## 18 0 0 0 0 0 0  0  0
 ## 
 ## $comp[[1]]$level.sizes
-## [1] 1 4 8 2
+## [1] 1 1 1 5
 ## 
 ## 
 ## $comp[[2]]
 ## $comp[[2]]$matrix
-##    3 11 17 13 18
-## 3  0  0  1  0  0
-## 11 0  0  0  1  0
-## 17 0  0  0  1  0
-## 13 0  0  0  0  1
-## 18 0  0  0  0  0
+##    6 15 11 20 12 17 8 9 10 13 16 19
+## 6  0  0  1  1  0  0 0 0  0  0  0  0
+## 15 0  0  1  0  0  0 0 0  0  0  0  0
+## 11 0  0  0  0  0  0 0 0  0  0  0  0
+## 20 0  0  0  0  1  0 0 0  0  0  0  0
+## 12 0  0  0  0  0  0 0 0  1  0  1  1
+## 17 0  0  0  0  0  0 1 1  0  1  0  1
+## 8  0  0  0  0  0  0 0 0  0  0  0  0
+## 9  0  0  0  0  0  0 0 0  0  0  0  0
+## 10 0  0  0  0  0  0 0 0  0  0  0  0
+## 13 0  0  0  0  0  0 0 0  0  0  0  0
+## 16 0  0  0  0  0  0 0 0  0  0  0  0
+## 19 0  0  0  0  0  0 0 0  0  0  0  0
 ## 
 ## $comp[[2]]$level.sizes
-## [1] 1 2 1 1</code></pre>
+## [1] 2 2 2 6</code></pre>
 <p><strong>Example 2</strong></p>
 <pre class="r"><code>dina.data &lt;- gen(&quot;dina&quot;, p, progress = TRUE)</code></pre>
 <pre><code>## Generate dina from c(&quot;Q&quot;, &quot;M&quot;, &quot;slip&quot;, &quot;guess&quot;)
@@ -510,70 +510,70 @@ v &lt;- viz(poks.data$po)</code></pre>
 <pre class="r"><code>dina.data$dina</code></pre>
 <pre><code>## $R
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    1    1    1    1    1    1    1    1    1     1     1     1     0
-##  [2,]    1    0    0    1    0    0    1    0    1     1     0     0     1
-##  [3,]    1    1    0    1    1    1    1    0    1     0     1     1     1
-##  [4,]    0    1    0    1    0    1    0    1    0     1     0     0     0
-##  [5,]    0    0    0    1    0    0    1    0    0     0     0     0     0
-##  [6,]    0    0    0    0    0    0    0    0    0     0     0     0     1
-##  [7,]    1    0    1    0    0    0    0    0    0     0     0     0     0
-##  [8,]    0    0    0    0    0    0    0    0    0     0     0     0     1
-##  [9,]    1    1    1    1    1    0    0    1    1     0     1     0     1
-## [10,]    0    0    1    1    0    1    0    1    0     0     0     1     1
-## [11,]    0    0    0    0    0    0    1    0    0     0     1     1     0
-## [12,]    0    0    0    0    0    0    1    0    0     0     1     0     0
-## [13,]    0    0    0    0    0    0    0    1    0     1     1     0     0
-## [14,]    1    0    0    1    0    1    1    0    1     1     1     0     0
-## [15,]    0    0    1    0    0    0    0    0    0     0     1     1     1
-## [16,]    1    0    0    1    0    1    1    0    0     1     1     0     0
-## [17,]    0    1    0    1    0    1    0    0    1     0     1     0     0
-## [18,]    1    0    1    0    1    0    0    1    1     0     1     0     1
-## [19,]    0    0    0    0    1    0    0    0    0     0     1     0     0
-## [20,]    1    1    0    1    1    1    1    1    1     1     1     0     1
+##  [1,]    0    0    1    1    1    1    0    1    0     1     0     1     0
+##  [2,]    1    1    1    1    1    1    1    1    0     1     1     0     1
+##  [3,]    0    1    1    0    1    1    0    0    0     0     0     1     0
+##  [4,]    1    1    1    0    1    1    1    1    1     0     1     0     0
+##  [5,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+##  [6,]    0    0    1    1    0    0    1    0    0     0     0     0     0
+##  [7,]    0    1    0    0    0    0    1    0    0     0     0     0     1
+##  [8,]    1    0    1    1    0    0    0    1    0     1     0     0     0
+##  [9,]    1    1    1    0    0    1    0    0    0     1     1     1     1
+## [10,]    0    0    0    0    0    1    0    0    0     1     0     0     1
+## [11,]    0    0    0    1    1    0    0    0    1     0     0     0     0
+## [12,]    1    0    0    1    1    0    1    1    1     1     1     1     1
+## [13,]    1    1    0    1    1    0    0    0    0     1     1     1     0
+## [14,]    0    0    0    0    0    1    0    0    0     1     0     1     0
+## [15,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+## [16,]    1    1    1    1    1    1    1    1    0     1     1     1     1
+## [17,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+## [18,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+## [19,]    0    1    1    0    1    0    1    0    0     0     0     0     1
+## [20,]    0    1    1    1    1    1    0    1    1     1     1     1     1
 ##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     1     1     1     0     1     1     1
-##  [2,]     0     0     1     1     1     0     1
-##  [3,]     1     1     1     1     0     1     0
-##  [4,]     0     1     0     1     1     1     0
-##  [5,]     0     0     0     0     0     0     0
+##  [1,]     1     1     1     1     1     1     1
+##  [2,]     0     1     0     1     1     1     1
+##  [3,]     1     0     1     1     1     1     0
+##  [4,]     0     1     0     1     0     1     1
+##  [5,]     1     1     1     1     1     1     1
 ##  [6,]     0     0     0     0     0     0     0
-##  [7,]     0     0     0     0     0     1     0
-##  [8,]     0     0     0     0     0     0     0
-##  [9,]     1     1     1     0     1     1     0
-## [10,]     1     1     1     0     1     1     0
-## [11,]     0     0     1     1     0     0     1
-## [12,]     0     0     0     0     0     1     1
-## [13,]     1     0     1     0     0     0     0
-## [14,]     0     0     0     0     1     1     1
-## [15,]     0     0     1     1     0     0     1
-## [16,]     1     0     1     0     1     0     1
-## [17,]     0     0     0     0     0     1     1
-## [18,]     1     1     0     0     0     0     0
-## [19,]     0     0     0     0     0     0     0
-## [20,]     1     0     0     1     1     0     1
+##  [7,]     1     1     0     0     1     1     1
+##  [8,]     1     1     1     1     0     1     1
+##  [9,]     1     0     0     0     0     1     1
+## [10,]     0     1     0     1     0     1     0
+## [11,]     0     1     1     0     0     0     0
+## [12,]     1     1     1     1     0     0     0
+## [13,]     0     1     1     0     1     0     0
+## [14,]     0     0     0     1     0     0     0
+## [15,]     0     0     0     0     0     0     0
+## [16,]     1     1     1     1     1     1     1
+## [17,]     1     1     1     1     1     1     1
+## [18,]     1     1     1     1     1     1     1
+## [19,]     0     0     0     0     1     0     0
+## [20,]     1     1     0     1     1     1     0
 ## 
 ## $Q
 ##       [,1] [,2] [,3] [,4] [,5]
-##  [1,]    1    1    0    0    1
-##  [2,]    1    0    1    1    1
-##  [3,]    0    0    1    0    1
-##  [4,]    0    1    1    1    1
-##  [5,]    1    0    1    0    1
-##  [6,]    1    1    0    0    0
-##  [7,]    0    1    1    0    1
-##  [8,]    1    0    1    0    1
-##  [9,]    0    0    1    0    1
-## [10,]    0    1    0    1    0
-## [11,]    1    1    0    1    1
-## [12,]    1    1    0    1    0
-## [13,]    1    0    1    0    0
+##  [1,]    0    0    1    1    0
+##  [2,]    1    1    1    0    0
+##  [3,]    0    1    1    1    0
+##  [4,]    0    1    0    1    0
+##  [5,]    0    0    0    0    1
+##  [6,]    1    0    0    1    1
+##  [7,]    1    1    1    1    1
+##  [8,]    0    1    1    1    1
+##  [9,]    1    1    0    1    1
+## [10,]    1    0    0    1    1
+## [11,]    1    0    0    1    1
+## [12,]    1    1    0    0    1
+## [13,]    1    1    1    1    0
 ## [14,]    0    0    1    1    1
-## [15,]    1    0    1    0    1
-## [16,]    0    0    1    1    1
-## [17,]    0    1    0    0    1
-## [18,]    1    1    1    0    0
-## [19,]    1    1    1    1    1
-## [20,]    0    0    1    1    0</code></pre>
+## [15,]    0    0    0    0    1
+## [16,]    0    1    0    1    1
+## [17,]    1    0    0    0    1
+## [18,]    0    1    1    1    0
+## [19,]    1    1    1    1    0
+## [20,]    1    1    1    1    0</code></pre>
 <p><code>gen</code> only allow one model and one context at a time, we can save time generating data across different models and contexts using <code>gen.apply</code>. Setting the argument <code>multiply</code> to <code>TRUE</code> or <code>FALSE</code> decides what kind of matching will be made between models and contexts.</p>
 <pre class="r"><code>dat.1 &lt;- gen.apply(ALL.MODELS, list(p1 = p,p2 = p_), multiply = FALSE, n = 5)
 dat.1</code></pre>
@@ -650,47 +650,47 @@ poks.data</code></pre>
 <pre class="r"><code>poks.data$poks</code></pre>
 <pre><code>## $R
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    1    1    1    1    1    0    1    1    1     1     0     1     1
-##  [2,]    1    0    0    0    1    0    0    0    1     0     0     0     0
-##  [3,]    1    0    1    0    1    0    1    0    0     1     0     0     1
-##  [4,]    1    0    1    1    1    1    1    1    0     1     1     1     0
-##  [5,]    0    1    1    1    1    0    1    0    0     1     0     0     1
-##  [6,]    1    0    1    1    0    1    0    0    0     1     1     1     0
-##  [7,]    1    0    1    1    1    1    1    1    1     1     1     1     1
-##  [8,]    1    1    1    0    0    1    1    1    0     1     0     0     1
-##  [9,]    1    0    1    0    0    1    0    0    0     1     0     1     0
-## [10,]    1    1    1    1    1    1    1    1    1     1     1     1     1
-## [11,]    1    1    1    1    1    1    1    1    1     1     1     1     1
-## [12,]    0    0    0    0    0    0    1    1    0     0     0     1     0
-## [13,]    0    0    0    1    0    0    0    0    0     0     1     0     0
-## [14,]    0    0    1    1    1    0    0    0    1     0     0     0     1
-## [15,]    1    0    1    1    1    1    1    1    0     1     0     0     1
-## [16,]    1    1    0    1    0    0    1    1    0     0     0     1     0
-## [17,]    1    0    0    0    1    0    0    0    0     0     0     0     1
-## [18,]    1    0    1    1    1    1    1    0    1     1     1     0     1
-## [19,]    1    1    1    1    1    1    1    1    1     1     1     1     1
-## [20,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+##  [1,]    1    0    1    0    1    1    0    0    0     0     1     0     0
+##  [2,]    1    1    1    1    1    1    1    1    1     1     1     0     1
+##  [3,]    1    1    1    1    1    1    1    1    0     1     1     0     1
+##  [4,]    1    1    0    1    1    1    1    1    1     1     1     1     1
+##  [5,]    0    0    1    0    0    1    0    0    0     0     0     0     0
+##  [6,]    1    1    0    1    1    1    1    0    0     1     1     1     0
+##  [7,]    0    0    0    0    0    1    1    0    0     0     0     1     0
+##  [8,]    1    0    0    0    0    1    0    1    0     1     1     0     0
+##  [9,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+## [10,]    0    0    0    0    1    1    1    1    1     0     1     0     0
+## [11,]    1    1    1    1    0    1    1    1    0     1     0     1     1
+## [12,]    0    0    0    0    0    1    1    0    0     0     1     0     1
+## [13,]    1    1    0    1    0    1    0    1    1     1     0     0     0
+## [14,]    0    0    0    1    0    1    0    1    0     1     0     0     0
+## [15,]    0    0    0    0    1    0    1    0    1     0     0     0     0
+## [16,]    1    0    0    1    0    1    0    1    1     1     1     0     0
+## [17,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+## [18,]    0    0    0    1    0    1    0    0    0     1     0     0     0
+## [19,]    1    0    1    1    1    1    0    1    1     0     1     1     1
+## [20,]    1    0    1    0    1    1    1    1    1     1     1     1     1
 ##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     1     1     1     1     1     1     1
-##  [2,]     0     1     1     0     0     0     0
-##  [3,]     1     0     0     0     1     1     1
-##  [4,]     0     1     1     0     0     0     0
-##  [5,]     0     1     0     0     0     1     1
-##  [6,]     0     1     1     0     0     0     0
-##  [7,]     0     1     1     1     1     0     1
-##  [8,]     1     0     0     0     1     1     0
-##  [9,]     0     1     1     0     0     0     0
-## [10,]     1     1     1     0     1     1     1
-## [11,]     1     1     1     1     1     1     1
-## [12,]     0     0     0     0     0     1     1
-## [13,]     0     0     0     0     0     0     0
-## [14,]     0     1     0     1     0     0     0
-## [15,]     1     1     1     1     1     1     1
-## [16,]     1     0     0     0     0     1     1
-## [17,]     0     0     1     1     0     1     0
-## [18,]     1     1     0     1     1     1     1
+##  [1,]     1     1     1     1     1     0     0
+##  [2,]     1     1     1     1     1     1     1
+##  [3,]     1     1     1     0     1     1     0
+##  [4,]     0     1     1     1     1     1     1
+##  [5,]     1     0     1     0     0     0     0
+##  [6,]     1     0     0     0     0     0     0
+##  [7,]     0     1     1     0     0     0     0
+##  [8,]     0     1     1     0     1     1     1
+##  [9,]     1     1     1     1     1     1     1
+## [10,]     0     1     0     1     1     0     1
+## [11,]     1     1     1     1     0     1     0
+## [12,]     0     1     1     1     1     0     0
+## [13,]     0     0     1     0     1     1     0
+## [14,]     1     0     0     0     1     1     0
+## [15,]     0     0     1     1     1     1     0
+## [16,]     1     0     1     0     1     1     1
+## [17,]     1     1     1     1     1     1     0
+## [18,]     1     0     0     0     0     0     1
 ## [19,]     1     1     1     1     1     1     1
-## [20,]     1     1     1     1     1     1     1
+## [20,]     1     1     1     1     1     0     1
 ## 
 ## $alpha.c
 ## [1] 0.25
@@ -709,47 +709,47 @@ poks.data</code></pre>
 ##  [9] &quot;alpha.c&quot;      &quot;alpha.p&quot;      &quot;p.min&quot;        &quot;items&quot;</code></pre>
 <pre class="r"><code>learn.poks$po</code></pre>
 <pre><code>##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    0    0    0    0    0    0    0    0    0     0     1     0     0
-##  [2,]    0    0    0    0    0    0    0    0    1     0     0     0     0
-##  [3,]    0    0    0    0    1    0    0    1    0     0     0     0     0
-##  [4,]    0    0    0    0    0    1    1    0    1     0     0     0     0
-##  [5,]    0    0    1    0    0    0    0    0    0     0     0     0     0
-##  [6,]    0    0    1    1    0    0    1    0    1     0     0     0     0
-##  [7,]    0    0    0    1    0    0    0    0    0     0     0     0     0
-##  [8,]    0    0    1    0    0    0    0    0    0     0     0     0     0
-##  [9,]    0    1    0    1    0    1    0    0    0     0     0     0     0
-## [10,]    0    0    0    0    0    0    0    0    0     0     1     0     0
-## [11,]    0    0    0    0    0    0    0    0    0     1     0     0     0
-## [12,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-## [13,]    1    0    0    0    0    1    0    0    0     0     1     0     0
-## [14,]    0    1    0    0    1    0    0    0    0     0     0     0     0
-## [15,]    1    0    1    0    0    0    0    1    0     0     0     0     0
-## [16,]    0    0    0    0    0    0    0    0    0     0     0     1     0
-## [17,]    0    1    0    0    0    0    0    0    0     1     0     0     0
-## [18,]    0    0    1    0    0    0    0    0    0     0     0     0     0
-## [19,]    0    0    0    0    0    0    0    0    0     1     1     0     0
-## [20,]    0    0    0    0    0    0    0    0    0     1     1     0     0
+##  [1,]    0    0    0    0    1    0    0    0    0     0     0     1     0
+##  [2,]    0    0    1    0    0    0    0    0    1     0     0     0     0
+##  [3,]    0    1    0    0    0    0    0    0    0     0     1     0     0
+##  [4,]    0    0    0    0    0    0    0    0    1     0     0     0     0
+##  [5,]    1    0    0    0    0    0    1    0    0     0     0     0     0
+##  [6,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+##  [7,]    0    1    0    0    1    0    0    0    0     0     0     1     0
+##  [8,]    0    0    0    0    0    0    0    0    0     0     0     0     1
+##  [9,]    0    1    0    0    0    0    0    0    0     0     0     0     0
+## [10,]    0    0    0    0    0    0    0    0    0     0     0     1     0
+## [11,]    0    0    1    0    0    0    0    0    0     0     0     0     0
+## [12,]    1    0    0    0    0    0    1    0    0     1     0     0     0
+## [13,]    0    0    0    0    0    0    0    1    0     0     0     0     0
+## [14,]    0    0    1    0    0    0    0    1    0     0     0     0     1
+## [15,]    0    0    0    0    0    0    0    0    0     1     1     0     0
+## [16,]    0    0    0    0    0    0    0    1    0     0     0     0     1
+## [17,]    0    0    1    0    0    0    0    0    1     0     0     0     0
+## [18,]    0    0    0    0    1    1    0    0    0     0     0     0     0
+## [19,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+## [20,]    0    0    0    0    0    0    0    0    0     0     0     0     0
 ##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     0     1     0     0     0     1     1
-##  [2,]     1     0     0     1     0     0     0
-##  [3,]     0     1     0     0     1     0     0
+##  [1,]     0     0     0     0     0     1     1
+##  [2,]     0     0     0     0     0     0     0
+##  [3,]     0     0     0     1     0     0     0
 ##  [4,]     0     0     0     0     0     0     0
-##  [5,]     1     0     0     0     0     0     0
-##  [6,]     0     0     0     0     0     0     0
+##  [5,]     0     0     0     0     1     0     0
+##  [6,]     0     0     0     0     1     0     0
 ##  [7,]     0     0     0     0     0     0     0
-##  [8,]     0     1     0     0     0     0     0
-##  [9,]     0     0     0     0     0     0     0
-## [10,]     0     0     0     0     0     1     1
-## [11,]     0     0     0     0     0     1     1
-## [12,]     0     0     1     0     1     0     0
-## [13,]     0     1     0     0     0     1     1
-## [14,]     0     0     0     0     1     0     0
-## [15,]     0     0     0     0     1     0     0
-## [16,]     0     0     0     0     1     0     0
+##  [8,]     1     0     1     0     0     0     0
+##  [9,]     0     0     0     1     0     0     0
+## [10,]     0     1     0     0     0     0     1
+## [11,]     0     0     0     1     0     0     0
+## [12,]     0     0     0     0     0     0     0
+## [13,]     1     0     1     0     0     0     0
+## [14,]     0     0     1     0     1     0     0
+## [15,]     0     0     0     0     0     0     0
+## [16,]     1     0     0     0     1     0     0
 ## [17,]     0     0     0     0     0     0     0
-## [18,]     0     1     0     0     0     0     0
-## [19,]     0     0     0     0     0     0     1
-## [20,]     0     0     0     0     0     1     0</code></pre>
+## [18,]     1     0     1     1     0     0     0
+## [19,]     0     0     0     0     0     0     0
+## [20,]     0     0     0     0     0     0     0</code></pre>
 <p>If we want to learn from this same data using DINA model, <code>poks.data$poks</code> cannot be used because components <code>p.min</code>, <code>alpha.p</code>, <code>alpha.c</code> are meaningless to DINA. In order to do the task, one will need to hand-design this data. DINA requires one additional component besides the response matrix: Q-matrix. Normally, Q-matrix is expected to be expert-defined, however this illustration will just simply generate it randomly.</p>
 <pre class="r"><code>Q &lt;- get.par(&quot;Q&quot;, p)$value
 R &lt;- poks.data$poks$R
@@ -784,13 +784,13 @@ learn.dina &lt;- learn(&quot;dina&quot;, data = dina.data)</code></pre>
 ## [4,]     1     1     1     0     1     1     1     1
 ## [5,]     1     1     0     1     1     1     1     1</code></pre>
 <pre class="r"><code>learn.dina$skill.dist</code></pre>
-<pre><code>##  [1] 5.761158e-03 5.761158e-03 5.761158e-03 5.761158e-03 5.761158e-03
-##  [6] 2.055577e-07 5.761158e-03 1.331748e-05 1.298963e-06 1.218844e-05
-## [11] 5.761158e-03 2.436928e-09 2.055577e-07 5.761158e-03 2.728806e-11
-## [16] 2.055577e-07 6.134797e-08 3.817164e-10 1.265335e-66 2.238237e-10
-## [21] 1.769977e-13 9.598183e-02 9.747710e-09 1.091522e-10 1.501849e-12
-## [26] 3.268260e-02 1.040170e-01 3.742383e-45 4.631395e-22 9.999943e-02
-## [31] 1.212024e-01 5.000000e-01</code></pre>
+<pre><code>##  [1] 8.759041e-06 8.759041e-06 8.759041e-06 6.794014e-02 1.308496e-12
+##  [6] 5.498010e-05 8.759041e-06 6.794014e-02 1.385974e-19 5.498010e-05
+## [11] 6.828958e-02 1.421694e-12 3.199835e-02 8.614379e-09 3.579427e-06
+## [16] 4.869069e-11 6.828958e-02 2.208306e-43 3.199835e-02 1.415430e-17
+## [21] 3.347245e-11 1.248317e-21 2.764647e-05 5.668943e-12 4.403155e-10
+## [26] 8.628012e-13 6.336989e-02 1.971256e-07 3.000150e-01 2.082125e-29
+## [31] 5.332250e-18 2.999825e-01</code></pre>
 </div>
 <div id="generate-synthetic-data-using-syn" class="section level2">
 <h2>Generate synthetic data using <code>syn</code></h2>
@@ -848,49 +848,49 @@ learn.dina &lt;- learn(&quot;dina&quot;, data = dina.data)</code></pre>
 <pre class="r"><code>dina.syn$synthetic[[5]]$dina</code></pre>
 <pre><code>## $R
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-##  [1,]    1    0    1    1    0    1    1    1    0     1     1     1
-##  [2,]    0    0    0    0    1    0    0    0    1     0     0     1
-##  [3,]    1    0    1    1    0    0    1    1    0     0     1     0
-##  [4,]    0    0    1    1    0    0    1    1    1     1     0     0
-##  [5,]    1    0    1    0    0    1    1    0    0     0     0     0
-##  [6,]    0    0    0    0    0    1    0    1    0     1     0     1
-##  [7,]    0    1    0    1    1    1    1    1    1     1     1     1
-##  [8,]    0    1    0    1    0    1    0    1    0     0     1     0
-##  [9,]    0    0    1    0    0    0    0    1    1     0     0     0
-## [10,]    1    1    1    1    1    1    1    1    1     1     1     1
-## [11,]    1    1    1    1    1    1    1    1    1     1     1     1
-## [12,]    0    0    0    1    1    0    0    0    1     0     0     0
-## [13,]    0    0    0    0    1    0    0    1    0     0     0     0
-## [14,]    0    1    0    0    1    0    0    1    1     1     0     0
-## [15,]    1    1    1    1    0    1    1    1    0     1     1     1
-## [16,]    1    0    1    1    0    1    0    0    0     1     1     0
-## [17,]    0    0    0    0    1    0    0    0    0     0     0     0
-## [18,]    1    1    1    1    1    1    1    1    1     0     1     1
-## [19,]    1    1    1    1    1    1    1    1    1     1     1     1
-## [20,]    1    1    1    1    1    1    1    1    1     1     1     1
+##  [1,]    1    0    0    0    0    1    0    1    0     0     1     1
+##  [2,]    1    1    1    1    1    1    1    1    1     1     1     1
+##  [3,]    1    1    1    1    0    1    1    1    1     1     1     1
+##  [4,]    1    1    1    1    1    1    1    1    1     1     0     1
+##  [5,]    0    0    1    0    0    0    0    0    0     0     0     0
+##  [6,]    1    0    0    1    1    0    0    0    1     0     0     1
+##  [7,]    0    0    0    1    0    0    0    0    0     0     0     0
+##  [8,]    0    0    1    0    1    1    1    1    1     1     0     1
+##  [9,]    1    1    1    1    1    1    1    1    1     1     1     1
+## [10,]    1    1    0    0    0    0    1    0    1     1     1     0
+## [11,]    1    1    1    1    0    1    1    0    1     1     1     1
+## [12,]    0    0    0    1    0    0    0    0    0     0     0     0
+## [13,]    1    0    1    0    1    1    0    1    1     1     0     1
+## [14,]    0    0    1    0    1    1    1    0    1     0     0     1
+## [15,]    1    1    0    1    0    0    0    0    0     0     0     0
+## [16,]    1    0    1    0    1    1    1    1    1     1     0     1
+## [17,]    1    1    1    1    1    1    1    1    1     1     1     1
+## [18,]    0    0    1    0    1    0    0    0    1     0     0     0
+## [19,]    1    0    1    1    1    1    1    1    1     1     1     1
+## [20,]    1    0    1    0    0    1    1    1    1     0     1     1
 ## 
 ## $Q
 ##       [,1] [,2] [,3] [,4] [,5]
-##  [1,]    0    0    1    0    1
-##  [2,]    0    0    0    0    1
-##  [3,]    1    1    0    0    1
-##  [4,]    1    0    1    0    0
-##  [5,]    0    0    1    0    1
-##  [6,]    0    1    0    1    0
-##  [7,]    0    1    1    1    1
-##  [8,]    1    1    1    1    1
-##  [9,]    1    0    1    0    1
-## [10,]    1    0    0    0    1
-## [11,]    0    1    1    0    1
-## [12,]    1    0    1    1    0
-## [13,]    1    0    1    1    0
-## [14,]    1    1    1    0    0
-## [15,]    1    0    1    1    1
-## [16,]    0    0    1    1    1
-## [17,]    0    1    1    1    1
-## [18,]    1    0    0    1    0
-## [19,]    0    1    1    1    0
-## [20,]    1    1    1    1    1</code></pre>
+##  [1,]    0    1    1    0    0
+##  [2,]    1    1    0    1    0
+##  [3,]    1    1    1    1    1
+##  [4,]    1    1    1    0    1
+##  [5,]    0    1    0    1    0
+##  [6,]    0    1    0    0    1
+##  [7,]    0    0    1    0    1
+##  [8,]    1    0    0    1    0
+##  [9,]    0    1    1    1    0
+## [10,]    1    0    1    1    1
+## [11,]    1    1    1    0    1
+## [12,]    0    0    1    0    0
+## [13,]    0    0    0    0    1
+## [14,]    0    0    0    1    0
+## [15,]    0    0    1    0    1
+## [16,]    1    1    0    1    1
+## [17,]    0    0    0    0    1
+## [18,]    1    0    0    1    1
+## [19,]    1    0    1    0    1
+## [20,]    1    1    1    1    0</code></pre>
 <p>In case the default option is not favoured, <code>syn</code> also allows users to manually specify which parameters to keep through argument <code>keep.pars</code>.</p>
 <pre class="r"><code>dina.syn &lt;- syn(&quot;dina&quot;, data = dina.data, keep.pars = c(&quot;Q&quot;, &quot;concept.exp&quot;), students = 12)</code></pre>
 <pre><code>## Learning by 'dina' ...</code></pre>
@@ -898,6 +898,647 @@ learn.dina &lt;- learn(&quot;dina&quot;, data = dina.data)</code></pre>
 <pre class="r"><code>dina.syn &lt;- syn(&quot;dina&quot;, data = dina.data, keep.pars = c(&quot;Q&quot;, &quot;M&quot;), students = 12)</code></pre>
 <pre><code>## Learning by 'dina' ...</code></pre>
 <pre><code>## Error in down.stream(filtered.pars): 'students' receives different values at once</code></pre>
+</div>
+<div id="modifying-edmsyn" class="section level2">
+<h2>Modifying <code>edmsyn</code></h2>
+<p><code>edmsyn</code> comes with a pre-defined set of parameters and relationships amongst themselves. These relationships are rules that help <code>edmsyn</code> derive values for one or more parameters from some others. Specifically, these rules are represented as functions in the package. For example, a function that takes two integers and randomly produce a binary matrix with its dimensions being the two inputted integers can be used as the rule to derive <code>M</code> (skill mastery matrix) from <code>students</code> and <code>concepts</code>. Rules that derive value for “data parameter” such as <code>poks</code>, <code>dina</code>, or <code>dino</code> encode POKS, DINA, DINO models respectively. Similarly, rules that derive value in the opposite direction encode the corresponding learning algorithms.</p>
+<p>The choice of built-in parameters, models, and learning algorithms is made independently at the time of development for <code>edmsyn</code> and thus, it may or may not satisfy users’ need. That is why <code>edmsyn</code> also comes with a set of tools that allow its users to re-define all these components to the extent of building a whole new set of parameters and models, while still retaining all the original benefits that it offers. All possible changes on <code>edmsyn</code> will be made on a single graphical structure that <code>edmsyn</code> creates at the loading time, with vertices representing parameters and edges encoding the respective relationships.</p>
+<p>Functions that allows these modifications have names starting with <code>edmtree.</code> There are just a few of such functions and they provide everything you need to work with <code>edmsyn</code> at its internal level. This tutorial will also walk you through the building blocks of them so that an in-depth understanding of <code>edmsyn</code> mechanism is provided. By the end of this section, you are expected to handle <code>edmtree.</code> functions properly and efficiently.</p>
+<p>If you do not feel going that deep, feel free to skip to <strong>A toy model</strong> at your own risk. Reading <strong>A toy model</strong> before going through the whole tutorial is also a good suggestion.</p>
+</div>
+<div id="fetching-a-node-using-edmtree.fetch" class="section level2">
+<h2>Fetching a node using <code>edmtree.fetch</code></h2>
+<p>Firstly, let’s start with the skill mastery matrix <code>M</code></p>
+<pre class="r"><code>M.node &lt;- edmtree.fetch('M')
+class(M.node)</code></pre>
+<pre><code>## [1] &quot;list&quot;</code></pre>
+<pre class="r"><code>names(M.node)</code></pre>
+<pre><code>## [1] &quot;tell&quot;   &quot;gen&quot;    &quot;f.tell&quot; &quot;f.gen&quot;</code></pre>
+<p>The representation of <code>M</code> in <code>edmsyn</code> is essentially a list with four components <code>tell</code>, <code>f.tell</code>, <code>gen</code>, and <code>f.gen</code>. The first one, <code>tell</code>, is a set of names of parameters that receive information if the value of <code>M</code> is known.</p>
+<pre class="r"><code>M.node$tell</code></pre>
+<pre><code>## [1] &quot;concepts&quot;    &quot;students&quot;    &quot;concept.exp&quot;</code></pre>
+<p>In this case, the value of <code>M</code> <em>tells</em> <code>edmsyn</code> the values of <code>concepts</code>, <code>students</code> and <code>concept.exp</code> (expected mastery rate for each concept). This is quite straightforward since <code>concepts</code>, <code>students</code>, and <code>concept.exp</code> are respectively the row dimension, column dimension, and row means of <code>M</code>. At this point, it is reasonable to look at the third component <code>f.tell</code></p>
+<pre class="r"><code>M.node$f.tell</code></pre>
+<pre><code>## function (x) 
+## {
+##     list(nrow(x), ncol(x), rowMeans(x))
+## }
+## &lt;environment: 0x3ed1908&gt;</code></pre>
+<p>The third component, <code>f.tell</code>, is the function to derive values for each parameter listed in <code>tell</code> from value of <code>M</code>. As can be seen, this function does exactly what we expected: taking the row dimension, column dimension and row means value of its input <code>M</code>, assemble these results into a list as its return value.</p>
+<p>The second component, <code>gen</code>, is a list of generating methods for <code>M</code>.</p>
+<pre class="r"><code>M.node$gen</code></pre>
+<pre><code>## [[1]]
+## [1] &quot;S&quot;
+## 
+## [[2]]
+## [1] &quot;students&quot;    &quot;skill.space&quot; &quot;skill.dist&quot; 
+## 
+## [[3]]
+## [1] &quot;students&quot;    &quot;concept.exp&quot;</code></pre>
+<p>In this example, <code>edmsyn</code> knows that there are three different methods to reach <code>M</code>: either using (<code>S</code>), (<code>students</code>,<code>skill.space</code>,<code>skill.dist</code>), or (<code>students</code>,<code>concept.exp</code>). If the generating process of <code>M</code> is somehow determined to use <code>S</code> (the skill matrix, or the probabilistic version of <code>M</code>), then one way to proceed can be rounding <code>S</code> element-wise to obtain <code>M</code>. In fact, this is the chosen method in <code>edmsyn</code>, let’s have a look at the last component</p>
+<pre class="r"><code>M.node$f.gen</code></pre>
+<pre><code>## [[1]]
+## function (x) 
+## {
+##     round(x[[1]])
+## }
+## &lt;environment: 0x3ed1908&gt;
+## 
+## [[2]]
+## function (x) 
+## {
+##     x[[2]][, sample(1:length(x[[3]]), size = x[[1]], prob = x[[3]], 
+##         replace = TRUE)]
+## }
+## &lt;environment: 0x3ed1908&gt;
+## 
+## [[3]]
+## function (x) 
+## {
+##     conexp &lt;- x[[2]]
+##     sapply(1:x[[1]], function(dum) {
+##         sapply(conexp, function(p) {
+##             sample(0:1, 1, prob = c(1 - p, p))
+##         })
+##     })
+## }
+## &lt;environment: 0x3ed1908&gt;</code></pre>
+<p>As can be seen, <code>f.gen</code> is a list of three functions correspond to three generating methods in <code>gen</code>, and the first one is somehow rounding its input for the return value. The details of these functions will be discussed in later part, at this point it is sufficient to just realise what is the representation of a parameter in <code>edmsyn</code> and which tasks it is trying to achieve.</p>
+<p>From this point on, the all <code>f.tell</code> functions will be referred to as type-1 connections. Similarly, the collections of functions in <code>f.gen</code> will be referred to as type-2 connections. These are the two types of connections along which all data flow. The main benefit <code>edmsyn</code> offers is a convenient interface that allow easy access and control to various data processes.</p>
+</div>
+<div id="replacing-using-edmtree.replace" class="section level2">
+<h2>Replacing using <code>edmtree.replace</code></h2>
+<div id="replacing-type-2-connections" class="section level3">
+<h3>Replacing type-2 connections</h3>
+<p>Suppose you are not satisfied with the current generation method for <code>M</code> from <code>S</code> (rounding), and expect a fully probabilistic implementation of it. To do this, the first function in <code>f.gen</code> should be replaced. Firstly, we must design a function that takes one input being the matrix <code>S</code>, sample binary result from <code>S</code>’s entries and return the value of <code>M</code> as follows:</p>
+<pre class="r"><code>new.gen.S.to.M &lt;- function(S){
+  M &lt;- matrix(0, nrow(S), ncol(S))
+  for (row in 1:nrow(S))
+    for (col in 1:ncol(S)){
+      p &lt;- S[row,col]
+      M[row, col] &lt;- sample(x = 0:1, 1, prob = c(1 - p, p))
+    }
+  return(M)
+}</code></pre>
+<p>Next, this function is replaced into the internal structure of <code>M</code></p>
+<pre class="r"><code>edmtree.replace.gen('M','S',new.gen.S.to.M)
+M.node &lt;- edmtree.fetch('M')
+M.node$f.gen</code></pre>
+<pre><code>## [[1]]
+## function (x) 
+## {
+##     do.call(f.gen.copy[[l]], x)
+## }
+## &lt;environment: 0x316e6c0&gt;
+## 
+## [[2]]
+## function (x) 
+## {
+##     x[[2]][, sample(1:length(x[[3]]), size = x[[1]], prob = x[[3]], 
+##         replace = TRUE)]
+## }
+## &lt;environment: 0x3ed1908&gt;
+## 
+## [[3]]
+## function (x) 
+## {
+##     conexp &lt;- x[[2]]
+##     sapply(1:x[[1]], function(dum) {
+##         sapply(conexp, function(p) {
+##             sample(0:1, 1, prob = c(1 - p, p))
+##         })
+##     })
+## }
+## &lt;environment: 0x3ed1908&gt;</code></pre>
+<p>Now that <code>f.gen[1]</code> is changed. But apparently it is not the original <code>new.gen.S.to.M</code> that has been designed by us, the reason is that <code>edmsyn</code> has wrapped this function inside one or more layers to make sure it fit in perfectly with the internal working environment. We can check if the replacement is carried out successfully by simply generating <code>M</code> from <code>S</code> many times, if the result is different each time, the probabilistic version has been installed successfully.</p>
+<pre class="r"><code>S &lt;- matrix(runif(15),3,5)
+p &lt;- pars(S = S)
+M1 &lt;- get.par('M',p)$value
+M2 &lt;- get.par('M',p)$value
+# This is very unlikely to be TRUE
+identical(M1, M2)</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code># Let's try something else
+M = matrix(0, 3, 5)
+big.number = 10000
+for (i in 1:big.number)
+  M = M + get.par('M',p)$value
+# This is likely to be TRUE
+identical(round(M/big.number), round(S))</code></pre>
+<p>Similarly, we can change the functions of other generating methods by simply create a new function for each and replace them into the structure.</p>
+<pre class="r"><code># Examples of changing generating methods
+new.f.gen.2 &lt;- function(students, skill.space, skill.dist){
+  # Evaluate M here
+  return(value.of.M)
+}
+edmtree.replace.gen('M', M.node$gen[[2]], new.f.gen.2)</code></pre>
+<p>As long as the number and the order of arguments match that of what is defined in the corresponding <code>gen</code>, the replacement will be done successfully. Otherwise, error will be detected either at replacement time or run-time depending on the error.</p>
+<pre class="r"><code># Some more playing around with replacement
+M.node$gen[[3]]</code></pre>
+<pre><code>## [1] &quot;students&quot;    &quot;concept.exp&quot;</code></pre>
+<pre class="r"><code>new.gen.3 &lt;- rev(M.node$gen[[3]])
+new.gen.3</code></pre>
+<pre><code>## [1] &quot;concept.exp&quot; &quot;students&quot;</code></pre>
+<pre class="r"><code># Notice that the order of arguments of new.f.gen.3 below
+# matches the order of new.gen.3
+new.f.gen.3 &lt;- function(concept.expectation, num.of.students){
+  # evaluate M here
+  return(value.of.M)
+}
+# Successful
+edmtree.replace.gen('M', new.gen.3, new.f.gen.3)</code></pre>
+<p>Below are some examples where <code>edmtree.replace</code> fails to execute.</p>
+<pre class="r"><code># Unsucessful examples:
+# new f.gen is supposed to have 3 arguments as M.node$gen[[2]] has length 3
+edmtree.replace.gen('M', M.node$gen[[2]], function(arg1, arg2) {
+  return(NULL) # does not matter
+})</code></pre>
+<pre><code>## Error in edmtree.check(node.name, node.val, int, dat): number of arguments of f.gen[[2]] must match the size of gen[[2]]</code></pre>
+<pre class="r"><code># (items, poks) is not an existing method
+edmtree.replace.gen('M', c('items', 'poks'), function(arg1, arg2){
+  return(NULL) # does not matter
+})</code></pre>
+<pre><code>## Error in edmtree.replace.gen(&quot;M&quot;, c(&quot;items&quot;, &quot;poks&quot;), function(arg1, arg2) {: method (items, poks) cannot be found in M$gen</code></pre>
+</div>
+<div id="replacing-type-1-connections" class="section level3">
+<h3>Replacing type-1 connections</h3>
+<p>Besides <code>edmtree.replace.gen</code>, <code>edmsyn</code> also allow <code>edmtree.replace.tell</code> where users are able to modify <code>tell</code> and <code>f.tell</code> in many flexible ways. Knowing the value of <code>S</code>, it is straightforward to infer values of <code>students</code> and <code>concepts</code>, being the number of columns and rows respectively. As a toy example, let’s swap the inference of <code>students</code> and <code>concepts</code> (and thus produce an incorrect result)</p>
+<pre class="r"><code>S.node &lt;- edmtree.fetch('S')
+S.node$tell</code></pre>
+<pre><code>## [1] &quot;concepts&quot;  &quot;students&quot;  &quot;S.st.var&quot;  &quot;S.con.exp&quot;</code></pre>
+<pre class="r"><code>p &lt;- pars(S = S)
+print(dim(S))</code></pre>
+<pre><code>## [1] 3 5</code></pre>
+<pre class="r"><code># this would give correct result
+c(p$concepts, p$students)</code></pre>
+<pre><code>## [1] 3 5</code></pre>
+<pre class="r"><code># Now let's alter f.tell so that concepts
+# is the number of columns of S and students
+# is the number of rows of S.
+edmtree.replace.tell('S',c('concepts','students'), function(S){
+  return(list( ncol(S), nrow(S) ))
+})
+p &lt;- pars(S=S)</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'concepts' receives different values at once</code></pre>
+<p>The reason why <code>pars</code> fails to execute is that, not only <code>concepts</code> and <code>students</code> are being inferred from <code>S</code>, <code>S.con.exp</code>, a vector of length <code>concepts</code>, is also being inferred <em>correctly</em>. This caused a conflict that <code>edmsyn</code> was able to detect. One way to force the incorrect result is as follows:</p>
+<pre class="r"><code>edmtree.replace.tell('S',c('S.con.exp','concepts','students'), function(S){
+  return(list( colMeans(S), ncol(S), nrow(S) ))
+})
+p &lt;- pars(S=S)
+print(dim(S))</code></pre>
+<pre><code>## [1] 3 5</code></pre>
+<pre class="r"><code># Now we successfully produce a wrong result.
+c(p$concepts, p$students)</code></pre>
+<pre><code>## [1] 5 3</code></pre>
+<p>There is two important points to make here: firstly, it is dangerous to replace such incorrect calculations into <code>edmsyn</code> structure: from what we have seen above, these false implementations may take long (sometimes forever) to be detected after the replacement and thus, your application may have operated incorrectly for many steps without being noticed. Take careful examination before you decide to change <code>edmsyn</code>’s built-in functions.</p>
+<p>Secondly, the replacement we did above is called <em>partial replacement</em> because not all parameters in <code>tell</code> is modified. Unlike many other classes of objects in R, <code>f.tell</code>, which is essentially an R <code>function</code>, is inherently not modular, which means it can not be modified partially. So how did <code>edmsyn</code> finish the task above? It simply executes the old function <em>and then</em> the new one, after that new results will replace the old ones at appropriate positions in the returned list. This, apparently, may involve a great deal of redundant calculations and thus, the use of <code>edmtree.replace.tell</code> to modify a subset of <code>tell</code> is strongly discourage. In other words, whenever it is possible, try to use <code>edmtree.replace.tell</code> with argument <code>tell</code> being an identical set to <code>S$tell</code>.</p>
+<p>To proceed normally, let’s recover the original correct version of <code>f.tell</code> inside <code>S</code></p>
+<pre class="r"><code>edmtree.replace.tell('S', S.node$tell, S.node$f.tell)
+p &lt;- pars(S=S)
+dim(S)</code></pre>
+<pre><code>## [1] 3 5</code></pre>
+<pre class="r"><code>c(p$concepts, p$students)</code></pre>
+<pre><code>## [1] 3 5</code></pre>
+</div>
+<div id="naive-replacing-with-edmtree.replace" class="section level3">
+<h3>Naive replacing with <code>edmtree.replace</code></h3>
+<p>The previous replacing functions are <em>smart</em> because they are flexible in terms of partial replacement. Namely, they retain the parts that is not declare in their function call and properly handle the integration of new parts with old parts.</p>
+<p>If you wish to simply throw away some parts of the node and subtitude new ones, (in other words, you do not care about retaining any part of the existing functions, either they are useful to be reused or not), simply use <code>edmtree.replace</code>. See some examples below</p>
+<pre class="r"><code># replacing tell
+edmtree.replace('S', tell = new.tell)
+# replacing tell and f.gen
+edmtree.replace('S', tell = new.tell, f.gen = new.f.gen)
+# replacing gen, f.gen and f.tell
+edmtree.replace('S', f.gen = new.f.gen, f.tell = new.f.tell, gen = new.gen)</code></pre>
+</div>
+</div>
+<div id="removing-using-edmtree.remove" class="section level2">
+<h2>Removing using <code>edmtree.remove</code></h2>
+<div id="removing-type-2-connections" class="section level3">
+<h3>Removing type-2 connections</h3>
+<p>Let’s start with a context where <em>students</em> and <em>concepts</em> are defined</p>
+<pre class="r"><code>p &lt;- pars(students = 20, concepts = 15)
+M &lt;- get.par('M', p, progress = TRUE)</code></pre>
+<pre><code>## Generate M from c(&quot;students&quot;, &quot;concept.exp&quot;)
+## Generate concept.exp from concepts</code></pre>
+<p>Assume that we desire not to produce <code>M</code> from the process that requires generating <code>concept.exp</code>. In fact, we want to remove this method of generating <code>M</code> from <code>edmsyn</code> completely. <code>edmtree.remove.gen</code> is here to help:</p>
+<pre class="r"><code>edmtree.remove.gen('M',c('concept.exp','students'))
+M &lt;- get.par('M', p, progress = TRUE)</code></pre>
+<pre><code>## Generate M from c(&quot;students&quot;, &quot;skill.space&quot;, &quot;skill.dist&quot;)
+## Generate skill.space from c(&quot;concepts&quot;, &quot;skill.space.size&quot;)
+## Generate skill.space.size from concepts
+## Generate skill.dist from skill.space.size</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'skill.space.size' receives different values at once</code></pre>
+<pre class="r"><code>edmtree.remove.gen('M',c('skill.dist','students','skill.space'))
+M &lt;- get.par('M', p, progress = TRUE)</code></pre>
+<pre><code>## Generate M from S
+## Generate S from c(&quot;concepts&quot;, &quot;students&quot;)</code></pre>
+<pre class="r"><code>edmtree.remove.gen('M', 'S')
+M &lt;- get.par('M', p, progress = TRUE)</code></pre>
+<pre><code>## Error in up.stream(target, pars, FALSE, progress): Cannot reach 'M' since 'M' is missing</code></pre>
+<p>As we consecutively went through the deletion of all three generating methods for <code>M</code>, a reasonable question is raised: why does it have to be in the order of (<code>concept.exp</code>, <code>students</code>), then (<code>skill.dist</code>, <code>students</code>, <code>skill.space</code>), and lastly (<code>S</code>)? In other words, base on which criteria did <code>edmsyn</code> prioritise the method (<code>concept.exp</code>, <code>students</code>) over (<code>skill.dist</code>, <code>students</code>, <code>skill.space</code>); and (<code>skill.dist</code>, <code>students</code>, <code>skill.space</code>) over (<code>S</code>)? Note that when <code>students</code> and <code>concepts</code> are provided, all three options are possible to implement.</p>
+</div>
+<div id="the-generating-critera" class="section level3">
+<h3>The generating critera</h3>
+<p>One complication of the <code>edmsyn</code> perspective is that, there will be times when there are more than one way to generate data. One example is the case above. There is critera that <code>edmsyn</code> follows in terms of prioritizing one option over another. Note that this criteria is chosen by the author at the time of developing <code>edmsyn</code> and there is no certain theoretical foundation for it. It is, however, beneficial for the users to be informed anyway.</p>
+<p>If there are more than one <em>available</em> method to generate a node’s value:</p>
+<ol style="list-style-type: decimal">
+<li><p>Choose the one that most utilizes inputted data. In the previous example, inputted data includes <code>students</code> and <code>concepts</code>, thus both (<code>concept.exp</code>, <code>students</code>) and (<code>skill.dist</code>, <code>students</code>, <code>skill.space</code>), utilizing a half of the input, are certainly better than (<code>S</code>).</p></li>
+<li><p>If there is a tie, as pointed out in the <code>M$gen</code> example above, choose the one is that most covered by the input. In this case, one half of (<code>concept.exp</code>, <code>students</code>) is covered (by <code>students</code>), while only one third of (<code>skill.dist</code>, <code>students</code>, <code>skill.space</code>) is covered (also by <code>students</code>). This is why (<code>concept.exp</code>,<code>students</code>) is most favoured amongst the three.</p></li>
+<li><p>If there is still a tie, then choose the one that most cover <code>tell</code> of the target node. For example in this case, <code>M$tell</code> consists of <code>concepts</code>, <code>students</code>, and <code>concept.exp</code>; two of them is covered by (<code>concept.exp</code>, <code>students</code>), one is covered by (<code>skill.dist</code>, <code>students</code>, <code>skill.space</code>) and none is covered by (<code>S</code>). For ties beyond this point, the choice is completely random.</p></li>
+</ol>
+</div>
+<div id="removing-type-1-connections" class="section level3">
+<h3>Removing type-1 connections</h3>
+<p>Now we move on to removing type-1 connections. Let’s say we want to discard any information about <code>concepts</code> inferred from <code>M</code>, <code>edmtree.remove.tell</code> should be used as follows:</p>
+<pre class="r"><code>edmtree.remove.tell('M', 'concepts')
+p &lt;- pars(M = M1)
+print(p)</code></pre>
+<pre><code>## Activated information in the context:
+## [1] &quot;M&quot;            &quot;default.vals&quot; &quot;students&quot;     &quot;concept.exp&quot; 
+## [5] &quot;concepts&quot;</code></pre>
+<p>Why does <code>concepts</code> is still there in p? Actually in this case <code>concepts</code> is not inferred from <code>M</code> but from <code>concept.exp</code>, to completely eliminate <code>concepts</code>, one would need to remove <code>concept.exp</code></p>
+<pre class="r"><code>edmtree.remove.tell('M','concept.exp')
+p &lt;- pars(M = M1)
+# now concept.exp is gone, along with concepts
+print(p)</code></pre>
+<pre><code>## Activated information in the context:
+## [1] &quot;M&quot;            &quot;default.vals&quot; &quot;students&quot;</code></pre>
+<pre class="r"><code># recover
+edmtree.replace('M', tell = M.node$tell, f.tell = M.node$f.tell)
+edmtree.fetch('M')</code></pre>
+<pre><code>## $tell
+## [1] &quot;concepts&quot;    &quot;students&quot;    &quot;concept.exp&quot;
+## 
+## $gen
+## list()
+## 
+## $f.tell
+## function (x) 
+## {
+##     list(nrow(x), ncol(x), rowMeans(x))
+## }
+## &lt;environment: 0x3ed1908&gt;
+## 
+## $f.gen
+## list()</code></pre>
+<p>Again, since <code>f.tell</code> cannot be partially modified, the users should be aware of the fact that there are redundant calculations going under the implementation of the removed <code>concepts</code>. In fact, <code>concepts</code> is still being calculated, but then discarded from the returned list each time information is inferred from <code>M</code>. So it is highly recommended that the <code>f.tell</code> argument of <code>edmtree.remove.tell</code> is used whenever it is possible. Namely, the recommended way to completely remove <code>concepts</code> is as follows:</p>
+<pre class="r"><code>edmtree.remove.tell('M', c('concept.exp', 'concepts'), f.tell = function(M){
+  return(ncol(M)) # since the only one left in tell is students
+})
+p &lt;- pars(M = M1)</code></pre>
+<pre><code>## Warning in get(var.name, envir = STRUCTURE)$f.tell(var.val): node 'M' :
+## f.tell did not return a list, coerced to list of length 1</code></pre>
+<p>The warning here tells us that, the returning line inside our new <code>f.tell</code> should be <code>return(list(ncol(M))</code> instead of <code>return(ncol(M))</code>. However, <code>edmsyn</code> is smart enough to prevent this error by a function wrapper that detects and fixes many errors like these whenever it is possible. Note that since this is an error at returning of our function (in other words, it requires actual execution of the function to be presented), this error is a run-time error and cannot be detected immediately in the <code>edmtree.remove</code> step, but much later when <code>pars</code> calls for data to flow from <code>M</code> to lower level parameters in the execution of <code>p &lt;- pars(M = M1)</code>.</p>
+<p>To avoid displaying this warning each time data flow through <code>M</code>, let’s fix <code>f.tell</code> by a proper one.</p>
+<pre class="r"><code># recover
+edmtree.replace('M', tell = M.node$tell, f.tell = M.node$f.tell)
+# remove
+edmtree.remove.tell('M', c('concept.exp', 'concepts'), f.tell = function(M){
+  return(list(ncol(M)))
+})
+p &lt;- pars(M = M1)
+print(p)</code></pre>
+<pre><code>## Activated information in the context:
+## [1] &quot;M&quot;            &quot;default.vals&quot; &quot;students&quot;</code></pre>
+</div>
+<div id="removing-a-node-from-the-structure" class="section level3">
+<h3>Removing a node from the structure</h3>
+<p>Removing a whole node is syntactically simple but requires a high level of awareness. Removing root parameters such as <code>students</code> or <code>concepts</code> can cause the whole system to crash since everything is built up from these root parameters. In short, removing parameters at higher level creates less an impact on the whole structure than removing lower ones.</p>
+<p>In this first example, let’s remove a “data parameter”, namely <code>bkt</code>:</p>
+<pre class="r"><code>bkt.node &lt;- edmtree.remove(&quot;bkt&quot;)</code></pre>
+<pre><code>## Successfully removed bkt</code></pre>
+<pre class="r"><code>edmtree.fetch(&quot;bkt&quot;)</code></pre>
+<pre><code>## Error in edmtree.fetch(&quot;bkt&quot;): 'bkt' is not found in current tree</code></pre>
+<p>Later on, plugging <code>bkt.node</code> back into the structure is simple, but only because this is a special case where <code>bkt</code> is at data level. The situation is more complicated when deleting a lower level node such as <code>concept.exp</code>.</p>
+<pre class="r"><code># For the purpose of illustration, let's first recover everything for M
+edmtree.replace('M', tell = M.node$tell, f.tell = M.node$f.tell,
+                gen = M.node$gen, f.gen = M.node$f.gen)
+concept.exp.node &lt;- edmtree.remove(&quot;concept.exp&quot;)</code></pre>
+<pre><code>## Remove concept.exp from M$tell</code></pre>
+<pre><code>## Remove method (students, concept.exp) from M$gen</code></pre>
+<pre><code>## Remove concept.exp from nmf.dis$tell</code></pre>
+<pre><code>## Remove concept.exp from nmf.com$tell</code></pre>
+<pre><code>## Remove concept.exp from nmf.con$tell</code></pre>
+<pre><code>## Successfully removed concept.exp</code></pre>
+<pre class="r"><code>get.par('concept.exp', pars(concepts = 3))</code></pre>
+<pre><code>## Error in edmtree.fetch(node.name): 'concept.exp' is not found in current tree</code></pre>
+<p>As can be seen, removing <code>concept.exp</code> will consequently remove several other parts of the whole structure. Let’s say you want to reverse <code>edmsyn</code> back to the state before this removal, you will have to plug the <code>concept.exp.node</code> back and <em>manually</em> recover everything else that have gone along.</p>
+<p>To do this, for example, adding method (<code>students</code>, <code>concept.exp</code>) back into <code>M</code>, <code>edmtree.add</code> is needed.</p>
+</div>
+</div>
+<div id="adding-with-edmtree.add" class="section level2">
+<h2>Adding with <code>edmtree.add</code></h2>
+<div id="adding-a-node" class="section level3">
+<h3>Adding a node</h3>
+<p>This task is simple so long as you have already done the hard part: defining all four components <code>tell</code>, <code>f.tell</code>, <code>gen</code> and <code>f.gen</code> of the node. With node <code>concept.exp</code> in the removal section above, luckily we have saved these components into <code>concept.exp.node</code>. Let’s reuse them for a quick illustration</p>
+<pre class="r"><code>edmtree.add('concept.exp', tell = concept.exp.node$tell,
+            f.tell = concept.exp.node$f.tell,
+            gen = concept.exp.node$gen,
+            f.gen = concept.exp.node$f.gen)
+concept.exp &lt;- get.par('concept.exp', pars(concepts=3))$value
+print(concept.exp)</code></pre>
+<pre><code>## [1] 0.1715011 0.2482985 0.8237567</code></pre>
+</div>
+<div id="adding-type-2-connection" class="section level3">
+<h3>Adding type-2 connection</h3>
+<p>Now move on to adding method (<code>concept.exp</code>, <code>students</code>) into <code>M</code>. Again, we will reuse <code>M.node</code> for a quick and clean illustration</p>
+<pre class="r"><code># First let's see what method is being used to generate M
+# When students and concept.exp is given
+p &lt;- pars(students = 10, concept.exp = concept.exp)
+M &lt;- get.par('M', p, progress = TRUE)</code></pre>
+<pre><code>## Generate M from c(&quot;students&quot;, &quot;skill.space&quot;, &quot;skill.dist&quot;)
+## Generate skill.space from c(&quot;concepts&quot;, &quot;skill.space.size&quot;)
+## Generate skill.space.size from concepts
+## Generate skill.dist from skill.space.size</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'skill.space.size' receives different values at once</code></pre>
+<pre class="r"><code># See what we have in M.node
+M.node$gen</code></pre>
+<pre><code>## [[1]]
+## [1] &quot;S&quot;
+## 
+## [[2]]
+## [1] &quot;students&quot;    &quot;skill.space&quot; &quot;skill.dist&quot; 
+## 
+## [[3]]
+## [1] &quot;students&quot;    &quot;concept.exp&quot;</code></pre>
+<pre class="r"><code># Add the new method
+edmtree.add.gen('M', gen.method = M.node$gen[[3]], 
+                f.gen.method = M.node$f.gen[[3]])
+
+# Generate M again to see the change
+M &lt;- get.par('M', p, progress = TRUE)$value</code></pre>
+<pre><code>## Generate M from c(&quot;students&quot;, &quot;concept.exp&quot;)</code></pre>
+<p>Now as method (<code>students</code>, <code>concept.exp</code>) is available, and clearly has a better input utilisation than (<code>students</code>, <code>skill.space</code>, <code>skill.dist</code>) (see <strong>The generating criteria</strong> section above), <code>edmsyn</code> opts for this method to generate <code>M</code>.</p>
+</div>
+<div id="adding-type-1-connection" class="section level3">
+<h3>Adding type-1 connection</h3>
+<p>Adding <code>concept.exp</code> into <code>M$tell</code> is also a necessary step in recovering the deleted <code>concept.exp</code> node. In this task, <code>edmtree.add.tell</code> is used.</p>
+<pre class="r"><code># For the purpose of illustration, let's say knowing M only tells us about the number of concepts
+edmtree.replace('M', tell = 'concepts', f.tell = function(M){
+  return(list(nrow(M)))
+})
+
+# Now see that currently knowing M tells nothing about the expected mastery rate for each concept or the number of students
+p &lt;- pars(M = M)
+print(p)</code></pre>
+<pre><code>## Activated information in the context:
+## [1] &quot;M&quot;            &quot;default.vals&quot; &quot;concepts&quot;</code></pre>
+<pre class="r"><code># It is time to add the full set of tell to M
+edmtree.add.tell('M', c('concept.exp', 'students'), function(M){
+  return(list( rowMeans(M), ncol(M) ))
+})
+p &lt;- pars(M = M)
+print(p)</code></pre>
+<pre><code>## Activated information in the context:
+## [1] &quot;M&quot;            &quot;default.vals&quot; &quot;concepts&quot;     &quot;concept.exp&quot; 
+## [5] &quot;students&quot;</code></pre>
+<pre class="r"><code># Check if all calulations are correct
+identical( dim(M), c(p$concepts, p$students) )</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>identical( p$concept.exp, rowMeans(M) )</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+</div>
+<div id="a-toy-model" class="section level3">
+<h3>A toy model</h3>
+<p>Let’s wrap up this section by going through the process of adding a whole new model into <code>edmsyn</code> structure. During this process, a few useful techniques that <code>edmsyn</code> provides will also be introduced, so it is beneficial to pay attention to the details in this section. Note that:</p>
+<ol style="list-style-type: decimal">
+<li><p>None of the details in this toy model makes sense, all of them is specifically designed for illustration purpose</p></li>
+<li><p>This part covers only <code>edmtree.add</code>. <code>edmtree.replace</code> and <code>edmtree.remove</code> will not be used since we are not modifying any of the existing models and parameters.</p></li>
+</ol>
+<p>Below is an outline of what is added to <code>edmsyn</code> by this new model (named <code>toy</code>):</p>
+<ul>
+<li>a root integer parameter named <code>foo</code></li>
+<li>an integer parameter named <code>lower.foo</code> being the strict lower bound of <code>foo</code> (i.e. <code>foo</code> must be greater than <code>lower.foo</code>), <code>lower.foo</code> have the default value of 1.</li>
+<li>an integer parameter named <code>upper.foo</code> being the upper bound of <code>foo</code> (i.e. <code>foo</code> must be less than or equal to <code>upper.foo</code>), <code>upper.foo</code> have the default value equal to the sum of default value for <code>min.it.per.tree</code> and <code>concepts</code>.</li>
+<li><code>bar</code>, a matrix with dimension (<code>foo</code>,<code>concepts</code>), its entries being real numbers between 0 and 1.</li>
+<li>data node of this model (named <code>toy</code>) is a list with two components: the first one is a matrix obtained from the rounded multiplication of <code>foo</code> and <code>M</code>, the second is the number of concepts</li>
+</ul>
+<pre class="r"><code># foo is a root node, with no default values
+edmtree.add('foo', integer = TRUE)</code></pre>
+<pre><code>## 'foo' appears to be a root node</code></pre>
+<pre><code>## 'foo' appears to have no default initialization</code></pre>
+<pre class="r"><code>edmtree.add('lower.foo', integer = TRUE,
+            tell = 'foo', f.tell = less.strict,
+            gen = 'default.vals', f.gen = 1)</code></pre>
+<pre><code>## 'lower.foo' appears to have a constant default value</code></pre>
+<p><code>less.strict</code> is a special function provided by edmsyn for cases when you want to tell the structure that <code>lower.foo</code> should be strictly less than <code>foo</code>. Alternatively, <code>edmtree.add.tell('foo', tell = 'lower.foo', f.tell = greater.strict)</code> gives the same effect. There are four such special functions recognised by <code>edmsyn</code>: <code>less.equal</code>, <code>less.strict</code>, <code>greater.equal</code>, and <code>greater.strict</code>.</p>
+<p>The presence of these four functions highlighted the fact that inferring information in <code>edmsyn</code> is not solely inferring values, but can also be inferring different aspects of this value, namely the bound of them in this case.</p>
+<pre class="r"><code># Now add upper.foo
+edmtree.add('upper.foo', integer = TRUE,
+            gen = c('default.vals', 'concepts'),
+            f.gen = function(default.vals, concepts){
+              return(default.vals$min.it.per.tree + concepts)
+            })</code></pre>
+<pre><code>## 'upper.foo' appears to be a root node</code></pre>
+<pre><code>## 'upper.foo' appears to have a default value that relies on at least one run-time values</code></pre>
+<pre class="r"><code># Another use of special bound function
+edmtree.add.tell('upper.foo', 'concepts', function(upper.foo){
+  list(greater.equal(upper.foo - default()$min.it.per.tree))
+})</code></pre>
+<pre><code>## 'upper.foo' appears to have a default value that relies on at least one run-time values</code></pre>
+<pre class="r"><code># Instead of upper.foo telling the bound of foo,
+# we will do it in the opposite direction,
+# just for the purpose of illustration
+edmtree.add.tell('foo', tell = 'upper.foo', f.tell = less.equal)</code></pre>
+<pre><code>## 'foo' appears to have no default initialization</code></pre>
+<pre class="r"><code># Now since lower.foo and upper.foo are both presented in the structure
+# it's time to add a generating method for foo
+edmtree.add.gen('foo', gen.method = c('lower.foo', 'upper.foo'),
+                f.gen.method = function(lower.foo, upper.foo){
+                  sample((lower.foo+1) : upper.foo, 1)
+                })
+# add bar
+edmtree.add('bar', gen = c('foo', 'concepts'),
+            f.gen = function(foo, concepts){
+              matrix(runif(foo * concepts), foo, concepts)
+            })</code></pre>
+<pre><code>## 'bar' appears to be a root node</code></pre>
+<pre class="r"><code># dimensions of bar are foo and concepts
+edmtree.add.tell('bar', tell = c('foo', 'concepts'),
+                 f.tell = function(bar){
+                   list(nrow(bar), ncol(bar))
+                 })</code></pre>
+<p>Note that it is okay not to add the <code>tell</code> component for <code>bar</code>, (in fact, it is okay to skip defining <code>tell</code> and <code>f.tell</code> in <em>every</em> parameter, your application will still run just fine as long as the rest is properly designed). However doing so will limit the capability of <code>edmsyn</code> to recognise conflicts (<strong>condition 2</strong>). For example, <code>pars(bar = matrix(0, 3, 5), concepts = 4)</code> will not raise the conflict between 4 and 5 if <code>bar$tell</code> does not include the inference for <code>concepts</code>. Adding <code>tell</code> and <code>f.tell</code> is a good practice if you want to add more debugging power to a big and complicated application.</p>
+<pre class="r"><code># to make the model a little more sophisticated,
+# we add another generating method for bar
+edmtree.add.gen('bar', gen = c('M', 'foo'),
+                f.gen = function(M, foo){
+                  concepts = nrow(M)
+                  matrix(runif(foo * concepts), foo, concepts)
+                })
+# finally, add the data node &quot;toy&quot;
+edmtree.add('toy', data = TRUE,
+            gen = c('bar','M'), f.gen = function(bar, M){
+              list(R = round(bar %*% M), concepts = nrow(M))
+            },
+            tell = c('bar', 'M'), f.tell = function(toy){
+              # Note that the following learning algorithm makes no sense
+              # it is just for the purpose of illustration
+              concepts = toy$concepts
+              R = toy$R
+              foo = nrow(R)
+              students = ncol(R)
+              bar = matrix(runif(foo * concepts), foo, concepts)
+              M = matrix(sample(0:1, concepts * students, TRUE),
+                         concepts, students)
+              list(bar, M)
+            })
+
+# Check if ALL.MODELS includes &quot;toy&quot; (yes it does)
+edmconst$ALL.MODELS</code></pre>
+<pre><code>##  [1] &quot;exp&quot;     &quot;irt&quot;     &quot;poks&quot;    &quot;dina&quot;    &quot;dino&quot;    &quot;lin.avg&quot; &quot;nmf.con&quot;
+##  [8] &quot;nmf.dis&quot; &quot;nmf.com&quot; &quot;toy&quot;</code></pre>
+<p>So, that is all there is to plug a new model into <code>edmsyn</code>. The process is simple and it forces users to think about various aspects while doing so. Another benefit is that before adding <code>toy</code>, a whole system of 62 parameters with carefully-built and well-tested connections is already there. This makes the work even lighter, we saved a lot of time before moving on testing our model.</p>
+</div>
+<div id="test-the-toy-model" class="section level3">
+<h3>Test the toy model</h3>
+<pre class="r"><code># 1. Test the bounds
+p &lt;- pars(lower.foo = 3, foo = 3)</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'foo' violates bound suggested by 'lower.foo'</code></pre>
+<pre class="r"><code>p &lt;- pars(foo = 4, upper.foo = 3)</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'upper.foo' violates bound suggested by 'foo'</code></pre>
+<pre class="r"><code># This one requires reasoning to detect
+# Thus error is not raised immediately
+p &lt;- pars(lower.foo = 3, upper.foo = 2)
+# But nevertheless, when p go into use, it immediately fails
+get.par('foo', p)</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'foo' violates bound suggested by 'lower.foo'</code></pre>
+<pre class="r"><code>p &lt;- pars(upper.foo = 5, concepts = 5)</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'concepts' violates bound suggested by 'upper.foo'</code></pre>
+<pre class="r"><code># 2. Test foo$gen
+get.par('foo', pars())</code></pre>
+<pre><code>## Error in up.stream(target, pars, FALSE, progress): Cannot reach 'foo' since 'concepts' is missing</code></pre>
+<pre class="r"><code>p &lt;- pars(p, upper.foo = 15)
+get.par('foo', p)</code></pre>
+<pre><code>## $value
+## [1] 9
+## 
+## $context
+## Activated information in the context:
+## [1] &quot;lower.foo&quot;    &quot;upper.foo&quot;    &quot;default.vals&quot; &quot;foo&quot;</code></pre>
+<pre class="r"><code>p &lt;- pars(concepts = 5)
+get.par('foo', p, progress = TRUE)</code></pre>
+<pre><code>## Generate foo from c(&quot;lower.foo&quot;, &quot;upper.foo&quot;)
+## Generate lower.foo from default.vals
+## Generate upper.foo from c(&quot;default.vals&quot;, &quot;concepts&quot;)</code></pre>
+<pre><code>## $value
+## [1] 4
+## 
+## $context
+## Activated information in the context:
+## [1] &quot;concepts&quot;     &quot;default.vals&quot; &quot;lower.foo&quot;    &quot;upper.foo&quot;   
+## [5] &quot;foo&quot;</code></pre>
+<pre class="r"><code>p &lt;- pars(M = M)
+p &lt;- get.par('foo', p, progress = TRUE)</code></pre>
+<pre><code>## Generate foo from c(&quot;lower.foo&quot;, &quot;upper.foo&quot;)
+## Generate lower.foo from default.vals
+## Generate upper.foo from c(&quot;default.vals&quot;, &quot;concepts&quot;)</code></pre>
+<pre class="r"><code>print(p)</code></pre>
+<pre><code>## $value
+## [1] 3
+## 
+## $context
+## Activated information in the context:
+## [1] &quot;M&quot;            &quot;default.vals&quot; &quot;concepts&quot;     &quot;concept.exp&quot; 
+## [5] &quot;students&quot;     &quot;lower.foo&quot;    &quot;upper.foo&quot;    &quot;foo&quot;</code></pre>
+<pre class="r"><code># 3. Test bar
+get.par('bar', pars())</code></pre>
+<pre><code>## Error in up.stream(target, pars, FALSE, progress): Cannot reach 'bar' since 'concepts' is missing</code></pre>
+<pre class="r"><code>get.par('bar', pars(upper.foo = 15))</code></pre>
+<pre><code>## Error in up.stream(target, pars, FALSE, progress): Cannot reach 'bar' since 'concepts' is missing</code></pre>
+<pre class="r"><code>get.par('bar', pars(lower.foo = 3, concepts = 5), progress = TRUE)</code></pre>
+<pre><code>## Generate bar from c(&quot;foo&quot;, &quot;concepts&quot;)
+## Generate foo from c(&quot;lower.foo&quot;, &quot;upper.foo&quot;)
+## Generate upper.foo from c(&quot;default.vals&quot;, &quot;concepts&quot;)</code></pre>
+<pre><code>## $value
+##            [,1]       [,2]        [,3]      [,4]      [,5]
+## [1,] 0.64998883 0.89090470 0.965725145 0.8474282 0.8515781
+## [2,] 0.55115956 0.29617690 0.145885864 0.3922261 0.4138070
+## [3,] 0.63600423 0.55691546 0.008518833 0.8171661 0.9369018
+## [4,] 0.03934416 0.07725642 0.727930685 0.7823676 0.5247688
+## 
+## $context
+## Activated information in the context:
+## [1] &quot;concepts&quot;     &quot;lower.foo&quot;    &quot;default.vals&quot; &quot;upper.foo&quot;   
+## [5] &quot;foo&quot;          &quot;bar&quot;</code></pre>
+<pre class="r"><code>get.par('bar', pars(M = M), progress = TRUE)</code></pre>
+<pre><code>## Generate bar from c(&quot;foo&quot;, &quot;concepts&quot;)
+## Generate foo from c(&quot;lower.foo&quot;, &quot;upper.foo&quot;)
+## Generate lower.foo from default.vals
+## Generate upper.foo from c(&quot;default.vals&quot;, &quot;concepts&quot;)</code></pre>
+<pre><code>## $value
+##            [,1]      [,2]      [,3]
+## [1,] 0.13221637 0.8686755 0.7356017
+## [2,] 0.06616522 0.3094461 0.6346916
+## [3,] 0.80324177 0.6297708 0.3223879
+## [4,] 0.87863373 0.9410528 0.4728168
+## 
+## $context
+## Activated information in the context:
+## [1] &quot;M&quot;            &quot;default.vals&quot; &quot;concepts&quot;     &quot;concept.exp&quot; 
+## [5] &quot;students&quot;     &quot;lower.foo&quot;    &quot;upper.foo&quot;    &quot;foo&quot;         
+## [9] &quot;bar&quot;</code></pre>
+<pre class="r"><code># 4. Test data
+toys &lt;- gen('toy', pars(M = M, bar = matrix(0, 3, 5)))</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'concepts' receives different values at once</code></pre>
+<pre class="r"><code>toys &lt;- gen('toy', pars(M = M, bar = matrix(1, 3, 3)),
+            n = 2, progress = TRUE)</code></pre>
+<pre><code>## Generate toy from c(&quot;bar&quot;, &quot;M&quot;)</code></pre>
+<pre class="r"><code>toys &lt;- gen('toy', pars(students = 20, concepts = 4), 
+            n = 3, progress = TRUE)</code></pre>
+<pre><code>## Generate toy from c(&quot;bar&quot;, &quot;M&quot;)
+## Generate bar from c(&quot;foo&quot;, &quot;concepts&quot;)
+## Generate foo from c(&quot;lower.foo&quot;, &quot;upper.foo&quot;)
+## Generate lower.foo from default.vals
+## Generate upper.foo from c(&quot;default.vals&quot;, &quot;concepts&quot;)
+## Generate M from c(&quot;students&quot;, &quot;concept.exp&quot;)
+## Generate concept.exp from concepts</code></pre>
+<pre class="r"><code>toys &lt;- gen('toy', pars(M = M), n = 3, progress = TRUE)</code></pre>
+<pre><code>## Generate toy from c(&quot;bar&quot;, &quot;M&quot;)
+## Generate bar from c(&quot;M&quot;, &quot;foo&quot;)
+## Generate foo from c(&quot;lower.foo&quot;, &quot;upper.foo&quot;)
+## Generate lower.foo from default.vals
+## Generate upper.foo from c(&quot;default.vals&quot;, &quot;concepts&quot;)</code></pre>
+<pre class="r"><code>toys.syn &lt;- syn('toy', toys[[2]]$toy,
+                keep.pars = c(&quot;foo&quot;,&quot;concept.exp&quot;),
+                students = 12, n = 3, progress = TRUE)</code></pre>
+<pre><code>## Learning by 'toy' ...
+## Generate toy from c(&quot;bar&quot;, &quot;M&quot;)
+## Generate bar from c(&quot;foo&quot;, &quot;concepts&quot;)
+## Generate M from c(&quot;students&quot;, &quot;concept.exp&quot;)</code></pre>
+</div>
+</div>
+<div id="working-with-the-whole-structure" class="section level2">
+<h2>Working with the whole structure</h2>
+<p>Now that you have everything needed to fully manipulate the internal structure of <code>edmsyn</code>, it is time to move on working with the whole structure (as oppose to working with nodes and edges like before). The first thing to know is that, each time <code>library(edmsyn)</code> is executed, the original <code>edmsyn</code> graphical structure (without <code>foo</code>, <code>bar</code>, <code>toy</code>, etc) will be restored and everything we have built so far is lost. Thus, occasionally saving the modified structure is important.</p>
+<pre class="r"><code>toy.tree &lt;- edmtree.dump()</code></pre>
+<p>Assume a different situation where no part of the current structure is needed, you will manually build a whole new structure from scratch. This case, the first thing to do is to clear out all nodes</p>
+<pre class="r"><code>edmtree.clear()
+edmtree.fetch('toy')</code></pre>
+<pre><code>## Error in edmtree.fetch(&quot;toy&quot;): 'toy' is not found in current tree</code></pre>
+<pre class="r"><code>edmtree.fetch('M')</code></pre>
+<pre><code>## Error in edmtree.fetch(&quot;M&quot;): 'M' is not found in current tree</code></pre>
+<p>Lastly, you can always restore a saved structure</p>
+<pre class="r"><code>edmtree.load(toy.tree)
+gen('toy', pars(M = M))</code></pre>
+<pre><code>## Activated information in the context:
+##  [1] &quot;M&quot;            &quot;default.vals&quot; &quot;concepts&quot;     &quot;concept.exp&quot; 
+##  [5] &quot;students&quot;     &quot;lower.foo&quot;    &quot;upper.foo&quot;    &quot;foo&quot;         
+##  [9] &quot;bar&quot;          &quot;toy&quot;</code></pre>
+<pre class="r"><code>gen('bkt', pars(students = 15, items = 20))</code></pre>
+<pre><code>## Error in gen(&quot;bkt&quot;, pars(students = 15, items = 20)): Model 'bkt' is not available</code></pre>
+<pre class="r"><code># Leave the argument part empty
+# if you want the original edmsyn structure
+edmtree.load()
+gen('toy', pars(M = M))</code></pre>
+<pre><code>## Error in gen(&quot;toy&quot;, pars(M = M)): Model 'toy' is not available</code></pre>
+<pre class="r"><code>gen('bkt', pars(students = 15, items = 20, 
+                concepts = 4, time = 10))</code></pre>
+<pre><code>## Activated information in the context:
+##  [1] &quot;items&quot;        &quot;concepts&quot;     &quot;students&quot;     &quot;time&quot;        
+##  [5] &quot;default.vals&quot; &quot;per.item&quot;     &quot;S&quot;            &quot;L&quot;           
+##  [9] &quot;bkt.slip&quot;     &quot;bkt.guess&quot;    &quot;order&quot;        &quot;bkt&quot;</code></pre>
 </div>
 <div class="footnotes">
 <hr />

@@ -2,11 +2,6 @@
 title: "Educational Data Synthesizer"
 author: "Hoang-Trieu Trinh, Behzad Beheshti, Michel C. Desmarais"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Vignette Title}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ## Introduction
@@ -30,10 +25,11 @@ R package `edmsyn` provides users a simple framework that conveniently handles a
 library(edmsyn)
 ```
 
-Vector `ALL.MODELS` loaded at the start of this package contains the names of all available models.
+Vector `edmconst$ALL.MODELS` loaded at the start of this package contains the names of all available models.
 
 ```{r all_models}
-edmsyn::ALL.MODELS
+ALL.MODELS <- edmconst$ALL.MODELS
+ALL.MODELS
 ```
 
 ## Class `context` and function `pars()`
@@ -252,10 +248,10 @@ Generating synthetic data includes three steps:
 
 1. Learn the most probable context by using `learn`.
 
-2. Keep some parameters (the default choice is stored in `KEEP`^[`KEEP` is designed in a way such that, with any new value the user updates for `students`, the new context is still consistent and sufficient, in this sense function `syn` generates synthetic data by creating simulated students.]) and discard the rest, also allow the user to change parameter `students`.
+2. Keep some parameters (the default choice is stored in `edmconst$KEEP`^[`edmconst$KEEP` is designed in a way such that, with any new value the user updates for `students`, the new context is still consistent and sufficient, in this sense function `syn` generates synthetic data by creating simulated students.]) and discard the rest, also allow the user to change parameter `students`.
 
 ```{r keep}
-KEEP
+edmconst$KEEP
 ```
 
 3. Generate synthetic data from this new context by `gen`

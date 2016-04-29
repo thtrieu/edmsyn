@@ -32,7 +32,7 @@ get.par("students", p)
 # However, it is not trivial to generate a skill mastery matrix from p
 p$M # NULL returned
 # get.par can do this
-M <- get.par("M", p, progress = True)
+M <- get.par("M", p, progress = TRUE)
 print(M)
 }
 \author{

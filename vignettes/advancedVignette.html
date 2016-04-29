@@ -116,795 +116,651 @@ $(document).ready(function () {
 </div>
 
 
-<div id="introduction" class="section level2">
-<h2>Introduction</h2>
-<p>In general, generating data from a given set of parameters under a specified model’s assumptions is straightforward, as long as the following two conditions are satisfied:</p>
-<ul>
-<li><em>condition 1</em> : All the necessary parameters are given.</li>
-<li><em>condition 2</em> : Information inferred from the given parameters’ values does not conflict with itself (user input is consistent).</li>
-</ul>
-<p>However, checking for these conditions is not always a straightforward task. Namely, difficulties may arise from the Educational Data Mining literature, where parameters are usually organised in a complex manner. Some of them are shared between different models (e.g. average success rate, student variance, number of concepts, etc), the collection of all parameters can also be arranged into a hierarchical structure in the sense that some parameters can be used to generate some others, as oppose to a set of parameters that directly generates data.</p>
-<p>For example, with Non-negative Matrix Factorization models, Q-matrix and Skill matrix are parameters that directly generate data, while these two parameters can be generated using parameters at lower level such as number of students, number of items, or number of concepts. A sufficient set of parameters to generate data in this case can be {Q-matrix, Skill matrix} or {Q-matrix, number of students}. For the former set to be consistent, number of columns of Q-matrix must equate the number of rows of Skill matrix because both represent number of concepts.</p>
-<p>One can conclude from the above observation that there are many different ways to generate data depending on which model is being acquired and which parameters are given (assuming that they all satisfy <em>condition 1</em> and <em>condition 2</em>). At this point it is important to stress that for different sufficient and consistent sets of parameters, even with respect to a single model <em>M</em>, we must expect different amounts of variance in the generated data. The reason is, with a set of parameters at lower level, it requires more intermediate generating steps before reaching the final one (generating data), thus produces more variability in the corresponding generated data.</p>
-<p>R package <code>edmsyn</code> provides users a simple framework that conveniently handles all the situations above while generating data, including checking for <em>condition 1</em> and <em>condition 2</em>. It also automates the process of learning parameters from raw data, modifying and using this information to create synthetic data from 10 different models. This document is intended to give a quick and thorough tutorial on using <code>edmsyn</code>.</p>
-</div>
-<div id="loading-the-package" class="section level2">
-<h2>Loading the package</h2>
+<div id="load-the-package" class="section level2">
+<h2>Load the package</h2>
 <pre class="r"><code>library(edmsyn)</code></pre>
-<p>Vector <code>edmconst$ALL.MODELS</code> loaded at the start of this package contains the names of all available models.</p>
-<pre class="r"><code>ALL.MODELS &lt;- edmconst$ALL.MODELS
-ALL.MODELS</code></pre>
-<pre><code>##  [1] &quot;exp&quot;     &quot;irt&quot;     &quot;poks&quot;    &quot;dina&quot;    &quot;dino&quot;    &quot;lin.avg&quot; &quot;nmf.con&quot;
-##  [8] &quot;nmf.dis&quot; &quot;nmf.com&quot; &quot;bkt&quot;</code></pre>
 </div>
-<div id="class-context-and-function-pars" class="section level2">
-<h2>Class <code>context</code> and function <code>pars()</code></h2>
-<p>Since some of the parameters are shared between different models, <code>edmsyn</code> did not regard the collection of all parameters from 10 models separately, but jointly as different aspects describing a single instance of reality. For example, the vector of discrimination factors of all items is a parameter belongs to the IRT-2pl model, which is not the case for the parameter Q-matrix, however, <code>edmsyn</code> introduces the class <code>context</code> where these two parameters can co-exist in a single object and can be utilized according to user purpose.</p>
-<p>Function <code>pars()</code> produce an object of class <code>context</code>.</p>
-<pre class="r"><code>p &lt;- pars(students = 15, items = 20)
-class(p)</code></pre>
-<pre><code>## [1] &quot;context&quot;</code></pre>
-<p>By the assignment <code>p &lt;- pars(students = 20, items = 20)</code> there is currently no other information in the context <code>p</code> except <code>students</code>, <code>items</code>, and <code>default.vals</code>.</p>
-<pre class="r"><code>print(p)</code></pre>
-<pre><code>## Activated information in the context:
-## [1] &quot;items&quot;        &quot;students&quot;     &quot;default.vals&quot;</code></pre>
-<p><code>p</code> - a <code>context</code> object, is essentially a <code>list</code> object with different components. <code>default.vals</code> is the component that is always available (activated) in any <code>context</code> object, it is an environment containing the default values for some of the parameters. Whenever one of these parameters is needed without user idicated input, the corresponding value will be fetched from <code>default.vals</code> and then loaded into the <code>context</code>.</p>
-<pre class="r"><code>class(p$default.vals)</code></pre>
-<pre><code>## [1] &quot;defaults&quot;</code></pre>
-<pre class="r"><code>names(p$default.vals)</code></pre>
-<pre><code>##  [1] &quot;min.ntree&quot;        &quot;bkt.mod&quot;          &quot;L.st.var&quot;        
-##  [4] &quot;abi.mean&quot;         &quot;student.var&quot;      &quot;min.depth&quot;       
-##  [7] &quot;alpha.p&quot;          &quot;trans&quot;            &quot;time&quot;            
-## [10] &quot;p.min&quot;            &quot;density&quot;          &quot;avg.success&quot;     
-## [13] &quot;bkt.slip.st.var&quot;  &quot;bkt.guess.st.var&quot; &quot;abi.sd&quot;          
-## [16] &quot;min.it.per.tree&quot;  &quot;S.st.var&quot;         &quot;per.item&quot;        
-## [19] &quot;alpha.c&quot;</code></pre>
-<pre class="r"><code>p$default.vals$avg.success</code></pre>
-<pre><code>## [1] 0.5</code></pre>
-<pre class="r"><code>p$avg.success</code></pre>
-<pre><code>## NULL</code></pre>
-<p>At some point in the future, if data need to be generated from <code>p</code> by a model that requires <code>avg.success</code>, in case this parameter had not been inputted by the user, the value of <code>0.5</code> would be used.</p>
-<p>We can change these default values by using the <code>init</code> function</p>
-<pre class="r"><code>p_ &lt;- pars(default.vals = default(avg.success = 0.6))
-p_$default.vals$avg.success</code></pre>
-<pre><code>## [1] 0.6</code></pre>
-<p>Function <code>pars</code> can also be used to update an available <code>context</code>, for example, we can change the number of students in <code>p</code> from 15 to 20, add the <em>number of concepts</em> information into <code>p</code>, and delete the <em>number of items</em> information.</p>
-<pre class="r"><code>p &lt;- pars(p, concepts = 5, students = 20, items = NULL)
-p</code></pre>
-<pre><code>## Activated information in the context:
-## [1] &quot;students&quot;     &quot;default.vals&quot; &quot;concepts&quot;</code></pre>
-<pre class="r"><code># Recover items = 20 for later use
-p &lt;- pars(p, items = 20)
-p</code></pre>
-<pre><code>## Activated information in the context:
-## [1] &quot;students&quot;     &quot;default.vals&quot; &quot;concepts&quot;     &quot;items&quot;</code></pre>
-<p><code>pars</code> also automatically figures out obtainable parameters at lower level whenever a parameter is activated. For example, dimensions of <code>M</code> imply the number of concepts and the number of students. Thus, if a context is supplied with <code>M</code>, parameters <code>concepts</code> and <code>students</code> (and some other obtainable parameters) are activated.</p>
-<pre class="r"><code>p_ &lt;- pars(M = matrix(1, 7, 30))
-p_</code></pre>
-<pre><code>## Activated information in the context:
-## [1] &quot;M&quot;            &quot;default.vals&quot; &quot;concepts&quot;     &quot;students&quot;    
-## [5] &quot;concept.exp&quot;</code></pre>
-<pre class="r"><code>p_$concepts</code></pre>
-<pre><code>## [1] 7</code></pre>
-<p>While assembling input parameters from users, <code>pars</code> will check for their consistency (<em>condition 2</em>) <a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>. Since <code>p</code> is a context where there are 20 question items, a Q-matrix with 30 rows is incompatible.</p>
-<pre class="r"><code>p &lt;- pars(p, Q = matrix(1,30,5))</code></pre>
-<pre><code>## Error in down.stream(new.pars): 'items' receives different values at once</code></pre>
-<p>In short, the introduction of class <code>context</code> and function <code>pars</code> is mostly for convenience in the following cases:</p>
-<ul>
-<li>A user is working across many different models with some shared parameters.</li>
-<li>A user wants to study data generation from different sufficient sets of parameters. Without having to use many functions to handle each case separately, he/she will only need a function to deal with objects of a single class <code>context</code>.</li>
-</ul>
+<div id="modifying-edmsyn" class="section level2">
+<h2>Modifying <code>edmsyn</code></h2>
+<p><code>edmsyn</code> comes with a pre-defined set of parameters and relationships amongst themselves. These relationships are rules that help <code>edmsyn</code> derive values for one or more parameters from some others. Specifically, these rules are represented as functions in the package. For example, a function that takes two integers and randomly produce a binary matrix with its dimensions being the two inputted integers can be used as the rule to derive <code>M</code> (skill mastery matrix) from <code>students</code> and <code>concepts</code>. Rules that derive value for “data parameter” such as <code>poks</code>, <code>dina</code>, or <code>dino</code> encode POKS, DINA, DINO models respectively. Similarly, rules that derive value in the opposite direction encode the corresponding learning algorithms.</p>
+<p>The choice of built-in parameters, models, and learning algorithms is made independently at the time of development for <code>edmsyn</code> and thus, it may or may not satisfy users’ need. That is why <code>edmsyn</code> also comes with a set of tools that allow its users to re-define all these components to the extent of building a whole new set of parameters and models, while still retaining all the original benefits that it offers. All possible changes on <code>edmsyn</code> will be made on a single graphical structure that <code>edmsyn</code> creates at the loading time, with vertices representing parameters and edges encoding the respective relationships.</p>
+<p>Functions that allows these modifications have names starting with <code>edmtree.</code> There are just a few of such functions and they provide everything you need to work with <code>edmsyn</code> at its internal level. This tutorial will also walk you through the building blocks of them so that an in-depth understanding of <code>edmsyn</code> mechanism is provided. By the end of this section, you are expected to handle <code>edmtree.</code> functions properly and efficiently.</p>
+<p>If you do not feel going that deep, feel free to skip to <strong>A toy model</strong> at your own risk. Reading <strong>A toy model</strong> before going through the whole tutorial is also a good suggestion.</p>
 </div>
-<div id="get-the-value-of-a-parameter-from-a-context-by-get.par" class="section level2">
-<h2>Get the value of a parameter from a context by <code>get.par</code></h2>
-<p>We can access to components of a <code>context</code> object just like accessing to components of a list. <code>edmsyn</code> provides an alternative approach to this by the function <code>get.par</code></p>
-<pre class="r"><code>p$students</code></pre>
-<pre><code>## [1] 20</code></pre>
-<pre class="r"><code>get.par(&quot;students&quot;, p)</code></pre>
-<pre><code>## $value
-## [1] 20
-## 
-## $context
-## Activated information in the context:
-## [1] &quot;students&quot;     &quot;default.vals&quot; &quot;concepts&quot;     &quot;items&quot;</code></pre>
-<p>The advantage of <code>get.par</code> is that, it gives result even when the parameter is not available, as long as the parameter is possible to be generated. For example, if we want to produce the value of the skill mastery matrix (<code>M</code>) from <code>p</code>, the conventional operator <code>$</code> will return <code>NULL</code>, while <code>get.par</code> finds a way to generate <code>M</code> from <code>concepts</code> and <code>students</code>. Set the argument <code>progress = TRUE</code> to see how <code>get.par</code> does it.</p>
-<pre class="r"><code>p$M</code></pre>
-<pre><code>## NULL</code></pre>
-<pre class="r"><code>M_ &lt;- get.par(&quot;M&quot;, p, progress = TRUE)</code></pre>
-<pre><code>## Generate M from c(&quot;students&quot;, &quot;concept.exp&quot;)
-## Generate concept.exp from concepts</code></pre>
-<pre class="r"><code>M_</code></pre>
-<pre><code>## $value
-##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-## [1,]    0    1    0    1    1    1    0    1    0     1     1     0     1
-## [2,]    1    0    1    0    0    0    0    0    0     1     1     0     0
-## [3,]    1    1    1    1    1    1    1    1    1     1     1     1     1
-## [4,]    1    0    1    0    1    1    1    1    0     1     1     0     1
-## [5,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-##      [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-## [1,]     0     1     0     0     1     0     1
-## [2,]     0     0     0     0     0     0     0
-## [3,]     1     1     1     0     1     1     1
-## [4,]     0     1     1     1     1     1     1
-## [5,]     0     0     0     0     0     0     0
-## 
-## $context
-## Activated information in the context:
-## [1] &quot;students&quot;     &quot;default.vals&quot; &quot;concepts&quot;     &quot;items&quot;       
-## [5] &quot;concept.exp&quot;  &quot;M&quot;</code></pre>
-<p>As can be seen, the progress involves generating an intermediate parameter called <code>concept.exp</code> before generating <code>M</code>. <code>concept.exp</code> is a vector of the expected mastery rates for 5 concepts in <code>p</code>. By using <code>get.par</code>, we can examine the values of these intermediate generations.</p>
-<pre class="r"><code>M_$context$concept.exp</code></pre>
-<pre><code>## [1] 0.55 0.20 0.95 0.75 0.00</code></pre>
-<p>For example, looking at the above <code>concept.exp</code>, it is expected that there is about 55 percent of the students who mastered the first concept in <code>p</code>. In fact, due to the abundant availability of parameters co-existing in a context, generating <code>concept.exp</code> is just one amongst many other ways by which <code>get.par</code> can reach <code>M</code>, the reason why it turns out to be this way will be discussed in later parts.</p>
-<p>If we run <code>get.par</code> to obtain <code>M</code> again, in general the result will be different. This is because of the fact that each time doing so, another probabilistic generation will be carried out, thus we receive a different <code>concept.exp</code>, and after that a different <code>M</code>.</p>
-<pre class="r"><code>identical(M_$value, get.par(&quot;M&quot;, p)$value)</code></pre>
-<pre><code>## [1] FALSE</code></pre>
-<p><code>get.par</code> can detect whether there is enough information to generate the required parameters. For example, Q-matrix needs the number of concepts to be defined, without the number of concepts, there is no way Q-matrix can be derived.</p>
-<pre class="r"><code>p_ &lt;- pars(students = 20, items = 15)
-get.par(&quot;Q&quot;, p_)</code></pre>
-<pre><code>## Error in up.stream(target, pars, FALSE, progress): Cannot reach 'Q' since 'concepts' is missing</code></pre>
-<p>One way to fix this is supplying <code>M</code> to the context, which essentially contains the <em>number of concepts</em> information. By this, the process becomes possible</p>
-<pre class="r"><code>p_ &lt;- pars(p_, M = matrix(1, 4, 20))
-get.par(&quot;Q&quot;, p_)</code></pre>
-<pre><code>## $value
-##       [,1] [,2] [,3] [,4]
-##  [1,]    0    0    0    1
-##  [2,]    1    1    0    0
-##  [3,]    0    1    1    1
-##  [4,]    1    1    0    1
-##  [5,]    0    1    0    1
-##  [6,]    1    1    1    0
-##  [7,]    0    0    1    0
-##  [8,]    1    1    0    1
-##  [9,]    0    1    1    0
-## [10,]    0    1    1    0
-## [11,]    0    1    1    0
-## [12,]    1    1    0    1
-## [13,]    1    1    1    0
-## [14,]    0    0    1    1
-## [15,]    0    1    0    0
-## 
-## $context
-## Activated information in the context:
-## [1] &quot;items&quot;        &quot;students&quot;     &quot;default.vals&quot; &quot;M&quot;           
-## [5] &quot;concepts&quot;     &quot;concept.exp&quot;  &quot;Q&quot;</code></pre>
-</div>
-<div id="generate-data-from-a-context-using-gen" class="section level2">
-<h2>Generate data from a context using <code>gen</code></h2>
-<p>Parameters activated in a single context are ensured non-conflict while being put together by <code>pars</code> (<em>condition 2</em>). If a context satisfies <em>condition 1</em>, there will be a way to generate data from it. <code>edmsyn</code> provides function <code>gen</code> that can check for <em>condition 2</em> and generates data with the specified model. For example, the following code generates data from <code>p</code> by POKS model (Partial Order Knowledge Structure model) twice:</p>
-<pre class="r"><code>poks.data &lt;- gen(&quot;poks&quot;, p, n = 2, progress = TRUE)</code></pre>
-<pre><code>## Generate poks from c(&quot;students&quot;, &quot;po&quot;, &quot;avg.success&quot;, &quot;alpha.c&quot;, &quot;alpha.p&quot;, &quot;p.min&quot;)
-## Generate po from c(&quot;items&quot;, &quot;min.ntree&quot;, &quot;max.ntree&quot;, &quot;min.depth&quot;, &quot;max.depth&quot;, &quot;density&quot;, &quot;min.it.per.tree&quot;, &quot;max.it.per.tree&quot;, &quot;trans&quot;)
-## Generate min.ntree from default.vals
-## Generate max.ntree from items
-## Generate min.depth from default.vals
-## Generate max.depth from items
-## Generate density from default.vals
-## Generate min.it.per.tree from default.vals
-## Generate max.it.per.tree from items
-## Generate trans from default.vals
-## Generate avg.success from default.vals
-## Generate alpha.c from default.vals
-## Generate alpha.p from default.vals
-## Generate p.min from default.vals</code></pre>
-<pre class="r"><code>poks.data</code></pre>
+<div id="fetching-a-node-using-edmtree.fetch" class="section level2">
+<h2>Fetching a node using <code>edmtree.fetch</code></h2>
+<p>Firstly, let’s start with the skill mastery matrix <code>M</code></p>
+<pre class="r"><code>M.node &lt;- edmtree.fetch('M')
+class(M.node)</code></pre>
+<pre><code>## [1] &quot;list&quot;</code></pre>
+<pre class="r"><code>names(M.node)</code></pre>
+<pre><code>## [1] &quot;tell&quot;   &quot;gen&quot;    &quot;f.tell&quot; &quot;f.gen&quot;</code></pre>
+<p>The representation of <code>M</code> in <code>edmsyn</code> is essentially a list with four components <code>tell</code>, <code>f.tell</code>, <code>gen</code>, and <code>f.gen</code>. The first one, <code>tell</code>, is a set of names of parameters that receive information if the value of <code>M</code> is known.</p>
+<pre class="r"><code>M.node$tell</code></pre>
+<pre><code>## [1] &quot;concepts&quot;    &quot;students&quot;    &quot;concept.exp&quot;</code></pre>
+<p>In this case, the value of <code>M</code> <em>tells</em> <code>edmsyn</code> the values of <code>concepts</code>, <code>students</code> and <code>concept.exp</code> (expected mastery rate for each concept). This is quite straightforward since <code>concepts</code>, <code>students</code>, and <code>concept.exp</code> are respectively the row dimension, column dimension, and row means of <code>M</code>. At this point, it is reasonable to look at the third component <code>f.tell</code></p>
+<pre class="r"><code>M.node$f.tell</code></pre>
+<pre><code>## function (x) 
+## {
+##     list(nrow(x), ncol(x), rowMeans(x))
+## }
+## &lt;environment: 0x3c8c1d8&gt;</code></pre>
+<p>The third component, <code>f.tell</code>, is the function to derive values for each parameter listed in <code>tell</code> from value of <code>M</code>. As can be seen, this function does exactly what we expected: taking the row dimension, column dimension and row means value of its input <code>M</code>, assemble these results into a list as its return value.</p>
+<p>The second component, <code>gen</code>, is a list of generating methods for <code>M</code>.</p>
+<pre class="r"><code>M.node$gen</code></pre>
 <pre><code>## [[1]]
-## Activated information in the context:
-##  [1] &quot;students&quot;        &quot;default.vals&quot;    &quot;concepts&quot;       
-##  [4] &quot;items&quot;           &quot;min.ntree&quot;       &quot;min.depth&quot;      
-##  [7] &quot;density&quot;         &quot;min.it.per.tree&quot; &quot;trans&quot;          
-## [10] &quot;avg.success&quot;     &quot;alpha.c&quot;         &quot;alpha.p&quot;        
-## [13] &quot;p.min&quot;           &quot;max.ntree&quot;       &quot;max.depth&quot;      
-## [16] &quot;max.it.per.tree&quot; &quot;po&quot;              &quot;poks&quot;           
+## [1] &quot;S&quot;
 ## 
 ## [[2]]
-## Activated information in the context:
-##  [1] &quot;students&quot;        &quot;default.vals&quot;    &quot;concepts&quot;       
-##  [4] &quot;items&quot;           &quot;min.ntree&quot;       &quot;min.depth&quot;      
-##  [7] &quot;density&quot;         &quot;min.it.per.tree&quot; &quot;trans&quot;          
-## [10] &quot;avg.success&quot;     &quot;alpha.c&quot;         &quot;alpha.p&quot;        
-## [13] &quot;p.min&quot;           &quot;max.ntree&quot;       &quot;max.depth&quot;      
-## [16] &quot;max.it.per.tree&quot; &quot;po&quot;              &quot;poks&quot;</code></pre>
-<p>As can be seen, <code>gen</code> returns a list of two components, correspond to two generations required by option <code>n = 2</code>. Each of the two is a context. <code>edmsyn</code> views the generated data as <em>a part of the context</em>. In fact, we can consider <em>data</em> as a parameter at highest level. In each of the generated context, there is a component whose name is the same as the specified model <code>poks</code>, this component contains the generated data.</p>
-<pre class="r"><code>poks.data[[1]]$poks</code></pre>
-<pre><code>## $R
-##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    0    0    1    1    1    1    1    1    0     0     1     1     0
-##  [2,]    1    0    0    1    1    1    1    1    0     0     0     1     0
-##  [3,]    0    1    0    1    1    1    1    1    0     0     1     1     1
-##  [4,]    0    1    0    0    1    1    1    1    0     0     1     1     0
-##  [5,]    0    0    0    1    1    1    1    1    0     0     1     1     0
-##  [6,]    0    0    0    1    1    1    1    1    0     0     1     1     0
-##  [7,]    1    0    0    1    1    1    1    1    0     0     1     1     0
-##  [8,]    1    0    0    0    0    0    1    0    0     0     0     0     0
-##  [9,]    1    1    1    1    1    1    1    0    0     0     1     1     1
-## [10,]    0    0    0    1    1    1    1    1    0     0     1     1     0
-## [11,]    0    0    1    0    0    0    0    0    1     1     1     1     1
-## [12,]    1    1    1    1    1    1    1    1    1     0     1     1     1
-## [13,]    1    1    1    1    1    1    1    1    1     1     1     1     1
-## [14,]    1    0    0    0    1    1    1    0    0     0     1     1     1
-## [15,]    1    1    1    1    1    1    0    1    1     1     0     0     0
-## [16,]    0    1    1    1    1    1    1    1    0     0     1     1     1
-## [17,]    0    0    0    1    1    1    1    1    0     0     1     1     0
-## [18,]    0    1    1    1    1    1    1    1    1     0     1     1     1
-## [19,]    0    1    0    1    1    1    1    1    1     1     0     0     0
-## [20,]    0    1    0    0    1    1    0    1    0     0     0     0     0
-##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     1     1     1     0     1     1     0
-##  [2,]     1     0     0     0     1     1     0
-##  [3,]     1     1     1     0     1     1     1
-##  [4,]     0     0     0     0     1     1     0
-##  [5,]     0     0     0     0     1     1     0
-##  [6,]     0     0     1     0     1     1     0
-##  [7,]     0     0     0     0     1     1     0
-##  [8,]     1     0     0     0     0     0     0
-##  [9,]     1     0     1     0     1     1     1
-## [10,]     1     0     1     0     1     1     1
-## [11,]     0     0     1     0     0     1     0
-## [12,]     1     1     1     0     1     1     1
-## [13,]     1     0     1     0     1     1     0
-## [14,]     1     0     1     0     0     0     0
-## [15,]     1     1     1     1     1     1     0
-## [16,]     1     1     1     0     1     1     1
-## [17,]     1     0     1     0     1     1     0
-## [18,]     1     1     1     1     1     1     1
-## [19,]     1     1     1     0     1     1     1
-## [20,]     0     0     0     0     1     1     0
+## [1] &quot;students&quot;    &quot;skill.space&quot; &quot;skill.dist&quot; 
 ## 
-## $alpha.c
-## [1] 0.25
+## [[3]]
+## [1] &quot;students&quot;    &quot;concept.exp&quot;</code></pre>
+<p>In this example, <code>edmsyn</code> knows that there are three different methods to reach <code>M</code>: either using (<code>S</code>), (<code>students</code>,<code>skill.space</code>,<code>skill.dist</code>), or (<code>students</code>,<code>concept.exp</code>). If the generating process of <code>M</code> is somehow determined to use <code>S</code> (the skill matrix, or the probabilistic version of <code>M</code>), then one way to proceed can be rounding <code>S</code> element-wise to obtain <code>M</code>. In fact, this is the chosen method in <code>edmsyn</code>, let’s have a look at the last component</p>
+<pre class="r"><code>M.node$f.gen</code></pre>
+<pre><code>## [[1]]
+## function (x) 
+## {
+##     round(x[[1]])
+## }
+## &lt;environment: 0x3c8c1d8&gt;
 ## 
-## $alpha.p
-## [1] 0.25
+## [[2]]
+## function (x) 
+## {
+##     x[[2]][, sample(1:length(x[[3]]), size = x[[1]], prob = x[[3]], 
+##         replace = TRUE)]
+## }
+## &lt;environment: 0x3c8c1d8&gt;
 ## 
-## $p.min
-## [1] 0.5</code></pre>
-<p>Looking at the result, the <code>poks</code> component is a list with component <code>R</code> being the response matrix, and other components representing other information that is needed for the learning process. This point will be explained in later sections.</p>
-<p>Since data is considered to be just another parameter in a context, we can actually use <code>get.par</code> to generate data. In fact, <code>gen</code> is simply a wrapper of <code>get.par</code> with an additional feature <code>n</code>, where users can specify how many times the process should be repeated.</p>
-<pre class="r"><code>get.par(&quot;poks&quot;, p)</code></pre>
+## [[3]]
+## function (x) 
+## {
+##     conexp &lt;- x[[2]]
+##     sapply(1:x[[1]], function(dum) {
+##         sapply(conexp, function(p) {
+##             sample(0:1, 1, prob = c(1 - p, p))
+##         })
+##     })
+## }
+## &lt;environment: 0x3c8c1d8&gt;</code></pre>
+<p>As can be seen, <code>f.gen</code> is a list of three functions correspond to three generating methods in <code>gen</code>, and the first one is somehow rounding its input for the return value. The details of these functions will be discussed in later part, at this point it is sufficient to just realise what is the representation of a parameter in <code>edmsyn</code> and which tasks it is trying to achieve.</p>
+<p>From this point on, the all <code>f.tell</code> functions will be referred to as type-1 connections. Similarly, the collections of functions in <code>f.gen</code> will be referred to as type-2 connections. These are the two types of connections along which all data flow. The main benefit <code>edmsyn</code> offers is a convenient interface that allow easy access and control to various data processes.</p>
+</div>
+<div id="replacing-using-edmtree.replace" class="section level2">
+<h2>Replacing using <code>edmtree.replace</code></h2>
+<div id="replacing-type-2-connections" class="section level3">
+<h3>Replacing type-2 connections</h3>
+<p>Suppose you are not satisfied with the current generation method for <code>M</code> from <code>S</code> (rounding), and expect a fully probabilistic implementation of it. To do this, the first function in <code>f.gen</code> should be replaced. Firstly, we must design a function that takes one input being the matrix <code>S</code>, sample binary result from <code>S</code>’s entries and return the value of <code>M</code> as follows:</p>
+<pre class="r"><code>new.gen.S.to.M &lt;- function(S){
+  M &lt;- matrix(0, nrow(S), ncol(S))
+  for (row in 1:nrow(S))
+    for (col in 1:ncol(S)){
+      p &lt;- S[row,col]
+      M[row, col] &lt;- sample(x = 0:1, 1, prob = c(1 - p, p))
+    }
+  return(M)
+}</code></pre>
+<p>Next, this function is replaced into the internal structure of <code>M</code></p>
+<pre class="r"><code>edmtree.replace.gen('M','S',new.gen.S.to.M)
+M.node &lt;- edmtree.fetch('M')
+M.node$f.gen</code></pre>
+<pre><code>## [[1]]
+## function (x) 
+## {
+##     do.call(f.gen.copy[[l]], x)
+## }
+## &lt;environment: 0x281a9f8&gt;
+## 
+## [[2]]
+## function (x) 
+## {
+##     x[[2]][, sample(1:length(x[[3]]), size = x[[1]], prob = x[[3]], 
+##         replace = TRUE)]
+## }
+## &lt;environment: 0x3c8c1d8&gt;
+## 
+## [[3]]
+## function (x) 
+## {
+##     conexp &lt;- x[[2]]
+##     sapply(1:x[[1]], function(dum) {
+##         sapply(conexp, function(p) {
+##             sample(0:1, 1, prob = c(1 - p, p))
+##         })
+##     })
+## }
+## &lt;environment: 0x3c8c1d8&gt;</code></pre>
+<p>Now that <code>f.gen[1]</code> is changed. But apparently it is not the original <code>new.gen.S.to.M</code> that has been designed by us, the reason is that <code>edmsyn</code> has wrapped this function inside one or more layers to make sure it fit in perfectly with the internal working environment. We can check if the replacement is carried out successfully by simply generating <code>M</code> from <code>S</code> many times, if the result is different each time, the probabilistic version has been installed successfully.</p>
+<pre class="r"><code>S &lt;- matrix(runif(15),3,5)
+p &lt;- pars(S = S)
+M1 &lt;- get.par('M',p)$value
+M2 &lt;- get.par('M',p)$value
+# This is very unlikely to be TRUE
+identical(M1, M2)</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code># Let's try something else
+M = matrix(0, 3, 5)
+big.number = 10000
+for (i in 1:big.number)
+  M = M + get.par('M',p)$value
+# This is likely to be TRUE
+identical(round(M/big.number), round(S))</code></pre>
+<p>Similarly, we can change the functions of other generating methods by simply create a new function for each and replace them into the structure.</p>
+<pre class="r"><code># Examples of changing generating methods
+new.f.gen.2 &lt;- function(students, skill.space, skill.dist){
+  # Evaluate M here
+  return(value.of.M)
+}
+edmtree.replace.gen('M', M.node$gen[[2]], new.f.gen.2)</code></pre>
+<p>As long as the number and the order of arguments match that of what is defined in the corresponding <code>gen</code>, the replacement will be done successfully. Otherwise, error will be detected either at replacement time or run-time depending on the error.</p>
+<pre class="r"><code># Some more playing around with replacement
+M.node$gen[[3]]</code></pre>
+<pre><code>## [1] &quot;students&quot;    &quot;concept.exp&quot;</code></pre>
+<pre class="r"><code>new.gen.3 &lt;- rev(M.node$gen[[3]])
+new.gen.3</code></pre>
+<pre><code>## [1] &quot;concept.exp&quot; &quot;students&quot;</code></pre>
+<pre class="r"><code># Notice that the order of arguments of new.f.gen.3 below
+# matches the order of new.gen.3
+new.f.gen.3 &lt;- function(concept.expectation, num.of.students){
+  # evaluate M here
+  return(value.of.M)
+}
+# Successful
+edmtree.replace.gen('M', new.gen.3, new.f.gen.3)</code></pre>
+<p>Below are some examples where <code>edmtree.replace</code> fails to execute.</p>
+<pre class="r"><code># Unsucessful examples:
+# new f.gen is supposed to have 3 arguments as M.node$gen[[2]] has length 3
+edmtree.replace.gen('M', M.node$gen[[2]], function(arg1, arg2) {
+  return(NULL) # does not matter
+})</code></pre>
+<pre><code>## Error in edmtree.check(node.name, node.val, int, dat): number of arguments of f.gen[[2]] must match the size of gen[[2]]</code></pre>
+<pre class="r"><code># (items, poks) is not an existing method
+edmtree.replace.gen('M', c('items', 'poks'), function(arg1, arg2){
+  return(NULL) # does not matter
+})</code></pre>
+<pre><code>## Error in edmtree.replace.gen(&quot;M&quot;, c(&quot;items&quot;, &quot;poks&quot;), function(arg1, arg2) {: method (items, poks) cannot be found in M$gen</code></pre>
+</div>
+<div id="replacing-type-1-connections" class="section level3">
+<h3>Replacing type-1 connections</h3>
+<p>Besides <code>edmtree.replace.gen</code>, <code>edmsyn</code> also allow <code>edmtree.replace.tell</code> where users are able to modify <code>tell</code> and <code>f.tell</code> in many flexible ways. Knowing the value of <code>S</code>, it is straightforward to infer values of <code>students</code> and <code>concepts</code>, being the number of columns and rows respectively. As a toy example, let’s swap the inference of <code>students</code> and <code>concepts</code> (and thus produce an incorrect result)</p>
+<pre class="r"><code>S.node &lt;- edmtree.fetch('S')
+S.node$tell</code></pre>
+<pre><code>## [1] &quot;concepts&quot;  &quot;students&quot;  &quot;S.st.var&quot;  &quot;S.con.exp&quot;</code></pre>
+<pre class="r"><code>p &lt;- pars(S = S)
+print(dim(S))</code></pre>
+<pre><code>## [1] 3 5</code></pre>
+<pre class="r"><code># this would give correct result
+c(p$concepts, p$students)</code></pre>
+<pre><code>## [1] 3 5</code></pre>
+<pre class="r"><code># Now let's alter f.tell so that concepts
+# is the number of columns of S and students
+# is the number of rows of S.
+edmtree.replace.tell('S',c('concepts','students'), function(S){
+  return(list( ncol(S), nrow(S) ))
+})
+p &lt;- pars(S=S)</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'concepts' receives different values at once</code></pre>
+<p>The reason why <code>pars</code> fails to execute is that, not only <code>concepts</code> and <code>students</code> are being inferred from <code>S</code>, <code>S.con.exp</code>, a vector of length <code>concepts</code>, is also being inferred <em>correctly</em>. This caused a conflict that <code>edmsyn</code> was able to detect. One way to force the incorrect result is as follows:</p>
+<pre class="r"><code>edmtree.replace.tell('S',c('S.con.exp','concepts','students'), function(S){
+  return(list( colMeans(S), ncol(S), nrow(S) ))
+})
+p &lt;- pars(S=S)
+print(dim(S))</code></pre>
+<pre><code>## [1] 3 5</code></pre>
+<pre class="r"><code># Now we successfully produce a wrong result.
+c(p$concepts, p$students)</code></pre>
+<pre><code>## [1] 5 3</code></pre>
+<p>There is two important points to make here: firstly, it is dangerous to replace such incorrect calculations into <code>edmsyn</code> structure: from what we have seen above, these false implementations may take long (sometimes forever) to be detected after the replacement and thus, your application may have operated incorrectly for many steps without being noticed. Take careful examination before you decide to change <code>edmsyn</code>’s built-in functions.</p>
+<p>Secondly, the replacement we did above is called <em>partial replacement</em> because not all parameters in <code>tell</code> is modified. Unlike many other classes of objects in R, <code>f.tell</code>, which is essentially an R <code>function</code>, is inherently not modular, which means it can not be modified partially. So how did <code>edmsyn</code> finish the task above? It simply executes the old function <em>and then</em> the new one, after that new results will replace the old ones at appropriate positions in the returned list. This, apparently, may involve a great deal of redundant calculations and thus, the use of <code>edmtree.replace.tell</code> to modify a subset of <code>tell</code> is strongly discourage. In other words, whenever it is possible, try to use <code>edmtree.replace.tell</code> with argument <code>tell</code> being an identical set to <code>S$tell</code>.</p>
+<p>To proceed normally, let’s recover the original correct version of <code>f.tell</code> inside <code>S</code></p>
+<pre class="r"><code>edmtree.replace.tell('S', S.node$tell, S.node$f.tell)
+p &lt;- pars(S=S)
+dim(S)</code></pre>
+<pre><code>## [1] 3 5</code></pre>
+<pre class="r"><code>c(p$concepts, p$students)</code></pre>
+<pre><code>## [1] 3 5</code></pre>
+</div>
+<div id="naive-replacing-with-edmtree.replace" class="section level3">
+<h3>Naive replacing with <code>edmtree.replace</code></h3>
+<p>The previous replacing functions are <em>smart</em> because they are flexible in terms of partial replacement. Namely, they retain the parts that is not declare in their function call and properly handle the integration of new parts with old parts.</p>
+<p>If you wish to simply throw away some parts of the node and subtitude new ones, (in other words, you do not care about retaining any part of the existing functions, either they are useful to be reused or not), simply use <code>edmtree.replace</code>. See some examples below</p>
+<pre class="r"><code># replacing tell
+edmtree.replace('S', tell = new.tell)
+# replacing tell and f.gen
+edmtree.replace('S', tell = new.tell, f.gen = new.f.gen)
+# replacing gen, f.gen and f.tell
+edmtree.replace('S', f.gen = new.f.gen, f.tell = new.f.tell, gen = new.gen)</code></pre>
+</div>
+</div>
+<div id="removing-using-edmtree.remove" class="section level2">
+<h2>Removing using <code>edmtree.remove</code></h2>
+<div id="removing-type-2-connections" class="section level3">
+<h3>Removing type-2 connections</h3>
+<p>Let’s start with a context where <em>students</em> and <em>concepts</em> are defined</p>
+<pre class="r"><code>p &lt;- pars(students = 20, concepts = 15)
+M &lt;- get.par('M', p, progress = TRUE)</code></pre>
+<pre><code>## Generate M from c(&quot;students&quot;, &quot;concept.exp&quot;)
+## Generate concept.exp from concepts</code></pre>
+<p>Assume that we desire not to produce <code>M</code> from the process that requires generating <code>concept.exp</code>. In fact, we want to remove this method of generating <code>M</code> from <code>edmsyn</code> completely. <code>edmtree.remove.gen</code> is here to help:</p>
+<pre class="r"><code>edmtree.remove.gen('M',c('concept.exp','students'))
+M &lt;- get.par('M', p, progress = TRUE)</code></pre>
+<pre><code>## Generate M from c(&quot;students&quot;, &quot;skill.space&quot;, &quot;skill.dist&quot;)
+## Generate skill.space from c(&quot;concepts&quot;, &quot;skill.space.size&quot;)
+## Generate skill.space.size from concepts
+## Generate skill.dist from skill.space.size</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'skill.space.size' receives different values at once</code></pre>
+<pre class="r"><code>edmtree.remove.gen('M',c('skill.dist','students','skill.space'))
+M &lt;- get.par('M', p, progress = TRUE)</code></pre>
+<pre><code>## Generate M from S
+## Generate S from c(&quot;concepts&quot;, &quot;students&quot;)</code></pre>
+<pre class="r"><code>edmtree.remove.gen('M', 'S')
+M &lt;- get.par('M', p, progress = TRUE)</code></pre>
+<pre><code>## Error in up.stream(target, pars, FALSE, progress): Cannot reach 'M' since 'M' is missing</code></pre>
+<p>As we consecutively went through the deletion of all three generating methods for <code>M</code>, a reasonable question is raised: why does it have to be in the order of (<code>concept.exp</code>, <code>students</code>), then (<code>skill.dist</code>, <code>students</code>, <code>skill.space</code>), and lastly (<code>S</code>)? In other words, base on which criteria did <code>edmsyn</code> prioritise the method (<code>concept.exp</code>, <code>students</code>) over (<code>skill.dist</code>, <code>students</code>, <code>skill.space</code>); and (<code>skill.dist</code>, <code>students</code>, <code>skill.space</code>) over (<code>S</code>)? Note that when <code>students</code> and <code>concepts</code> are provided, all three options are possible to implement.</p>
+</div>
+<div id="the-generating-critera" class="section level3">
+<h3>The generating critera</h3>
+<p>One complication of the <code>edmsyn</code> perspective is that, there will be times when there are more than one way to generate data. One example is the case above. There is critera that <code>edmsyn</code> follows in terms of prioritizing one option over another. Note that this criteria is chosen by the author at the time of developing <code>edmsyn</code> and there is no certain theoretical foundation for it. It is, however, beneficial for the users to be informed anyway.</p>
+<p>If there are more than one <em>available</em> method to generate a node’s value:</p>
+<ol style="list-style-type: decimal">
+<li><p>Choose the one that most utilizes inputted data. In the previous example, inputted data includes <code>students</code> and <code>concepts</code>, thus both (<code>concept.exp</code>, <code>students</code>) and (<code>skill.dist</code>, <code>students</code>, <code>skill.space</code>), utilizing a half of the input, are certainly better than (<code>S</code>).</p></li>
+<li><p>If there is a tie, as pointed out in the <code>M$gen</code> example above, choose the one is that most covered by the input. In this case, one half of (<code>concept.exp</code>, <code>students</code>) is covered (by <code>students</code>), while only one third of (<code>skill.dist</code>, <code>students</code>, <code>skill.space</code>) is covered (also by <code>students</code>). This is why (<code>concept.exp</code>,<code>students</code>) is most favoured amongst the three.</p></li>
+<li><p>If there is still a tie, then choose the one that most cover <code>tell</code> of the target node. For example in this case, <code>M$tell</code> consists of <code>concepts</code>, <code>students</code>, and <code>concept.exp</code>; two of them is covered by (<code>concept.exp</code>, <code>students</code>), one is covered by (<code>skill.dist</code>, <code>students</code>, <code>skill.space</code>) and none is covered by (<code>S</code>). For ties beyond this point, the choice is completely random.</p></li>
+</ol>
+</div>
+<div id="removing-type-1-connections" class="section level3">
+<h3>Removing type-1 connections</h3>
+<p>Now we move on to removing type-1 connections. Let’s say we want to discard any information about <code>concepts</code> inferred from <code>M</code>, <code>edmtree.remove.tell</code> should be used as follows:</p>
+<pre class="r"><code>edmtree.remove.tell('M', 'concepts')
+p &lt;- pars(M = M1)
+print(p)</code></pre>
+<pre><code>## Activated information in the context:
+## [1] &quot;M&quot;            &quot;default.vals&quot; &quot;students&quot;     &quot;concept.exp&quot; 
+## [5] &quot;concepts&quot;</code></pre>
+<p>Why does <code>concepts</code> is still there in p? Actually in this case <code>concepts</code> is not inferred from <code>M</code> but from <code>concept.exp</code>, to completely eliminate <code>concepts</code>, one would need to remove <code>concept.exp</code></p>
+<pre class="r"><code>edmtree.remove.tell('M','concept.exp')
+p &lt;- pars(M = M1)
+# now concept.exp is gone, along with concepts
+print(p)</code></pre>
+<pre><code>## Activated information in the context:
+## [1] &quot;M&quot;            &quot;default.vals&quot; &quot;students&quot;</code></pre>
+<pre class="r"><code># recover
+edmtree.replace('M', tell = M.node$tell, f.tell = M.node$f.tell)
+edmtree.fetch('M')</code></pre>
+<pre><code>## $tell
+## [1] &quot;concepts&quot;    &quot;students&quot;    &quot;concept.exp&quot;
+## 
+## $gen
+## list()
+## 
+## $f.tell
+## function (x) 
+## {
+##     list(nrow(x), ncol(x), rowMeans(x))
+## }
+## &lt;environment: 0x3c8c1d8&gt;
+## 
+## $f.gen
+## list()</code></pre>
+<p>Again, since <code>f.tell</code> cannot be partially modified, the users should be aware of the fact that there are redundant calculations going under the implementation of the removed <code>concepts</code>. In fact, <code>concepts</code> is still being calculated, but then discarded from the returned list each time information is inferred from <code>M</code>. So it is highly recommended that the <code>f.tell</code> argument of <code>edmtree.remove.tell</code> is used whenever it is possible. Namely, the recommended way to completely remove <code>concepts</code> is as follows:</p>
+<pre class="r"><code>edmtree.remove.tell('M', c('concept.exp', 'concepts'), f.tell = function(M){
+  return(ncol(M)) # since the only one left in tell is students
+})
+p &lt;- pars(M = M1)</code></pre>
+<pre><code>## Warning in get(var.name, envir = STRUCTURE)$f.tell(var.val): node 'M' :
+## f.tell did not return a list, coerced to list of length 1</code></pre>
+<p>The warning here tells us that, the returning line inside our new <code>f.tell</code> should be <code>return(list(ncol(M))</code> instead of <code>return(ncol(M))</code>. However, <code>edmsyn</code> is smart enough to prevent this error by a function wrapper that detects and fixes many errors like these whenever it is possible. Note that since this is an error at returning of our function (in other words, it requires actual execution of the function to be presented), this error is a run-time error and cannot be detected immediately in the <code>edmtree.remove</code> step, but much later when <code>pars</code> calls for data to flow from <code>M</code> to lower level parameters in the execution of <code>p &lt;- pars(M = M1)</code>.</p>
+<p>To avoid displaying this warning each time data flow through <code>M</code>, let’s fix <code>f.tell</code> by a proper one.</p>
+<pre class="r"><code># recover
+edmtree.replace('M', tell = M.node$tell, f.tell = M.node$f.tell)
+# remove
+edmtree.remove.tell('M', c('concept.exp', 'concepts'), f.tell = function(M){
+  return(list(ncol(M)))
+})
+p &lt;- pars(M = M1)
+print(p)</code></pre>
+<pre><code>## Activated information in the context:
+## [1] &quot;M&quot;            &quot;default.vals&quot; &quot;students&quot;</code></pre>
+</div>
+<div id="removing-a-node-from-the-structure" class="section level3">
+<h3>Removing a node from the structure</h3>
+<p>Removing a whole node is syntactically simple but requires a high level of awareness. Removing root parameters such as <code>students</code> or <code>concepts</code> can cause the whole system to crash since everything is built up from these root parameters. In short, removing parameters at higher level creates less an impact on the whole structure than removing lower ones.</p>
+<p>In this first example, let’s remove a “data parameter”, namely <code>bkt</code>:</p>
+<pre class="r"><code>bkt.node &lt;- edmtree.remove(&quot;bkt&quot;)</code></pre>
+<pre><code>## Successfully removed bkt</code></pre>
+<pre class="r"><code>edmtree.fetch(&quot;bkt&quot;)</code></pre>
+<pre><code>## Error in edmtree.fetch(&quot;bkt&quot;): 'bkt' is not found in current tree</code></pre>
+<p>Later on, plugging <code>bkt.node</code> back into the structure is simple, but only because this is a special case where <code>bkt</code> is at data level. The situation is more complicated when deleting a lower level node such as <code>concept.exp</code>.</p>
+<pre class="r"><code># For the purpose of illustration, let's first recover everything for M
+edmtree.replace('M', tell = M.node$tell, f.tell = M.node$f.tell,
+                gen = M.node$gen, f.gen = M.node$f.gen)
+concept.exp.node &lt;- edmtree.remove(&quot;concept.exp&quot;)</code></pre>
+<pre><code>## Remove concept.exp from M$tell</code></pre>
+<pre><code>## Remove method (students, concept.exp) from M$gen</code></pre>
+<pre><code>## Remove concept.exp from nmf.dis$tell</code></pre>
+<pre><code>## Remove concept.exp from nmf.com$tell</code></pre>
+<pre><code>## Remove concept.exp from nmf.con$tell</code></pre>
+<pre><code>## Successfully removed concept.exp</code></pre>
+<pre class="r"><code>get.par('concept.exp', pars(concepts = 3))</code></pre>
+<pre><code>## Error in edmtree.fetch(node.name): 'concept.exp' is not found in current tree</code></pre>
+<p>As can be seen, removing <code>concept.exp</code> will consequently remove several other parts of the whole structure. Let’s say you want to reverse <code>edmsyn</code> back to the state before this removal, you will have to plug the <code>concept.exp.node</code> back and <em>manually</em> recover everything else that have gone along.</p>
+<p>To do this, for example, adding method (<code>students</code>, <code>concept.exp</code>) back into <code>M</code>, <code>edmtree.add</code> is needed.</p>
+</div>
+</div>
+<div id="adding-with-edmtree.add" class="section level2">
+<h2>Adding with <code>edmtree.add</code></h2>
+<div id="adding-a-node" class="section level3">
+<h3>Adding a node</h3>
+<p>This task is simple so long as you have already done the hard part: defining all four components <code>tell</code>, <code>f.tell</code>, <code>gen</code> and <code>f.gen</code> of the node. With node <code>concept.exp</code> in the removal section above, luckily we have saved these components into <code>concept.exp.node</code>. Let’s reuse them for a quick illustration</p>
+<pre class="r"><code>edmtree.add('concept.exp', tell = concept.exp.node$tell,
+            f.tell = concept.exp.node$f.tell,
+            gen = concept.exp.node$gen,
+            f.gen = concept.exp.node$f.gen)
+concept.exp &lt;- get.par('concept.exp', pars(concepts=3))$value
+print(concept.exp)</code></pre>
+<pre><code>## [1] 0.8711496 0.2329749 0.5060350</code></pre>
+</div>
+<div id="adding-type-2-connection" class="section level3">
+<h3>Adding type-2 connection</h3>
+<p>Now move on to adding method (<code>concept.exp</code>, <code>students</code>) into <code>M</code>. Again, we will reuse <code>M.node</code> for a quick and clean illustration</p>
+<pre class="r"><code># First let's see what method is being used to generate M
+# When students and concept.exp is given
+p &lt;- pars(students = 10, concept.exp = concept.exp)
+M &lt;- get.par('M', p, progress = TRUE)</code></pre>
+<pre><code>## Generate M from c(&quot;students&quot;, &quot;skill.space&quot;, &quot;skill.dist&quot;)
+## Generate skill.space from c(&quot;concepts&quot;, &quot;skill.space.size&quot;)
+## Generate skill.space.size from concepts
+## Generate skill.dist from skill.space.size</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'skill.space.size' receives different values at once</code></pre>
+<pre class="r"><code># See what we have in M.node
+M.node$gen</code></pre>
+<pre><code>## [[1]]
+## [1] &quot;S&quot;
+## 
+## [[2]]
+## [1] &quot;students&quot;    &quot;skill.space&quot; &quot;skill.dist&quot; 
+## 
+## [[3]]
+## [1] &quot;students&quot;    &quot;concept.exp&quot;</code></pre>
+<pre class="r"><code># Add the new method
+edmtree.add.gen('M', gen.method = M.node$gen[[3]], 
+                f.gen.method = M.node$f.gen[[3]])
+
+# Generate M again to see the change
+M &lt;- get.par('M', p, progress = TRUE)$value</code></pre>
+<pre><code>## Generate M from c(&quot;students&quot;, &quot;concept.exp&quot;)</code></pre>
+<p>Now as method (<code>students</code>, <code>concept.exp</code>) is available, and clearly has a better input utilisation than (<code>students</code>, <code>skill.space</code>, <code>skill.dist</code>) (see <strong>The generating criteria</strong> section above), <code>edmsyn</code> opts for this method to generate <code>M</code>.</p>
+</div>
+<div id="adding-type-1-connection" class="section level3">
+<h3>Adding type-1 connection</h3>
+<p>Adding <code>concept.exp</code> into <code>M$tell</code> is also a necessary step in recovering the deleted <code>concept.exp</code> node. In this task, <code>edmtree.add.tell</code> is used.</p>
+<pre class="r"><code># For the purpose of illustration, let's say knowing M only tells us about the number of concepts
+edmtree.replace('M', tell = 'concepts', f.tell = function(M){
+  return(list(nrow(M)))
+})
+
+# Now see that currently knowing M tells nothing about the expected mastery rate for each concept or the number of students
+p &lt;- pars(M = M)
+print(p)</code></pre>
+<pre><code>## Activated information in the context:
+## [1] &quot;M&quot;            &quot;default.vals&quot; &quot;concepts&quot;</code></pre>
+<pre class="r"><code># It is time to add the full set of tell to M
+edmtree.add.tell('M', c('concept.exp', 'students'), function(M){
+  return(list( rowMeans(M), ncol(M) ))
+})
+p &lt;- pars(M = M)
+print(p)</code></pre>
+<pre><code>## Activated information in the context:
+## [1] &quot;M&quot;            &quot;default.vals&quot; &quot;concepts&quot;     &quot;concept.exp&quot; 
+## [5] &quot;students&quot;</code></pre>
+<pre class="r"><code># Check if all calulations are correct
+identical( dim(M), c(p$concepts, p$students) )</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>identical( p$concept.exp, rowMeans(M) )</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+</div>
+<div id="a-toy-model" class="section level3">
+<h3>A toy model</h3>
+<p>Let’s wrap up this section by going through the process of adding a whole new model into <code>edmsyn</code> structure. During this process, a few useful techniques that <code>edmsyn</code> provides will also be introduced, so it is beneficial to pay attention to the details in this section. Note that:</p>
+<ol style="list-style-type: decimal">
+<li><p>None of the details in this toy model makes sense, all of them is specifically designed for illustration purpose</p></li>
+<li><p>This part covers only <code>edmtree.add</code>. <code>edmtree.replace</code> and <code>edmtree.remove</code> will not be used since we are not modifying any of the existing models and parameters.</p></li>
+</ol>
+<p>Below is an outline of what is added to <code>edmsyn</code> by this new model (named <code>toy</code>):</p>
+<ul>
+<li>a root integer parameter named <code>foo</code></li>
+<li>an integer parameter named <code>lower.foo</code> being the strict lower bound of <code>foo</code> (i.e. <code>foo</code> must be greater than <code>lower.foo</code>), <code>lower.foo</code> have the default value of 1.</li>
+<li>an integer parameter named <code>upper.foo</code> being the upper bound of <code>foo</code> (i.e. <code>foo</code> must be less than or equal to <code>upper.foo</code>), <code>upper.foo</code> have the default value equal to the sum of default value for <code>min.it.per.tree</code> and <code>concepts</code>.</li>
+<li><code>bar</code>, a matrix with dimension (<code>foo</code>,<code>concepts</code>), its entries being real numbers between 0 and 1.</li>
+<li>data node of this model (named <code>toy</code>) is a list with two components: the first one is a matrix obtained from the rounded multiplication of <code>foo</code> and <code>M</code>, the second is the number of concepts</li>
+</ul>
+<pre class="r"><code># foo is a root node, with no default values
+edmtree.add('foo', integer = TRUE)</code></pre>
+<pre><code>## 'foo' appears to be a root node</code></pre>
+<pre><code>## 'foo' appears to have no default initialization</code></pre>
+<pre class="r"><code>edmtree.add('lower.foo', integer = TRUE,
+            tell = 'foo', f.tell = less.strict,
+            gen = 'default.vals', f.gen = 1)</code></pre>
+<pre><code>## 'lower.foo' appears to have a constant default value</code></pre>
+<p><code>less.strict</code> is a special function provided by edmsyn for cases when you want to tell the structure that <code>lower.foo</code> should be strictly less than <code>foo</code>. Alternatively, <code>edmtree.add.tell('foo', tell = 'lower.foo', f.tell = greater.strict)</code> gives the same effect. There are four such special functions recognised by <code>edmsyn</code>: <code>less.equal</code>, <code>less.strict</code>, <code>greater.equal</code>, and <code>greater.strict</code>.</p>
+<p>The presence of these four functions highlighted the fact that inferring information in <code>edmsyn</code> is not solely inferring values, but can also be inferring different aspects of this value, namely the bound of them in this case.</p>
+<pre class="r"><code># Now add upper.foo
+edmtree.add('upper.foo', integer = TRUE,
+            gen = c('default.vals', 'concepts'),
+            f.gen = function(default.vals, concepts){
+              return(default.vals$min.it.per.tree + concepts)
+            })</code></pre>
+<pre><code>## 'upper.foo' appears to be a root node</code></pre>
+<pre><code>## 'upper.foo' appears to have a default value that relies on at least one run-time values</code></pre>
+<pre class="r"><code># Another use of special bound function
+edmtree.add.tell('upper.foo', 'concepts', function(upper.foo){
+  list(greater.equal(upper.foo - default()$min.it.per.tree))
+})</code></pre>
+<pre><code>## 'upper.foo' appears to have a default value that relies on at least one run-time values</code></pre>
+<pre class="r"><code># Instead of upper.foo telling the bound of foo,
+# we will do it in the opposite direction,
+# just for the purpose of illustration
+edmtree.add.tell('foo', tell = 'upper.foo', f.tell = less.equal)</code></pre>
+<pre><code>## 'foo' appears to have no default initialization</code></pre>
+<pre class="r"><code># Now since lower.foo and upper.foo are both presented in the structure
+# it's time to add a generating method for foo
+edmtree.add.gen('foo', gen.method = c('lower.foo', 'upper.foo'),
+                f.gen.method = function(lower.foo, upper.foo){
+                  sample((lower.foo+1) : upper.foo, 1)
+                })
+# add bar
+edmtree.add('bar', gen = c('foo', 'concepts'),
+            f.gen = function(foo, concepts){
+              matrix(runif(foo * concepts), foo, concepts)
+            })</code></pre>
+<pre><code>## 'bar' appears to be a root node</code></pre>
+<pre class="r"><code># dimensions of bar are foo and concepts
+edmtree.add.tell('bar', tell = c('foo', 'concepts'),
+                 f.tell = function(bar){
+                   list(nrow(bar), ncol(bar))
+                 })</code></pre>
+<p>Note that it is okay not to add the <code>tell</code> component for <code>bar</code>, (in fact, it is okay to skip defining <code>tell</code> and <code>f.tell</code> in <em>every</em> parameter, your application will still run just fine as long as the rest is properly designed). However doing so will limit the capability of <code>edmsyn</code> to recognise conflicts (<strong>condition 2</strong>). For example, <code>pars(bar = matrix(0, 3, 5), concepts = 4)</code> will not raise the conflict between 4 and 5 if <code>bar$tell</code> does not include the inference for <code>concepts</code>. Adding <code>tell</code> and <code>f.tell</code> is a good practice if you want to add more debugging power to a big and complicated application.</p>
+<pre class="r"><code># to make the model a little more sophisticated,
+# we add another generating method for bar
+edmtree.add.gen('bar', gen = c('M', 'foo'),
+                f.gen = function(M, foo){
+                  concepts = nrow(M)
+                  matrix(runif(foo * concepts), foo, concepts)
+                })
+# finally, add the data node &quot;toy&quot;
+edmtree.add('toy', data = TRUE,
+            gen = c('bar','M'), f.gen = function(bar, M){
+              list(R = round(bar %*% M), concepts = nrow(M))
+            },
+            tell = c('bar', 'M'), f.tell = function(toy){
+              # Note that the following learning algorithm makes no sense
+              # it is just for the purpose of illustration
+              concepts = toy$concepts
+              R = toy$R
+              foo = nrow(R)
+              students = ncol(R)
+              bar = matrix(runif(foo * concepts), foo, concepts)
+              M = matrix(sample(0:1, concepts * students, TRUE),
+                         concepts, students)
+              list(bar, M)
+            })
+
+# Check if ALL.MODELS includes &quot;toy&quot; (yes it does)
+edmconst$ALL.MODELS</code></pre>
+<pre><code>##  [1] &quot;exp&quot;     &quot;irt&quot;     &quot;poks&quot;    &quot;dina&quot;    &quot;dino&quot;    &quot;lin.avg&quot; &quot;nmf.con&quot;
+##  [8] &quot;nmf.dis&quot; &quot;nmf.com&quot; &quot;toy&quot;</code></pre>
+<p>So, that is all there is to plug a new model into <code>edmsyn</code>. The process is simple and it forces users to think about various aspects while doing so. Another benefit is that before adding <code>toy</code>, a whole system of 62 parameters with carefully-built and well-tested connections is already there. This makes the work even lighter, we saved a lot of time before moving on testing our model.</p>
+</div>
+<div id="test-the-toy-model" class="section level3">
+<h3>Test the toy model</h3>
+<pre class="r"><code># 1. Test the bounds
+p &lt;- pars(lower.foo = 3, foo = 3)</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'foo' violates bound suggested by 'lower.foo'</code></pre>
+<pre class="r"><code>p &lt;- pars(foo = 4, upper.foo = 3)</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'upper.foo' violates bound suggested by 'foo'</code></pre>
+<pre class="r"><code># This one requires reasoning to detect
+# Thus error is not raised immediately
+p &lt;- pars(lower.foo = 3, upper.foo = 2)
+# But nevertheless, when p go into use, it immediately fails
+get.par('foo', p)</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'upper.foo' violates bound suggested by 'foo'</code></pre>
+<pre class="r"><code>p &lt;- pars(upper.foo = 5, concepts = 5)</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'concepts' violates bound suggested by 'upper.foo'</code></pre>
+<pre class="r"><code># 2. Test foo$gen
+get.par('foo', pars())</code></pre>
+<pre><code>## Error in up.stream(target, pars, FALSE, progress): Cannot reach 'foo' since 'concepts' is missing</code></pre>
+<pre class="r"><code>p &lt;- pars(p, upper.foo = 15)
+get.par('foo', p)</code></pre>
 <pre><code>## $value
-## $value$R
-##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    1    1    1    1    1    1    0    1    1     1     1     0     1
-##  [2,]    0    0    0    0    0    0    0    1    0     0     0     0     0
-##  [3,]    0    0    0    0    1    0    0    0    0     0     0     0     0
-##  [4,]    0    1    1    0    1    1    1    1    1     1     1     1     1
-##  [5,]    0    0    1    0    0    0    1    0    1     0     0     0     0
-##  [6,]    1    1    1    1    1    1    1    1    0     1     1     1     1
-##  [7,]    0    0    0    0    0    0    0    0    0     1     0     0     1
-##  [8,]    0    1    1    1    0    1    1    1    1     1     1     0     1
-##  [9,]    1    1    1    1    1    1    1    1    1     1     1     1     1
-## [10,]    1    1    1    1    1    1    0    1    1     1     1     0     1
-## [11,]    1    1    1    1    1    1    1    1    1     1     1     0     1
-## [12,]    1    0    1    1    0    0    0    0    0     1     0     0     1
-## [13,]    1    1    1    1    1    1    0    1    1     1     1     0     1
-## [14,]    0    1    1    0    1    1    1    1    1     1     1     0     1
-## [15,]    0    0    0    1    1    1    0    0    1     1     1     1     0
-## [16,]    0    0    0    0    0    1    1    0    0     0     0     1     0
-## [17,]    0    0    0    0    0    0    0    0    1     0     1     0     0
-## [18,]    0    1    1    0    1    1    1    1    1     1     1     0     1
-## [19,]    1    1    1    1    1    1    1    1    1     1     1     1     1
-## [20,]    1    1    0    1    1    1    1    0    1     1     1     1     1
-##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     1     1     1     1     1     0     1
-##  [2,]     0     0     0     0     0     0     1
-##  [3,]     1     0     0     1     0     0     0
-##  [4,]     1     0     1     1     0     0     1
-##  [5,]     0     0     0     0     0     0     0
-##  [6,]     1     1     1     1     0     1     1
-##  [7,]     1     0     0     0     0     0     0
-##  [8,]     1     1     1     1     0     0     1
-##  [9,]     1     1     1     1     1     1     1
-## [10,]     1     1     1     1     1     0     1
-## [11,]     1     1     1     1     1     1     1
-## [12,]     0     1     1     1     1     0     0
-## [13,]     1     1     1     1     1     0     1
-## [14,]     0     1     0     0     0     0     1
-## [15,]     1     1     0     1     1     1     0
-## [16,]     0     0     0     0     0     0     0
-## [17,]     0     0     1     0     0     0     0
-## [18,]     0     1     0     1     0     0     1
-## [19,]     1     1     1     1     1     1     1
-## [20,]     0     1     1     1     1     0     1
-## 
-## $value$alpha.c
-## [1] 0.25
-## 
-## $value$alpha.p
-## [1] 0.25
-## 
-## $value$p.min
-## [1] 0.5
-## 
+## [1] 15
 ## 
 ## $context
 ## Activated information in the context:
-##  [1] &quot;students&quot;        &quot;default.vals&quot;    &quot;concepts&quot;       
-##  [4] &quot;items&quot;           &quot;min.ntree&quot;       &quot;min.depth&quot;      
-##  [7] &quot;density&quot;         &quot;min.it.per.tree&quot; &quot;trans&quot;          
-## [10] &quot;avg.success&quot;     &quot;alpha.c&quot;         &quot;alpha.p&quot;        
-## [13] &quot;p.min&quot;           &quot;max.ntree&quot;       &quot;max.depth&quot;      
-## [16] &quot;max.it.per.tree&quot; &quot;po&quot;              &quot;poks&quot;</code></pre>
-<p>Following is two more examples on using <code>gen</code>. In the first one, <code>gen</code> will generate data by POKS model again, but from a different context where user have more control on the Partial Order structure of items. In the second one, <code>gen</code> generates data by DINA model (Deterministic Input Noisy And model).</p>
-<p><strong>Example 1</strong></p>
-<p>Suppose this time we want the Partial Order structure of items to have two connected components, each with height 3 and no transitive link between items, this can be done by updating <code>p</code> with some more parameters. To visualize this structure, whose dependency matrix will be component <code>po</code> in the context returned by <code>gen</code>, we can use function <code>viz</code>.</p>
-<pre class="r"><code>p &lt;- pars(p, min.depth = 3, max.depth = 3, min.ntree = 2, max.ntree = 2, trans = FALSE)
-poks.data &lt;- gen(&quot;poks&quot;, p)
-v &lt;- viz(poks.data$po)</code></pre>
-<p><img src="data:image/png;base64,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uv7DzjPj5PzdG6derH1VD7fpu92NQXc/e+JwwKPjqx+bz7FF3BKrzXty9/PnTpb6zhl9OmjrFhKgyZPNozMO0E3vgv1x/v6jGe9949dwJLZjstSrdx4+vh/Pzmlr2tYtJkD/V1cvvn/uwscevxbg2s57597+cJZfFbU9AgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJARICAjQEBGgICMAAEZAQIyAgRkBAjICBCQESAgI0BARoCAjAABGQECMgIEZAQIyAgQkBEgICNAQEaAgIwAARkBAjICBGQECMgIEJD5G7QTAZTsb1BwAAAAAElFTkSuQmCC" title alt width="576" /></p>
-<p><code>v</code> contains analysed information about the structure. Its first component is identical to <code>po</code>, the second one is a list with equal number of components to the number of connected components of the structure <code>po</code> represents. Each of these components is in turn a list with first component being the corresponding dependency matrix, and sencond component represents how many items are there on each level of depth.</p>
-<pre class="r"><code>print(v)</code></pre>
-<pre><code>## $ks
-##    1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
-## 1  0 0 0 1 1 1 1 1 0  0  0  0  0  0  0  0  0  0  0  0
-## 2  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  1  0  0  1  0
-## 3  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  1  0  0  0
-## 4  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 5  0 0 0 0 0 0 0 0 0  0  0  1  0  0  0  0  0  0  0  0
-## 6  0 0 0 0 0 0 0 0 0  0  0  1  0  0  0  0  0  0  0  0
-## 7  0 0 0 0 0 0 0 0 0  0  0  1  0  0  0  0  0  0  0  0
-## 8  0 0 0 0 0 0 0 0 0  0  0  1  0  0  1  0  0  0  0  0
-## 9  0 0 0 0 1 0 1 0 0  0  0  0  0  1  0  0  0  0  0  0
-## 10 0 0 0 0 0 0 0 0 0  0  0  1  0  0  0  0  0  0  0  0
-## 11 0 0 0 0 0 0 0 0 0  0  0  0  1  0  0  0  0  0  0  0
-## 12 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 13 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  1  0  0
-## 14 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 15 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 16 0 0 0 0 1 1 0 1 0  0  0  0  0  0  0  0  0  0  0  1
-## 17 0 0 0 0 0 0 0 0 0  0  0  0  1  0  0  0  0  0  0  0
-## 18 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0  0  0
-## 19 0 0 0 0 0 0 0 0 0  1  0  0  0  1  0  0  0  0  0  0
-## 20 0 0 0 0 0 0 0 0 0  0  0  1  0  0  0  0  0  0  0  0
+## [1] &quot;lower.foo&quot;    &quot;upper.foo&quot;    &quot;default.vals&quot; &quot;foo&quot;</code></pre>
+<pre class="r"><code>p &lt;- pars(concepts = 5)
+get.par('foo', p, progress = TRUE)</code></pre>
+<pre><code>## Generate foo from c(&quot;lower.foo&quot;, &quot;upper.foo&quot;)
+## Generate lower.foo from default.vals
+## Generate upper.foo from c(&quot;default.vals&quot;, &quot;concepts&quot;)</code></pre>
+<pre><code>## $value
+## [1] 5
 ## 
-## $comp
-## $comp[[1]]
-## $comp[[1]]$matrix
-##    2 1 9 16 19 4 5 6 7 8 10 14 20 12 15
-## 2  0 0 0  1  1 0 0 0 0 0  0  0  0  0  0
-## 1  0 0 0  0  0 1 1 1 1 1  0  0  0  0  0
-## 9  0 0 0  0  0 0 1 0 1 0  0  1  0  0  0
-## 16 0 0 0  0  0 0 1 1 0 1  0  0  1  0  0
-## 19 0 0 0  0  0 0 0 0 0 0  1  1  0  0  0
-## 4  0 0 0  0  0 0 0 0 0 0  0  0  0  0  0
-## 5  0 0 0  0  0 0 0 0 0 0  0  0  0  1  0
-## 6  0 0 0  0  0 0 0 0 0 0  0  0  0  1  0
-## 7  0 0 0  0  0 0 0 0 0 0  0  0  0  1  0
-## 8  0 0 0  0  0 0 0 0 0 0  0  0  0  1  1
-## 10 0 0 0  0  0 0 0 0 0 0  0  0  0  1  0
-## 14 0 0 0  0  0 0 0 0 0 0  0  0  0  0  0
-## 20 0 0 0  0  0 0 0 0 0 0  0  0  0  1  0
-## 12 0 0 0  0  0 0 0 0 0 0  0  0  0  0  0
-## 15 0 0 0  0  0 0 0 0 0 0  0  0  0  0  0
+## $context
+## Activated information in the context:
+## [1] &quot;concepts&quot;     &quot;default.vals&quot; &quot;lower.foo&quot;    &quot;upper.foo&quot;   
+## [5] &quot;foo&quot;</code></pre>
+<pre class="r"><code>p &lt;- pars(M = M)
+p &lt;- get.par('foo', p, progress = TRUE)</code></pre>
+<pre><code>## Generate foo from c(&quot;lower.foo&quot;, &quot;upper.foo&quot;)
+## Generate lower.foo from default.vals
+## Generate upper.foo from c(&quot;default.vals&quot;, &quot;concepts&quot;)</code></pre>
+<pre class="r"><code>print(p)</code></pre>
+<pre><code>## $value
+## [1] 2
 ## 
-## $comp[[1]]$level.sizes
-## [1] 1 4 8 2
+## $context
+## Activated information in the context:
+## [1] &quot;M&quot;            &quot;default.vals&quot; &quot;concepts&quot;     &quot;concept.exp&quot; 
+## [5] &quot;students&quot;     &quot;lower.foo&quot;    &quot;upper.foo&quot;    &quot;foo&quot;</code></pre>
+<pre class="r"><code># 3. Test bar
+get.par('bar', pars())</code></pre>
+<pre><code>## Error in up.stream(target, pars, FALSE, progress): Cannot reach 'bar' since 'concepts' is missing</code></pre>
+<pre class="r"><code>get.par('bar', pars(upper.foo = 15))</code></pre>
+<pre><code>## Error in up.stream(target, pars, FALSE, progress): Cannot reach 'bar' since 'concepts' is missing</code></pre>
+<pre class="r"><code>get.par('bar', pars(lower.foo = 3, concepts = 5), progress = TRUE)</code></pre>
+<pre><code>## Generate bar from c(&quot;foo&quot;, &quot;concepts&quot;)
+## Generate foo from c(&quot;lower.foo&quot;, &quot;upper.foo&quot;)
+## Generate upper.foo from c(&quot;default.vals&quot;, &quot;concepts&quot;)</code></pre>
+<pre><code>## $value
+##           [,1]      [,2]      [,3]      [,4]       [,5]
+## [1,] 0.6282887 0.7779178 0.6714696 0.3229385 0.76916700
+## [2,] 0.5192958 0.7603650 0.2174205 0.6788141 0.74903196
+## [3,] 0.7170311 0.8622969 0.4020691 0.3945912 0.65498293
+## [4,] 0.4508402 0.1674351 0.6865095 0.3377349 0.76673834
+## [5,] 0.4679614 0.5211551 0.9617552 0.7187510 0.03914347
+## [6,] 0.1311302 0.2383403 0.9979056 0.7740466 0.46798468
 ## 
+## $context
+## Activated information in the context:
+## [1] &quot;concepts&quot;     &quot;lower.foo&quot;    &quot;default.vals&quot; &quot;upper.foo&quot;   
+## [5] &quot;foo&quot;          &quot;bar&quot;</code></pre>
+<pre class="r"><code>get.par('bar', pars(M = M), progress = TRUE)</code></pre>
+<pre><code>## Generate bar from c(&quot;foo&quot;, &quot;concepts&quot;)
+## Generate foo from c(&quot;lower.foo&quot;, &quot;upper.foo&quot;)
+## Generate lower.foo from default.vals
+## Generate upper.foo from c(&quot;default.vals&quot;, &quot;concepts&quot;)</code></pre>
+<pre><code>## $value
+##           [,1]      [,2]      [,3]
+## [1,] 0.8530865 0.3090032 0.6086614
+## [2,] 0.6550108 0.3790295 0.2563042
+## [3,] 0.4399682 0.9640085 0.9585594
 ## 
-## $comp[[2]]
-## $comp[[2]]$matrix
-##    3 11 17 13 18
-## 3  0  0  1  0  0
-## 11 0  0  0  1  0
-## 17 0  0  0  1  0
-## 13 0  0  0  0  1
-## 18 0  0  0  0  0
-## 
-## $comp[[2]]$level.sizes
-## [1] 1 2 1 1</code></pre>
-<p><strong>Example 2</strong></p>
-<pre class="r"><code>dina.data &lt;- gen(&quot;dina&quot;, p, progress = TRUE)</code></pre>
-<pre><code>## Generate dina from c(&quot;Q&quot;, &quot;M&quot;, &quot;slip&quot;, &quot;guess&quot;)
-## Generate Q from c(&quot;items&quot;, &quot;concepts&quot;)
+## $context
+## Activated information in the context:
+## [1] &quot;M&quot;            &quot;default.vals&quot; &quot;concepts&quot;     &quot;concept.exp&quot; 
+## [5] &quot;students&quot;     &quot;lower.foo&quot;    &quot;upper.foo&quot;    &quot;foo&quot;         
+## [9] &quot;bar&quot;</code></pre>
+<pre class="r"><code># 4. Test data
+toys &lt;- gen('toy', pars(M = M, bar = matrix(0, 3, 5)))</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'concepts' receives different values at once</code></pre>
+<pre class="r"><code>toys &lt;- gen('toy', pars(M = M, bar = matrix(1, 3, 3)),
+            n = 2, progress = TRUE)</code></pre>
+<pre><code>## Generate toy from c(&quot;bar&quot;, &quot;M&quot;)</code></pre>
+<pre class="r"><code>toys &lt;- gen('toy', pars(students = 20, concepts = 4), 
+            n = 3, progress = TRUE)</code></pre>
+<pre><code>## Generate toy from c(&quot;bar&quot;, &quot;M&quot;)
+## Generate bar from c(&quot;foo&quot;, &quot;concepts&quot;)
+## Generate foo from c(&quot;lower.foo&quot;, &quot;upper.foo&quot;)
+## Generate lower.foo from default.vals
+## Generate upper.foo from c(&quot;default.vals&quot;, &quot;concepts&quot;)
 ## Generate M from c(&quot;students&quot;, &quot;concept.exp&quot;)
-## Generate concept.exp from concepts
-## Generate slip from items
-## Generate guess from items</code></pre>
-<pre class="r"><code>dina.data</code></pre>
-<pre><code>## Activated information in the context:
-##  [1] &quot;students&quot;     &quot;default.vals&quot; &quot;concepts&quot;     &quot;items&quot;       
-##  [5] &quot;min.ntree&quot;    &quot;max.ntree&quot;    &quot;trans&quot;        &quot;min.depth&quot;   
-##  [9] &quot;max.depth&quot;    &quot;Q&quot;            &quot;concept.exp&quot;  &quot;M&quot;           
-## [13] &quot;slip&quot;         &quot;guess&quot;        &quot;dina&quot;</code></pre>
-<p>As reported by <code>gen</code>, unlike the previous case, <code>M</code> is now generated from three parameters <code>students</code>, <code>skill.space</code>, and <code>skill.dist</code> instead of <code>concept.exp</code> and <code>students</code>. The reason for this particular situation is that, <code>skill.space</code> and <code>skill.dist</code> are formal parameters of DINA model, so they should be used in the process of generating data. Again, we can access this data by referring to component <code>dina</code> of the generated context. Besides the response matrix, <code>dina.data$dina</code> also have another component <code>Q</code>, this is because of the fact that under DINA’s view, a response matrix without its corresponding Q-matrix is incomplete.</p>
-<pre class="r"><code>dina.data$dina</code></pre>
-<pre><code>## $R
-##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    1    1    1    1    1    1    1    1    1     1     1     1     0
-##  [2,]    1    0    0    1    0    0    1    0    1     1     0     0     1
-##  [3,]    1    1    0    1    1    1    1    0    1     0     1     1     1
-##  [4,]    0    1    0    1    0    1    0    1    0     1     0     0     0
-##  [5,]    0    0    0    1    0    0    1    0    0     0     0     0     0
-##  [6,]    0    0    0    0    0    0    0    0    0     0     0     0     1
-##  [7,]    1    0    1    0    0    0    0    0    0     0     0     0     0
-##  [8,]    0    0    0    0    0    0    0    0    0     0     0     0     1
-##  [9,]    1    1    1    1    1    0    0    1    1     0     1     0     1
-## [10,]    0    0    1    1    0    1    0    1    0     0     0     1     1
-## [11,]    0    0    0    0    0    0    1    0    0     0     1     1     0
-## [12,]    0    0    0    0    0    0    1    0    0     0     1     0     0
-## [13,]    0    0    0    0    0    0    0    1    0     1     1     0     0
-## [14,]    1    0    0    1    0    1    1    0    1     1     1     0     0
-## [15,]    0    0    1    0    0    0    0    0    0     0     1     1     1
-## [16,]    1    0    0    1    0    1    1    0    0     1     1     0     0
-## [17,]    0    1    0    1    0    1    0    0    1     0     1     0     0
-## [18,]    1    0    1    0    1    0    0    1    1     0     1     0     1
-## [19,]    0    0    0    0    1    0    0    0    0     0     1     0     0
-## [20,]    1    1    0    1    1    1    1    1    1     1     1     0     1
-##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     1     1     1     0     1     1     1
-##  [2,]     0     0     1     1     1     0     1
-##  [3,]     1     1     1     1     0     1     0
-##  [4,]     0     1     0     1     1     1     0
-##  [5,]     0     0     0     0     0     0     0
-##  [6,]     0     0     0     0     0     0     0
-##  [7,]     0     0     0     0     0     1     0
-##  [8,]     0     0     0     0     0     0     0
-##  [9,]     1     1     1     0     1     1     0
-## [10,]     1     1     1     0     1     1     0
-## [11,]     0     0     1     1     0     0     1
-## [12,]     0     0     0     0     0     1     1
-## [13,]     1     0     1     0     0     0     0
-## [14,]     0     0     0     0     1     1     1
-## [15,]     0     0     1     1     0     0     1
-## [16,]     1     0     1     0     1     0     1
-## [17,]     0     0     0     0     0     1     1
-## [18,]     1     1     0     0     0     0     0
-## [19,]     0     0     0     0     0     0     0
-## [20,]     1     0     0     1     1     0     1
-## 
-## $Q
-##       [,1] [,2] [,3] [,4] [,5]
-##  [1,]    1    1    0    0    1
-##  [2,]    1    0    1    1    1
-##  [3,]    0    0    1    0    1
-##  [4,]    0    1    1    1    1
-##  [5,]    1    0    1    0    1
-##  [6,]    1    1    0    0    0
-##  [7,]    0    1    1    0    1
-##  [8,]    1    0    1    0    1
-##  [9,]    0    0    1    0    1
-## [10,]    0    1    0    1    0
-## [11,]    1    1    0    1    1
-## [12,]    1    1    0    1    0
-## [13,]    1    0    1    0    0
-## [14,]    0    0    1    1    1
-## [15,]    1    0    1    0    1
-## [16,]    0    0    1    1    1
-## [17,]    0    1    0    0    1
-## [18,]    1    1    1    0    0
-## [19,]    1    1    1    1    1
-## [20,]    0    0    1    1    0</code></pre>
-<p><code>gen</code> only allow one model and one context at a time, we can save time generating data across different models and contexts using <code>gen.apply</code>. Setting the argument <code>multiply</code> to <code>TRUE</code> or <code>FALSE</code> decides what kind of matching will be made between models and contexts.</p>
-<pre class="r"><code>dat.1 &lt;- gen.apply(ALL.MODELS, list(p1 = p,p2 = p_), multiply = FALSE, n = 5)
-dat.1</code></pre>
-<pre><code>##            01      02      03      04      05     
-## exp.p1     List,14 List,14 List,14 List,14 List,14
-## irt.p2     List,10 List,10 List,10 List,10 List,10
-## poks.p1    List,18 List,18 List,18 List,18 List,18
-## dina.p2    List,10 List,10 List,10 List,10 List,10
-## dino.p1    List,15 List,15 List,15 List,15 List,15
-## lin.avg.p2 List,9  List,9  List,9  List,9  List,9 
-## nmf.con.p1 List,13 List,13 List,13 List,13 List,13
-## nmf.dis.p2 List,8  List,8  List,8  List,8  List,8 
-## nmf.com.p1 List,13 List,13 List,13 List,13 List,13
-## bkt.p2     List,16 List,16 List,16 List,16 List,16</code></pre>
-<pre class="r"><code>dat.1[&quot;dino.p1&quot;, 3]</code></pre>
-<pre><code>## [[1]]
-## Activated information in the context:
-##  [1] &quot;students&quot;     &quot;default.vals&quot; &quot;concepts&quot;     &quot;items&quot;       
-##  [5] &quot;min.ntree&quot;    &quot;max.ntree&quot;    &quot;trans&quot;        &quot;min.depth&quot;   
-##  [9] &quot;max.depth&quot;    &quot;Q&quot;            &quot;concept.exp&quot;  &quot;M&quot;           
-## [13] &quot;slip&quot;         &quot;guess&quot;        &quot;dino&quot;</code></pre>
-<pre class="r"><code>dat.2 &lt;- gen.apply(ALL.MODELS, list(p1 = p,p2 = p_), multiply = TRUE, n = 5)
-dat.2</code></pre>
-<pre><code>##         p1     p2    
-## exp     List,5 List,5
-## irt     List,5 List,5
-## poks    List,5 List,5
-## dina    List,5 List,5
-## dino    List,5 List,5
-## lin.avg List,5 List,5
-## nmf.con List,5 List,5
-## nmf.dis List,5 List,5
-## nmf.com List,5 List,5
-## bkt     List,5 List,5</code></pre>
-<pre class="r"><code>dat.2[&quot;nmf.com&quot;, &quot;p2&quot;]</code></pre>
-<pre><code>## [[1]]
-## [[1]][[1]]
-## Activated information in the context:
-## [1] &quot;items&quot;        &quot;students&quot;     &quot;default.vals&quot; &quot;M&quot;           
-## [5] &quot;concepts&quot;     &quot;concept.exp&quot;  &quot;Q&quot;            &quot;nmf.com&quot;     
-## 
-## [[1]][[2]]
-## Activated information in the context:
-## [1] &quot;items&quot;        &quot;students&quot;     &quot;default.vals&quot; &quot;M&quot;           
-## [5] &quot;concepts&quot;     &quot;concept.exp&quot;  &quot;Q&quot;            &quot;nmf.com&quot;     
-## 
-## [[1]][[3]]
-## Activated information in the context:
-## [1] &quot;items&quot;        &quot;students&quot;     &quot;default.vals&quot; &quot;M&quot;           
-## [5] &quot;concepts&quot;     &quot;concept.exp&quot;  &quot;Q&quot;            &quot;nmf.com&quot;     
-## 
-## [[1]][[4]]
-## Activated information in the context:
-## [1] &quot;items&quot;        &quot;students&quot;     &quot;default.vals&quot; &quot;M&quot;           
-## [5] &quot;concepts&quot;     &quot;concept.exp&quot;  &quot;Q&quot;            &quot;nmf.com&quot;     
-## 
-## [[1]][[5]]
-## Activated information in the context:
-## [1] &quot;items&quot;        &quot;students&quot;     &quot;default.vals&quot; &quot;M&quot;           
-## [5] &quot;concepts&quot;     &quot;concept.exp&quot;  &quot;Q&quot;            &quot;nmf.com&quot;</code></pre>
+## Generate concept.exp from concepts</code></pre>
+<pre class="r"><code>toys &lt;- gen('toy', pars(M = M), n = 3, progress = TRUE)</code></pre>
+<pre><code>## Generate toy from c(&quot;bar&quot;, &quot;M&quot;)
+## Generate bar from c(&quot;M&quot;, &quot;foo&quot;)
+## Generate foo from c(&quot;lower.foo&quot;, &quot;upper.foo&quot;)
+## Generate lower.foo from default.vals
+## Generate upper.foo from c(&quot;default.vals&quot;, &quot;concepts&quot;)</code></pre>
+<pre class="r"><code>toys.syn &lt;- syn('toy', toys[[2]]$toy,
+                keep.pars = c(&quot;foo&quot;,&quot;concept.exp&quot;),
+                students = 12, n = 3, progress = TRUE)</code></pre>
+<pre><code>## Learning by 'toy' ...
+## Generate toy from c(&quot;bar&quot;, &quot;M&quot;)
+## Generate bar from c(&quot;foo&quot;, &quot;concepts&quot;)
+## Generate M from c(&quot;students&quot;, &quot;concept.exp&quot;)</code></pre>
 </div>
-<div id="learning-the-most-probable-context-from-data-using-learn" class="section level2">
-<h2>Learning the most probable context from data using <code>learn</code></h2>
-<p>Let’s say we want to get the third data generation from the matching between context <code>p1</code> and model <code>poks</code>, and use POKS model to learn from this data.</p>
-<pre class="r"><code>poks.data &lt;- dat.2[&quot;poks&quot;, &quot;p1&quot;][[1]][[3]]
-poks.data</code></pre>
-<pre><code>## Activated information in the context:
-##  [1] &quot;students&quot;        &quot;default.vals&quot;    &quot;concepts&quot;       
-##  [4] &quot;items&quot;           &quot;min.ntree&quot;       &quot;max.ntree&quot;      
-##  [7] &quot;trans&quot;           &quot;min.depth&quot;       &quot;max.depth&quot;      
-## [10] &quot;density&quot;         &quot;min.it.per.tree&quot; &quot;avg.success&quot;    
-## [13] &quot;alpha.c&quot;         &quot;alpha.p&quot;         &quot;p.min&quot;          
-## [16] &quot;max.it.per.tree&quot; &quot;po&quot;              &quot;poks&quot;</code></pre>
-<pre class="r"><code>poks.data$poks</code></pre>
-<pre><code>## $R
-##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    1    1    1    1    1    0    1    1    1     1     0     1     1
-##  [2,]    1    0    0    0    1    0    0    0    1     0     0     0     0
-##  [3,]    1    0    1    0    1    0    1    0    0     1     0     0     1
-##  [4,]    1    0    1    1    1    1    1    1    0     1     1     1     0
-##  [5,]    0    1    1    1    1    0    1    0    0     1     0     0     1
-##  [6,]    1    0    1    1    0    1    0    0    0     1     1     1     0
-##  [7,]    1    0    1    1    1    1    1    1    1     1     1     1     1
-##  [8,]    1    1    1    0    0    1    1    1    0     1     0     0     1
-##  [9,]    1    0    1    0    0    1    0    0    0     1     0     1     0
-## [10,]    1    1    1    1    1    1    1    1    1     1     1     1     1
-## [11,]    1    1    1    1    1    1    1    1    1     1     1     1     1
-## [12,]    0    0    0    0    0    0    1    1    0     0     0     1     0
-## [13,]    0    0    0    1    0    0    0    0    0     0     1     0     0
-## [14,]    0    0    1    1    1    0    0    0    1     0     0     0     1
-## [15,]    1    0    1    1    1    1    1    1    0     1     0     0     1
-## [16,]    1    1    0    1    0    0    1    1    0     0     0     1     0
-## [17,]    1    0    0    0    1    0    0    0    0     0     0     0     1
-## [18,]    1    0    1    1    1    1    1    0    1     1     1     0     1
-## [19,]    1    1    1    1    1    1    1    1    1     1     1     1     1
-## [20,]    1    1    1    1    1    1    1    1    1     1     1     1     1
-##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     1     1     1     1     1     1     1
-##  [2,]     0     1     1     0     0     0     0
-##  [3,]     1     0     0     0     1     1     1
-##  [4,]     0     1     1     0     0     0     0
-##  [5,]     0     1     0     0     0     1     1
-##  [6,]     0     1     1     0     0     0     0
-##  [7,]     0     1     1     1     1     0     1
-##  [8,]     1     0     0     0     1     1     0
-##  [9,]     0     1     1     0     0     0     0
-## [10,]     1     1     1     0     1     1     1
-## [11,]     1     1     1     1     1     1     1
-## [12,]     0     0     0     0     0     1     1
-## [13,]     0     0     0     0     0     0     0
-## [14,]     0     1     0     1     0     0     0
-## [15,]     1     1     1     1     1     1     1
-## [16,]     1     0     0     0     0     1     1
-## [17,]     0     0     1     1     0     1     0
-## [18,]     1     1     0     1     1     1     1
-## [19,]     1     1     1     1     1     1     1
-## [20,]     1     1     1     1     1     1     1
-## 
-## $alpha.c
-## [1] 0.25
-## 
-## $alpha.p
-## [1] 0.25
-## 
-## $p.min
-## [1] 0.5</code></pre>
-<pre class="r"><code>learn.poks &lt;- learn(&quot;poks&quot;, data = poks.data$poks)</code></pre>
-<pre><code>## Learning by 'poks' ...</code></pre>
-<pre class="r"><code>learn.poks</code></pre>
-<pre><code>## Activated information in the context:
-##  [1] &quot;default.vals&quot; &quot;poks&quot;         &quot;student.var&quot;  &quot;avg.success&quot; 
-##  [5] &quot;state&quot;        &quot;or.t&quot;         &quot;or.f&quot;         &quot;po&quot;          
-##  [9] &quot;alpha.c&quot;      &quot;alpha.p&quot;      &quot;p.min&quot;        &quot;items&quot;</code></pre>
-<pre class="r"><code>learn.poks$po</code></pre>
-<pre><code>##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-##  [1,]    0    0    0    0    0    0    0    0    0     0     1     0     0
-##  [2,]    0    0    0    0    0    0    0    0    1     0     0     0     0
-##  [3,]    0    0    0    0    1    0    0    1    0     0     0     0     0
-##  [4,]    0    0    0    0    0    1    1    0    1     0     0     0     0
-##  [5,]    0    0    1    0    0    0    0    0    0     0     0     0     0
-##  [6,]    0    0    1    1    0    0    1    0    1     0     0     0     0
-##  [7,]    0    0    0    1    0    0    0    0    0     0     0     0     0
-##  [8,]    0    0    1    0    0    0    0    0    0     0     0     0     0
-##  [9,]    0    1    0    1    0    1    0    0    0     0     0     0     0
-## [10,]    0    0    0    0    0    0    0    0    0     0     1     0     0
-## [11,]    0    0    0    0    0    0    0    0    0     1     0     0     0
-## [12,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-## [13,]    1    0    0    0    0    1    0    0    0     0     1     0     0
-## [14,]    0    1    0    0    1    0    0    0    0     0     0     0     0
-## [15,]    1    0    1    0    0    0    0    1    0     0     0     0     0
-## [16,]    0    0    0    0    0    0    0    0    0     0     0     1     0
-## [17,]    0    1    0    0    0    0    0    0    0     1     0     0     0
-## [18,]    0    0    1    0    0    0    0    0    0     0     0     0     0
-## [19,]    0    0    0    0    0    0    0    0    0     1     1     0     0
-## [20,]    0    0    0    0    0    0    0    0    0     1     1     0     0
-##       [,14] [,15] [,16] [,17] [,18] [,19] [,20]
-##  [1,]     0     1     0     0     0     1     1
-##  [2,]     1     0     0     1     0     0     0
-##  [3,]     0     1     0     0     1     0     0
-##  [4,]     0     0     0     0     0     0     0
-##  [5,]     1     0     0     0     0     0     0
-##  [6,]     0     0     0     0     0     0     0
-##  [7,]     0     0     0     0     0     0     0
-##  [8,]     0     1     0     0     0     0     0
-##  [9,]     0     0     0     0     0     0     0
-## [10,]     0     0     0     0     0     1     1
-## [11,]     0     0     0     0     0     1     1
-## [12,]     0     0     1     0     1     0     0
-## [13,]     0     1     0     0     0     1     1
-## [14,]     0     0     0     0     1     0     0
-## [15,]     0     0     0     0     1     0     0
-## [16,]     0     0     0     0     1     0     0
-## [17,]     0     0     0     0     0     0     0
-## [18,]     0     1     0     0     0     0     0
-## [19,]     0     0     0     0     0     0     1
-## [20,]     0     0     0     0     0     1     0</code></pre>
-<p>If we want to learn from this same data using DINA model, <code>poks.data$poks</code> cannot be used because components <code>p.min</code>, <code>alpha.p</code>, <code>alpha.c</code> are meaningless to DINA. In order to do the task, one will need to hand-design this data. DINA requires one additional component besides the response matrix: Q-matrix. Normally, Q-matrix is expected to be expert-defined, however this illustration will just simply generate it randomly.</p>
-<pre class="r"><code>Q &lt;- get.par(&quot;Q&quot;, p)$value
-R &lt;- poks.data$poks$R
-dina.data &lt;- list(R=R,Q=Q)
-learn.dina &lt;- learn(&quot;dina&quot;, data = dina.data)</code></pre>
-<pre><code>## Learning by 'dina' ...</code></pre>
-<pre class="r"><code>learn.dina</code></pre>
-<pre><code>## Activated information in the context:
-##  [1] &quot;default.vals&quot;     &quot;dina&quot;             &quot;Q&quot;               
-##  [4] &quot;M&quot;                &quot;skill.space&quot;      &quot;skill.dist&quot;      
-##  [7] &quot;slip&quot;             &quot;guess&quot;            &quot;items&quot;           
-## [10] &quot;concepts&quot;         &quot;students&quot;         &quot;concept.exp&quot;     
-## [13] &quot;skill.space.size&quot;</code></pre>
-<p>Here we have a look at two parameters <code>skill.space</code> and <code>skill.dist</code></p>
-<pre class="r"><code>learn.dina$skill.space</code></pre>
-<pre><code>##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-## [1,]    0    1    0    0    0    0    1    1    1     1     0     0     0
-## [2,]    0    0    1    0    0    0    1    0    0     0     1     1     1
-## [3,]    0    0    0    1    0    0    0    1    0     0     1     0     0
-## [4,]    0    0    0    0    1    0    0    0    1     0     0     1     0
-## [5,]    0    0    0    0    0    1    0    0    0     1     0     0     1
-##      [,14] [,15] [,16] [,17] [,18] [,19] [,20] [,21] [,22] [,23] [,24]
-## [1,]     0     0     0     1     1     1     1     1     1     0     0
-## [2,]     0     0     0     1     1     1     0     0     0     1     1
-## [3,]     1     1     0     1     0     0     1     1     0     1     1
-## [4,]     1     0     1     0     1     0     1     0     1     1     0
-## [5,]     0     1     1     0     0     1     0     1     1     0     1
-##      [,25] [,26] [,27] [,28] [,29] [,30] [,31] [,32]
-## [1,]     0     0     1     1     1     1     0     1
-## [2,]     1     0     1     1     1     0     1     1
-## [3,]     0     1     1     1     0     1     1     1
-## [4,]     1     1     1     0     1     1     1     1
-## [5,]     1     1     0     1     1     1     1     1</code></pre>
-<pre class="r"><code>learn.dina$skill.dist</code></pre>
-<pre><code>##  [1] 5.761158e-03 5.761158e-03 5.761158e-03 5.761158e-03 5.761158e-03
-##  [6] 2.055577e-07 5.761158e-03 1.331748e-05 1.298963e-06 1.218844e-05
-## [11] 5.761158e-03 2.436928e-09 2.055577e-07 5.761158e-03 2.728806e-11
-## [16] 2.055577e-07 6.134797e-08 3.817164e-10 1.265335e-66 2.238237e-10
-## [21] 1.769977e-13 9.598183e-02 9.747710e-09 1.091522e-10 1.501849e-12
-## [26] 3.268260e-02 1.040170e-01 3.742383e-45 4.631395e-22 9.999943e-02
-## [31] 1.212024e-01 5.000000e-01</code></pre>
 </div>
-<div id="generate-synthetic-data-using-syn" class="section level2">
-<h2>Generate synthetic data using <code>syn</code></h2>
-<p>Generating synthetic data includes three steps:</p>
-<ol style="list-style-type: decimal">
-<li><p>Learn the most probable context from a given data by a specified model.</p></li>
-<li><p>Modify the learned context by keeping some of the parameters, changing some and discarding the rest.</p></li>
-<li><p>Generate data from the new context.</p></li>
-</ol>
-<p><code>edmsyn</code> provides function <code>syn</code> that automates the above process, specifically, <code>syn</code> consists of three parts:</p>
-<ol style="list-style-type: decimal">
-<li><p>Learn the most probable context by using <code>learn</code>.</p></li>
-<li><p>Keep some parameters (the default choice is stored in <code>edmconst$KEEP</code><a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>) and discard the rest, also allow the user to change parameter <code>students</code>.</p></li>
-</ol>
-<pre class="r"><code>edmconst$KEEP</code></pre>
-<pre><code>## $exp
-## [1] &quot;avg.success&quot; &quot;it.exp&quot;      &quot;student.var&quot;
-## 
-## $irt
-## [1] &quot;dis&quot;      &quot;dif&quot;      &quot;abi.mean&quot; &quot;abi.sd&quot;  
-## 
-## $poks
-## [1] &quot;po&quot;          &quot;student.var&quot; &quot;state&quot;       &quot;alpha.c&quot;     &quot;alpha.p&quot;    
-## [6] &quot;p.min&quot;      
-## 
-## $dina
-## [1] &quot;Q&quot;           &quot;skill.space&quot; &quot;skill.dist&quot;  &quot;slip&quot;        &quot;guess&quot;      
-## 
-## $dino
-## [1] &quot;Q&quot;           &quot;skill.space&quot; &quot;skill.dist&quot;  &quot;slip&quot;        &quot;guess&quot;      
-## 
-## $lin.avg
-## [1] &quot;Q&quot;         &quot;S.st.var&quot;  &quot;S.con.exp&quot;
-## 
-## $nmf.con
-## [1] &quot;Q&quot;           &quot;concept.exp&quot;
-## 
-## $nmf.dis
-## [1] &quot;Q&quot;           &quot;concept.exp&quot;
-## 
-## $nmf.com
-## [1] &quot;Q&quot;           &quot;concept.exp&quot;
-## 
-## $bkt
-##  [1] &quot;S.st.var&quot;         &quot;S.con.exp&quot;        &quot;L.st.var&quot;        
-##  [4] &quot;L.con.exp&quot;        &quot;bkt.slip.st.var&quot;  &quot;bkt.slip.it.exp&quot; 
-##  [7] &quot;bkt.guess.st.var&quot; &quot;bkt.guess.it.exp&quot; &quot;time&quot;            
-## [10] &quot;order&quot;            &quot;per.item&quot;         &quot;Q&quot;</code></pre>
-<ol start="3" style="list-style-type: decimal">
-<li>Generate synthetic data from this new context by <code>gen</code></li>
-</ol>
-<p>Now we synthesize <code>dina.data</code> with a new number of student</p>
-<pre class="r"><code>dina.syn &lt;- syn(&quot;dina&quot;, data = dina.data, students = 12, n = 10)</code></pre>
-<pre><code>## Learning by 'dina' ...</code></pre>
-<pre class="r"><code>dina.syn$synthetic[[5]]$dina</code></pre>
-<pre><code>## $R
-##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-##  [1,]    1    0    1    1    0    1    1    1    0     1     1     1
-##  [2,]    0    0    0    0    1    0    0    0    1     0     0     1
-##  [3,]    1    0    1    1    0    0    1    1    0     0     1     0
-##  [4,]    0    0    1    1    0    0    1    1    1     1     0     0
-##  [5,]    1    0    1    0    0    1    1    0    0     0     0     0
-##  [6,]    0    0    0    0    0    1    0    1    0     1     0     1
-##  [7,]    0    1    0    1    1    1    1    1    1     1     1     1
-##  [8,]    0    1    0    1    0    1    0    1    0     0     1     0
-##  [9,]    0    0    1    0    0    0    0    1    1     0     0     0
-## [10,]    1    1    1    1    1    1    1    1    1     1     1     1
-## [11,]    1    1    1    1    1    1    1    1    1     1     1     1
-## [12,]    0    0    0    1    1    0    0    0    1     0     0     0
-## [13,]    0    0    0    0    1    0    0    1    0     0     0     0
-## [14,]    0    1    0    0    1    0    0    1    1     1     0     0
-## [15,]    1    1    1    1    0    1    1    1    0     1     1     1
-## [16,]    1    0    1    1    0    1    0    0    0     1     1     0
-## [17,]    0    0    0    0    1    0    0    0    0     0     0     0
-## [18,]    1    1    1    1    1    1    1    1    1     0     1     1
-## [19,]    1    1    1    1    1    1    1    1    1     1     1     1
-## [20,]    1    1    1    1    1    1    1    1    1     1     1     1
-## 
-## $Q
-##       [,1] [,2] [,3] [,4] [,5]
-##  [1,]    0    0    1    0    1
-##  [2,]    0    0    0    0    1
-##  [3,]    1    1    0    0    1
-##  [4,]    1    0    1    0    0
-##  [5,]    0    0    1    0    1
-##  [6,]    0    1    0    1    0
-##  [7,]    0    1    1    1    1
-##  [8,]    1    1    1    1    1
-##  [9,]    1    0    1    0    1
-## [10,]    1    0    0    0    1
-## [11,]    0    1    1    0    1
-## [12,]    1    0    1    1    0
-## [13,]    1    0    1    1    0
-## [14,]    1    1    1    0    0
-## [15,]    1    0    1    1    1
-## [16,]    0    0    1    1    1
-## [17,]    0    1    1    1    1
-## [18,]    1    0    0    1    0
-## [19,]    0    1    1    1    0
-## [20,]    1    1    1    1    1</code></pre>
-<p>In case the default option is not favoured, <code>syn</code> also allows users to manually specify which parameters to keep through argument <code>keep.pars</code>.</p>
-<pre class="r"><code>dina.syn &lt;- syn(&quot;dina&quot;, data = dina.data, keep.pars = c(&quot;Q&quot;, &quot;concept.exp&quot;), students = 12)</code></pre>
-<pre><code>## Learning by 'dina' ...</code></pre>
-<p>However, in this case users take their own risk if the kept parameters (together with the new number of students if <code>students</code> is redefined), form an inconsistent or insufficient set with respect to the specified model. For example, for synthesizing data by DINA model case, if we choose to keep <code>M</code> (which essentially retain the number of students) and define a new number of students, there will be conflict.</p>
-<pre class="r"><code>dina.syn &lt;- syn(&quot;dina&quot;, data = dina.data, keep.pars = c(&quot;Q&quot;, &quot;M&quot;), students = 12)</code></pre>
-<pre><code>## Learning by 'dina' ...</code></pre>
-<pre><code>## Error in down.stream(filtered.pars): 'students' receives different values at once</code></pre>
-</div>
-<div class="footnotes">
-<hr />
-<ol>
-<li id="fn1"><p>Currently <code>edmsyn</code> is able to detect whether a parameter is receiving different values, or if it violates some bounds indicated by users<a href="#fnref1">↩</a></p></li>
-<li id="fn2"><p><code>edmconst$KEEP</code> is designed in a way such that, with any new value the user updates for <code>students</code>, the new context is still consistent and sufficient, in this sense function <code>syn</code> generates synthetic data by creating simulated students.<a href="#fnref2">↩</a></p></li>
-</ol>
+<div id="working-with-the-whole-structure" class="section level2">
+<h2>Working with the whole structure</h2>
+<p>Now that you have everything needed to fully manipulate the internal structure of <code>edmsyn</code>, it is time to move on working with the whole structure (as oppose to working with nodes and edges like before). The first thing to know is that, each time <code>library(edmsyn)</code> is executed, the original <code>edmsyn</code> graphical structure (without <code>foo</code>, <code>bar</code>, <code>toy</code>, etc) will be restored and everything we have built so far is lost. Thus, occasionally saving the modified structure is important.</p>
+<pre class="r"><code>toy.tree &lt;- edmtree.dump()</code></pre>
+<p>Assume a different situation where no part of the current structure is needed, you will manually build a whole new structure from scratch. This case, the first thing to do is to clear out all nodes</p>
+<pre class="r"><code>edmtree.clear()
+edmtree.fetch('toy')</code></pre>
+<pre><code>## Error in edmtree.fetch(&quot;toy&quot;): 'toy' is not found in current tree</code></pre>
+<pre class="r"><code>edmtree.fetch('M')</code></pre>
+<pre><code>## Error in edmtree.fetch(&quot;M&quot;): 'M' is not found in current tree</code></pre>
+<p>Lastly, you can always restore a saved structure</p>
+<pre class="r"><code>edmtree.load(toy.tree)
+gen('toy', pars(M = M))</code></pre>
+<pre><code>## Activated information in the context:
+##  [1] &quot;M&quot;            &quot;default.vals&quot; &quot;concepts&quot;     &quot;concept.exp&quot; 
+##  [5] &quot;students&quot;     &quot;lower.foo&quot;    &quot;upper.foo&quot;    &quot;foo&quot;         
+##  [9] &quot;bar&quot;          &quot;toy&quot;</code></pre>
+<pre class="r"><code>gen('bkt', pars(students = 15, items = 20))</code></pre>
+<pre><code>## Error in gen(&quot;bkt&quot;, pars(students = 15, items = 20)): Model 'bkt' is not available</code></pre>
+<pre class="r"><code># Leave the argument part empty
+# if you want the original edmsyn structure
+edmtree.load()
+gen('toy', pars(M = M))</code></pre>
+<pre><code>## Error in gen(&quot;toy&quot;, pars(M = M)): Model 'toy' is not available</code></pre>
+<pre class="r"><code>gen('bkt', pars(students = 15, items = 20, 
+                concepts = 4, time = 10))</code></pre>
+<pre><code>## Activated information in the context:
+##  [1] &quot;items&quot;        &quot;concepts&quot;     &quot;students&quot;     &quot;time&quot;        
+##  [5] &quot;default.vals&quot; &quot;per.item&quot;     &quot;S&quot;            &quot;L&quot;           
+##  [9] &quot;bkt.slip&quot;     &quot;bkt.guess&quot;    &quot;order&quot;        &quot;bkt&quot;</code></pre>
 </div>
 
 

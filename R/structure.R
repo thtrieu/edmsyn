@@ -34,12 +34,24 @@ print.context <- function(x){
 }
 
 #' @export
-class.default <- function(x){
-  print("default")
+class.edmfun <- function(x){
+  print("edmfun")
 }
 
 #' @export
-print.default <- function(x){
+print.edmfun <- function(x){
+  y <- x
+  attributes(y) <- NULL
+  print(y)
+}
+
+#' @export
+class.defaults <- function(x){
+  print("defaults")
+}
+
+#' @export
+print.defaults <- function(x){
   for(i in 1:length(names(x))){
     cat(paste0(names(x)[[i]],'\n'))
     print(get(names(x)[[i]],envir=x))
@@ -89,7 +101,7 @@ print.maxs <- function(x){
 #-----------------------------------+
 # down.stream and up.stream helpers |
 #-----------------------------------+
-# to string with leading zeros
+# num to string with leading zeros
 to.str <- function(x, max){
   if (max<10) r <- toString(x)
   else
@@ -114,6 +126,13 @@ compat <- function(val,tel){
   if (class(tel) == "maxs") return(all(tel > val))
   if (class(tel) == "numeric") return(max(abs(val-tel)) < 1e-10)
   else return(identical(val,tel))
+}
+
+# copy an environment
+env.copy <- function(env.from, env.to){
+  for (i in names(env.from))
+    assign(i, get(i, envir = env.from), envir = env.to)
+  return(env.to)
 }
 
 #================+
@@ -1451,6 +1470,11 @@ assemble.structure <- function(){
     if (dot == ".") {
       node.i <- all.nodes[[i]]
       names(node.i) <- c('tell','gen','f.tell','f.gen')
+      if (!is.null(node.i$f.tell))
+        class(node.i$f.tell) <- 'edmfun'
+      if (!identical(node.i$f.gen, list(NULL)))
+        for (i in 1:length(node.i$f.gen))
+          class(node.i$f.gen[[i]]) <- 'edmfun'
       assign(substr(name.i,1,l-1), node.i, envir = r)
     }
   }
@@ -1466,27 +1490,20 @@ assemble.structure <- function(){
 # @seealso \code{assemble.structure}
 # @export
 STRUCTURE.ORIGINAL <- assemble.structure()
-STRUCTURE <- STRUCTURE.ORIGINAL
+# @export
+STRUCTURE <- env.copy(STRUCTURE.ORIGINAL, new.env())
 
 #===========+
 # CONSTANTS |
 #===========+
 
-#' A character vector of names of all available models
-#' 
-#' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
-#'
-#' @export
-ALL.MODELS <- c("exp", "irt", "poks", "dina", "dino",
-                #"lin.pes",
-                "lin.avg","nmf.con", "nmf.dis", "nmf.com", "bkt")
+# @export
+edmconst.original <- new.env()
 
-#' List of parameters to be kept for each model in the synthesize process
-#' 
-#' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
-#' 
-#' @export
-KEEP <- list(exp = c("avg.success","it.exp","student.var"),
+edmconst.original$ALL.MODELS <- c("exp", "irt", "poks", "dina", "dino",
+                          "lin.avg","nmf.con", "nmf.dis", "nmf.com", "bkt")
+
+edmconst.original$KEEP <- list(exp = c("avg.success","it.exp","student.var"),
              irt = c("dis","dif","abi.mean","abi.sd"),
              poks = c("po","student.var","state","alpha.c","alpha.p","p.min"),
              dina = c("Q","skill.space","skill.dist","slip","guess"),
@@ -1502,15 +1519,18 @@ KEEP <- list(exp = c("avg.success","it.exp","student.var"),
 
 # Everything that is integer but not min/max, is definite (see below)
 # @export
-DEFINITE <- c("items","students","concepts","time","skill.space.size")
+edmconst.original$DEFINITE <- c("items","students","concepts","time","skill.space.size")
 
 # @export
 BOUND.CLASSES <- c("min", "max", "mins", "maxs")
 
 # @export
-INTEGER <- c(DEFINITE,
+edmconst.original$INTEGER <- c(edmconst.original$DEFINITE,
              "min.ntree","max.ntree","min.depth","max.depth",
              "min.it.per.tree","max.it.per.tree")
+
+#' @export
+edmconst <- env.copy(edmconst.original, new.env())
 
 #=====================+
 # OPERATING FUNCTIONS |
@@ -1564,7 +1584,7 @@ down.stream <- function(pars){
       for (j in 1:length(child.names)){
         child.j.val <- pars[[child.names[j]]]
         if (!is.null(child.j.val) &
-            ((child.names[j] %in% DEFINITE) |
+            ((child.names[j] %in% edmconst$DEFINITE) |
              (class(child.val[[j]]) %in% BOUND.CLASSES))){
           if (!suppressWarnings(compat(child.j.val,child.val[[j]]))){
             if (class(child.val[[j]]) %in% BOUND.CLASSES)
@@ -1704,7 +1724,10 @@ up.stream <- function(target, pars, target.base = TRUE, progress = FALSE){
       }
       print.trace(trace[target])
     }
-    return(new.pars)
+    if (target %in% edmconst$ALL.MODELS)
+      return(new.pars)
+    else 
+      return(down.stream(new.pars))
   }
 }
 
@@ -1857,9 +1880,9 @@ viz <- function(po){
   return(po)
 }
 
-INITIALS <- new.env()
+INITIALS.ORIGINAL <- new.env()
 asin <- function(node.name, val){
-  assign(node.name, val, envir = INITIALS)
+  assign(node.name, val, envir = INITIALS.ORIGINAL)
 }
 asin('student.var', 1/12)
 asin('avg.success', 0.5)
@@ -1880,6 +1903,8 @@ asin('p.min', 0.5)
 asin('abi.mean', 0)
 asin('abi.sd', 1)
 asin('trans', FALSE)
+
+INITIALS <- INITIALS.ORIGINAL
 
 #=======================================+
 # Environment containing initial values |
@@ -1948,13 +1973,13 @@ default <- function(student.var = NULL, avg.success = NULL, time = NULL,
       else
         stop("'",calls[[i]],"' is not found in current tree")
   
-  class(r) <- 'default'
+  class(r) <- 'defaults'
   return(r)
 }
 
 #' @export
 keep <- function(model){
-  KEEP[[model]]
+  edmconst$KEEP[[model]]
 }
 
 #==========================+
@@ -2095,7 +2120,7 @@ pars <- function(old.pars = NULL,
   if (is.null(new.pars$default.vals)) new.pars$default.vals = default() # user accidentally delete default.vals
   
   # Make sure integers are integers
-  sapply(INTEGER, function(x){
+  sapply(edmconst$INTEGER, function(x){
     if (!is.null(new.pars[[x]]))
       new.pars[[x]] <<- as.integer(new.pars[[x]])
   })
@@ -2126,7 +2151,7 @@ pars <- function(old.pars = NULL,
 #' # However, it is not trivial to generate a skill mastery matrix from p
 #' p$M # NULL returned
 #' # get.par can do this
-#' M <- get.par("M", p, progress = True)
+#' M <- get.par("M", p, progress = TRUE)
 #' print(M)
 #' @author Hoang-Trieu Trinh, \email{thtrieu@@apcs.vn}
 #' @seealso \code{gen}
@@ -2164,7 +2189,7 @@ get.par <- function(target, pars, progress = FALSE){
 #' @export
 gen <- function(model, pars, n = 1, progress = FALSE){
 
-  if (!(model %in% ALL.MODELS))
+  if (!(model %in% edmconst$ALL.MODELS))
     stop(paste0("Model '",model,"' is not available"))
   if (!identical(class(pars),c("context")))
     stop(paste0("'pars' is of an invalid class"))
@@ -2172,7 +2197,7 @@ gen <- function(model, pars, n = 1, progress = FALSE){
   r <-
     sapply(1:n,function(x){
       if (x > 1) progress <- FALSE
-      trial <- up.stream(model, pars, TRUE, progress)
+      trial <- up.stream(model, pars, FALSE, progress)
       if (is.null(trial))
         stop(paste0("Insufficient information to generate '",model,"'"))
       list(trial)
@@ -2272,7 +2297,7 @@ gen.apply <- function(models, pars, multiply = TRUE, n = 1, progress = FALSE){
 #' @export
 learn <- function(model, data){
 
-  if (!(model %in% ALL.MODELS))
+  if (!(model %in% edmconst$ALL.MODELS))
     stop(paste0("Model '",model,"' is not available"))
 
   cat(paste0("Learning by '",model,"' ...\n"))
@@ -2317,43 +2342,21 @@ syn <- function(model, data, keep.pars = keep(model),
   list(data = data, synthetic = gen(model, filtered.pars, n = n, progress))
 }
 
-#' @export
-edmtree.fetch <- function(node.name){
-  if (!(node.name %in% names(STRUCTURE)))
-    stop(paste0("'",node.name,"' is not found in current tree"))
-  get(node.name, envir = STRUCTURE) #STRUCTURE[[node.name]]
-}
+#=============================+
+# EDMTREE MANIPULATORS FAMILY |
+#=============================+
 
-#' @export
-edmtree.remove <- function(node.name){
-  temp = get(node.name, envir = STRUCTURE)
-  if (is.null(temp))
-    stop(paste0("'",node.name,"' is not found in current tree"))
-  else {
-    remove(node.name, envir=STRUCTURE)
-    for (name in names(STRUCTURE)) {
-      node.i <- edmtree.fetch(name)
-      if (name %in% node.i$tell) {
-        #TODO
-      }
-      for (i in 1:length(node.i$gen)) {
-        method.i <- node.i$gen[[i]]
-        if (name %in% method.i){
-          #TODO
-        }
-      }
-    }
-  }
-  temp
-}
+#-----------------+
+# edmtree helpers |
+#-----------------+
 
 # @export
 # User input when adding/replacing a node can be flexible (aka messy)
 # edmtree.check will regularise these kind of input into standard format,
 # add func wrappers where needed, and modify ALL.MODELS, INTEGER, DEFINITE
 # whenever applicable
-edmtree.check <- function(node.name, node.val, integer, data) {
-  
+edmtree.check <- function(node.name, node.val, 
+                          integer = NULL, data = NULL){
   # First check if node.name is root by looking at
   # whether tell or f.tell is NULL
   # If yes, both tell and f.tell is forced to NULL
@@ -2375,51 +2378,6 @@ edmtree.check <- function(node.name, node.val, integer, data) {
       warning('f.tell is not NULL, force it to NULL')
       node.val$f.tell <- NULL
     }
-    if ((node.val$gen == list(NULL)) || (node.val$f.gen == list(NULL))){
-      message(paste0("'",node.name,"' appears to have no default initialization"))
-      if (node.val$gen != list(NULL)){
-        warning('gen is not list(NULL), force it to list(NULL)')
-        node.val$gen <- list(NULL)
-      }
-      if (node.val$f.gen != list(NULL)){
-        warning('f.gen is not list(NULL), force it to list(NULL)')
-        node.val$f.gen <- list(NULL)
-      }
-      return(node.val)
-    } else {
-      # This is when node is a root with default value
-      # Case 1. this default value does not rely on any run-time value
-      if (node.val$gen == "default.vals" || identical(node.val$gen, list('default.vals'))){
-        node.val$gen <- list("default.vals")
-        func <- class(node.val$f.gen) == "function"
-        lfun <- class(node.val$f.gen) == "list" && node.val$f.gen[[1]] == "func"
-        # Case 1a. this default value is calculated from other default values,
-        # note that being calculated from a node X's default value is different from 
-        # calculated from X's run-time value
-        # this is unnecessary since a function of pre-defined constants is also a pre-defined constant
-        # edmsyn allows this case anyway, with a warning ofcourse.
-        if (func || lfunc){
-          warning("'",node.name,"' appears to have a default value that relies on other default values")
-          warning("note that default value of '",node.name,"' is calculated right now and will not change in the future")
-          if (lfunc && length(node.val$f.gen) > 1){
-            warning("f.gen of '",node.name,"' has more than one component, only the first one is taken")
-            node.val$f.gen <- node.val$f.gen[[1]]
-          }
-          if (length(formals(node.val$f.gen)) != 1)
-            stop("f.gen of '",node.name,"' must have one and only one argument")
-          node.default <- node.val$f.gen(default())
-        # Case 1b. this default value is a constant
-        # which is the case for all base roots with default values.
-        } else {
-          message("'",node.name,"' appears to have a constant default value")
-          node.default <- node.val$f.gen
-        }
-        asin(node.name, node.default)
-        node.val$f.gen <- list(function(x){x[[1]][[node.name]]})
-      # Case 2. This default value does rely on some run-time values
-      } else
-        message("'",node.name,"' appears to have a default value that relies on one or more run-time values")
-    }
   }
   
   names.struct <- names(STRUCTURE)
@@ -2431,13 +2389,13 @@ edmtree.check <- function(node.name, node.val, integer, data) {
   
   # Check if this node belong to bound classes
   bound <- FALSE
-  
   # if node is root, tell and f.tell is already regularised
-  if (!root){
+  if (!root && class(node.val$f.tell) != 'edmfun'){
     if (class(node.val$tell) != 'character') stop('tell must be a set of node names')
     check.avail(node.val$tell)
     
     # down stream regulariser
+    
     if (class(node.val$f.tell) != 'function') stop('f.tell must be a function')
     if (length(formals(node.val$f.tell)) != 1) stop('f.tell have one argument')
     f <- node.val$f.tell
@@ -2446,7 +2404,8 @@ edmtree.check <- function(node.name, node.val, integer, data) {
     bound.max <- identical(f, greater.equal)
     bound.maxs <- identical(f, greater.strict)
     if (bound.min || bound.mins || bound.max || bound.maxs){
-      new.f.tell <- listwrap(f)
+      if (class(f) != "list")
+        new.f.tell <- listwrap(f)
       bound <- TRUE
     } else {
       new.f.tell <- function(l){ 
@@ -2459,10 +2418,10 @@ edmtree.check <- function(node.name, node.val, integer, data) {
             warning(paste0("node '",node.name,"' : f.tell did not return a list, coerced to list of length 1"))
             f.tell.r <- list(f.tell.r)
           }
-          else {
-            stop(paste0("node '",node.name,"' : f.tell did not return a list as expected"))
-          }
-          
+        else {
+          stop(paste0("node '",node.name,"' : f.tell did not return a list as expected"))
+        }
+        
         if (length(f.tell.r) != length(node.val$tell))
           stop(paste0("node '",node.name,"' : f.tell did not return a list with length ",
                       length(node.val$tell)," (size of tell) as expected"))
@@ -2470,56 +2429,316 @@ edmtree.check <- function(node.name, node.val, integer, data) {
       }
     }
     node.val$f.tell <- new.f.tell
+    class(node.val$f.tell) <- 'edmfun'
   }
   
-  if (class(node.val$gen) != 'list') stop('gen must be a list')
-  for (i in 1:length(node.val$gen)){
-    gen.i <- node.val$gen[[i]]
-    if (class(gen.i) != 'character') stop('gen must be a list of character sets')
-    check.avail(gen.i)
+  null.gen <- FALSE
+  if (class(node.val$gen) != 'list')
+    node.val$gen = list(c(node.val$gen))
+  if (class(node.val$f.gen) != 'list')
+    node.val$f.gen = list(node.val$f.gen)
+  if (length(node.val$gen) != length(node.val$f.gen))
+    stop('gen and f.gen must be of the same length')
+  if (identical(node.val$gen,list(NULL)) || identical(node.val$f.gen,list(NULL))){
+    message(paste0("'",node.name,"' appears to have no default initialization"))
+    if (!identical(node.val$gen,list(NULL))){
+      warning('gen is not list(NULL), force it to list(NULL)')
+      node.val$gen <- list(NULL)
+    }
+    if (!identical(node.val$f.gen,list(NULL))){
+      warning('f.gen is not list(NULL), force it to list(NULL)')
+      node.val$f.gen <- list(NULL)
+    }
+    null.gen <- TRUE
   }
   
-  if (class(node.val$f.gen) != 'list') stop('f.gen must be a list')
-  # up stream regulariser
-  f.gen.copy <- node.val$f.gen # to avoid infinite recursion
-  for (i in 1:length(node.val$f.gen)){
-    f.gen.i <- node.val$f.gen[[i]]
-    if (class(f.gen.i) != 'function') stop('f.gen must be a list of functions')
-    if (length(formals(f.gen.i)) != length(node.val$gen[[i]])) 
-      stop(paste0("number of arguments of f.gen[[",i,"]] must match the size of gen[[",i,"]]"))
+  if (length(node.val$gen) > 0 && !null.gen){
+    f.gen.copy <- node.val$f.gen # to avoid infinite recursion
+    for (i in 1:length(node.val$gen)){
+      gen.i <- node.val$gen[[i]]
+      if (class(gen.i) != 'character') 
+        stop('gen must be a list of character sets')
+      check.avail(gen.i)
+      
+      f.gen.i <- node.val$f.gen[[i]]
+      if ('default.vals' %in% gen.i){
+        # This is when node is a not-yet regularised with default value
+        # Case 1. this default value does not rely on any run-time value
+        # and thus, is completely defined at this stage
+        if (identical(gen.i,"default.vals")) {
+          func <- class(f.gen.i) == "function"
+          # Case 1a. this default value is calculated from other default values,
+          # note that being calculated from a node X's default value is different from 
+          # calculated from X's run-time value
+          # this is unnecessary since a function of pre-defined constants is also a pre-defined constant
+          # edmsyn allows this case anyway, with a warning ofcourse.
+          if (func) {
+            warning("'",node.name,"' appears to have a default value that relies on other default values")
+            warning("note that default value of '",node.name,"' is calculated right now and will stay unchanged.")
+            default.i <- f.gen.i(default())
+            # Case 1b. this default value is a constant
+            # which is the case for all base roots with default values.
+          } else {
+            message("'",node.name,"' appears to have a constant default value")
+            default.i <- f.gen.i
+          }
+          asin(node.name, default.i)
+          node.val$f.gen[[i]] <- function(x){x[[1]][[node.name]]}
+          class(node.val$f.gen[[i]]) <- 'edmfun'
+          # Case 2. This default value does rely on some run-time values
+        } else {
+          message("'",node.name,"' appears to have a default value that relies on at least one run-time values")
+        }
+      }
+      
+      f.gen.i <- node.val$f.gen[[i]]
+      # up stream function regulariser
+      if (class(f.gen.i) == 'edmfun') next
+      if (class(f.gen.i) != 'function') stop('f.gen must be a list of functions')
+      if (length(formals(f.gen.i)) != length(node.val$gen[[i]])) 
+        stop(paste0("number of arguments of f.gen[[",i,"]] must match the size of gen[[",i,"]]"))
+    }
+    gen.len <- length(f.gen.copy)
+    fix.gen <- function(l){ 
+      if (l > gen.len) return() # recursion base
+      if (class(node.val$f.gen[[l]]) != 'edmfun'){
+        node.val$f.gen[[l]] <<- function(x){ do.call(f.gen.copy[[l]],x) }
+        class(node.val$f.gen[[l]]) <<- 'edmfun'
+      }
+      fix.gen(l+1)
+      # recursion creates a sequence of different enviroments
+      # to trap the values of l, 
+      # because otherwise - when a loop is used with l being the iterator, 
+      # then l will always == gen.len at runtime
+    }
+    fix.gen(1)
   }
-  gen.len <- length(f.gen.copy)
-  fix.gen <- function(l){ 
-    if (l > gen.len) return() # recursion base
-    node.val$f.gen[[l]] <<- function(x){ do.call(f.gen.copy[[l]],x) }
-    fix.gen(l+1)
-    # recursion creates a sequence of different enviroments
-    # to trap the values of l, 
-    # because otherwise - when a loop is used with l being the iterator, 
-    # then l will always == gen.len at runtime
-  }
-  fix.gen(1)
   
   # To this point, edmtree.check is successful, it's time
-  # to check if there is any changes to make to INTEGER or DEFINITE
-  if (integer && !(node.name %in% INTEGER))
-    INTEGER <- c(INTEGER, node.name)
-  if (!integer && (node.name %in% INTEGER))
-    INTEGER <- INTEGER[-c(which(INTEGER == node.name))]
-  if (data && !(node.name %in% ALL.MODELS))
-    ALL.MODELS <- c(ALL.MODELS, node.name)
-  if (!data && (node.name %in% ALL.MODELS))
-    ALL.MODELS <- ALL.MODELS[-c(which(ALL.MODELS == node.name))]
-  if (integer && !bound && !(node.name %in% DEFINITE)) { 
-    # not bound, but integer -> definite
-    DEFINITE <- c(DEFINITE, node.name)
+  # to check if there is any changes to make to 
+  # INTEGER, ALL.MODELS or DEFINITE
+  
+  if (!is.null(data)){
+    if (data && !(node.name %in% edmconst$ALL.MODELS))
+      edmconst$ALL.MODELS <- c(edmconst$ALL.MODELS, node.name)
+    if (!data && (node.name %in% edmconst$ALL.MODELS))
+      edmconst$ALL.MODELS <- edmconst$ALL.MODELS[-c(
+        which(edmconst$ALL.MODELS == node.name))]
   }
-  if ((!integer || bound) && (node.name %in% DEFINITE)) { 
-    # not integer, or bound -> !definite
-    DEFINITE <- DEFINITE[-c(which(DEFINITE == node.name))]
+  if (!is.null(integer)){
+    if (integer && !(node.name %in% edmconst$INTEGER))
+      edmconst$INTEGER <- c(edmconst$INTEGER, node.name)
+    if (!integer && (node.name %in% edmconst$INTEGER))
+      edmconst$INTEGER <- edmconst$INTEGER[-c(
+        which(edmconst$INTEGER == node.name))]
+    if (integer && !bound && !(node.name %in% edmconst$DEFINITE)) { 
+      # not bound, but integer -> definite
+      edmconst$DEFINITE <- c(edmconst$DEFINITE, node.name)
+    }
+    if ((!integer || bound) && (node.name %in% edmconst$DEFINITE)) { 
+      # not integer, or bound -> !definite
+      edmconst$DEFINITE <- edmconst$DEFINITE[-c(
+        which(edmconst$DEFINITE == node.name))]
+    }
   }
   return(node.val)
 }
+
+# @export
+# this is a function that expect func to return
+# a list of n output, it will mask the specified one
+# and return a list of n-1 output
+func.mask <- function(func, mask){
+  fun <- func
+  func.masked <- function(argv){
+    ret <- fun(argv)
+    ret <- ret[-c(mask)]
+  }
+  class(func.masked) <- 'edmfun'
+  return(func.masked)
+}
+
+
+# @export
+# This function concatenate two output lists
+# from two input functions
+func.concat <- function(node.name, fun1, fun2){
+  func1 <- fun1
+  func2 <- fun2
+  new.func <- function(args){
+    list1 <- func1(args)
+    list2 <- func2(args)
+    if (class(list2) != 'list')
+      stop(paste0(node.name,"$f.tell did not return a list"))
+    append(list1, list2)
+  }
+  class(new.func) <- 'edmfun'
+  return(new.func)
+}
+
+# @export
+# This function returns if two vector is identical
+# if they are considered as sets
+set.identical <- function(set1, set2){
+  if (length(set1) != length(set2))
+    return(FALSE)
+  all(sapply(set1, function(x){
+    x %in% set2
+  }))
+}
+
+# @export
+# is a set in a list of set?
+set.in.list <- function(set, list){
+  for (elem in list){
+    if (set.identical(set, elem)){
+      return(TRUE)
+    }
+  }
+  return(FALSE)
+}
+
+# @export
+# This function replace return values of old function
+# at indexes by new ones, node.name is there to
+# debug at run time if new function does not return
+# a list of proper length.
+# Partial replacement in tell is allowed but strongly discourage
+# Because of the fact that its only technical solution
+# will result in a very inefficient result
+# since there is no way to modify the existing function
+# the old result will be calculated anyway
+# before replacing with new results (thus inefficient)
+func.replace <- function(node.name, oldfun, newfun, indexes){
+  oldf <- oldfun
+  newf <- newfun
+  new.f <- function(args){
+    oldr <- oldf(args)
+    newr <- newf(args)
+    if (class(newr) != 'list')
+      stop(paste0(node.name,"$f.tell did not return a list"))
+    if (length(newr) != length(indexes))
+      stop(paste0(node.name,"$f.tell did not return a list of correct length",
+                  " ,must match the length of $tell (",length(oldr),")"))
+    for (i in 1:length(newr))
+      oldr[indexes[i]] <- newr[i]
+    return(oldr)
+  }
+  class(new.f) <- 'edmfun'
+  return(new.f)
+}
+
+#---------------------------+
+# Fetching an existing node |
+#---------------------------+
+
+#' @export
+edmtree.fetch <- function(node.name){
+  if (!(node.name %in% names(STRUCTURE)))
+    stop(paste0("'",node.name,"' is not found in current tree"))
+  get(node.name, envir = STRUCTURE) #STRUCTURE[[node.name]]
+}
+
+#-------------------------------------------+
+# fully/partially removing an existing node |
+#-------------------------------------------+
+
+#' @export
+edmtree.remove <- function(node.name, progress = TRUE){
+  temp = edmtree.fetch(node.name)
+  rm(list = c(node.name), envir = STRUCTURE)
+  if (node.name %in% names(INITIALS))
+    rm(list = c(node.name), envir = INITIALS)
+  for (name in names(STRUCTURE)) {
+    node.i <- edmtree.fetch(name)
+    # node.i will be reassign after this
+    if (node.name %in% node.i$tell) {
+      # what todo is mask the corresponding
+      # output of f.tell
+      # because name is removed
+      index <- which(node.i$tell == node.name)
+      message(paste0("Remove ",node.name," from ",name,"$tell"))
+      node.i$tell <- node.i$tell[-c(index)]
+      if (length(node.i$tell) == 0){
+        node.i$tell <- NULL
+        node.i$f.tell <- NULL
+      } else {
+        node.i$f.tell <- func.mask(node.i$f.tell, index)
+      }
+    }
+    i <- 1
+    while (i <= length(node.i$gen)) {
+      method.i <- node.i$gen[[i]]
+      if (node.name %in% method.i){
+        message(paste0("Remove method (",paste(method.i, collapse = ', '),
+                       ") from ",name,"$gen"))
+        node.i$gen <- node.i$gen[-c(i)]
+        node.i$f.gen <- node.i$f.gen[-c(i)]
+        i <- i - 1
+      }
+      i <- i + 1
+    }
+    assign(name, node.i, envir = STRUCTURE)
+  }
+  if (node.name %in% edmconst$ALL.MODELS)
+    edmconst$ALL.MODELS <- edmconst$ALL.MODELS[-c(
+      which(edmconst$ALL.MODELS == node.name)
+    )]
+  message(paste0("Successfully removed ",node.name))
+  return(temp)
+}
+
+#' @export
+edmtree.remove.tell <- function(node.name, tell, f.tell = NULL,
+                                integer = NULL, data = NULL){
+  node.val <- edmtree.fetch(node.name)
+  if (set.identical(tell, node.val$tell)){
+    new.tell <- NULL
+    new.f.tell <- NULL
+  } else {
+    indexes = sapply(tell, function(x){
+      pos <- which(x == node.val$tell)
+      if (identical(pos, integer(0)))
+        stop(paste0(x," cannot be found in ",node.name,"$tell"))
+      return(pos)
+    })
+    new.tell <- node.val$tell[-c(indexes)]
+    if (is.null(f.tell))
+      new.f.tell <- func.mask(node.val$f.tell, indexes)
+    else
+      new.f.tell <- f.tell
+  }
+  edmtree.replace(node.name, tell = new.tell, f.tell = new.f.tell,
+                  integer = integer, data = data)
+}
+
+#' @export
+edmtree.remove.gen <- function(node.name, gen.method,
+                               integer = NULL, data = NULL){
+  node.val <- edmtree.fetch(node.name)
+  if (set.in.list(gen.method, node.val$gen)) {
+    index <- which(sapply(node.val$gen, function(x) {
+      set.identical(x, gen.method)
+    }))
+    node.val$gen <- node.val$gen[-c(index)]
+    node.val$f.gen <- node.val$f.gen[-c(index)]
+    # if (length(node.val$gen) == 0){
+    #   node.val$gen <- list(NULL)
+    #   node.val$f.gen <- list(NULL)
+    # }
+    edmtree.replace(node.name, gen = node.val$gen,
+                    f.gen = node.val$f.gen,
+                    integer = NULL, data = NULL)
+  } else {
+    stop(paste0("method (", paste(gen.method, collapse=', '),
+                ") cannot be found in ",
+                node.name,"$gen"))
+  }
+}
+
+#-------------------------------+
+# fully/partially adding a node |
+#-------------------------------+
 
 #' @export
 edmtree.add <- function(node.name, tell = NULL, gen = list(NULL), 
@@ -2532,9 +2751,43 @@ edmtree.add <- function(node.name, tell = NULL, gen = list(NULL),
   else {
     node.val <- list(tell, gen, f.tell, f.gen)
     names(node.val) <- c('tell', 'gen', 'f.tell', 'f.gen')
-    assign(node.name, edmtree.check(node.name, node.val, integer), envir=STRUCTURE)
+    assign(node.name, edmtree.check(node.name, node.val, integer, data), envir=STRUCTURE)
   }
 }
+#' @export
+edmtree.add.tell <- function(node.name, tell, f.tell,
+                             integer = NULL, data = NULL){
+  node.val <- edmtree.fetch(node.name)
+  new.tell <- c(node.val$tell, tell)
+  if (!is.null(node.val$tell))
+    new.f.tell <- func.concat(node.name, node.val$f.tell, f.tell)
+  else
+    new.f.tell <- f.tell
+  edmtree.replace(node.name, tell = new.tell, f.tell = new.f.tell,
+                  integer = integer, data = data)
+}
+
+#' @export
+edmtree.add.gen <- function(node.name, gen.method, f.gen.method,
+                            integer = NULL, data = NULL){
+  node.val <- edmtree.fetch(node.name)
+  if (set.in.list(gen.method, node.val$gen))
+    stop(paste0(gen.method)," is already in ",node.name,"$gen")
+  if (identical(node.val$gen,list(NULL)))
+    new.gen <- list(gen.method)
+  else
+    new.gen <- append(node.val$gen, list(gen.method))
+  if (identical(node.val$f.gen,list(NULL)))
+    new.f.gen <- list(f.gen.method)
+  else
+    new.f.gen <- append(node.val$f.gen, f.gen.method)
+  edmtree.replace(node.name, gen = new.gen, f.gen = new.f.gen,
+                  integer = integer, data = data)
+}
+
+#----------------------------------+
+# fully/partially replacing a node |
+#----------------------------------+
 
 #' @export
 edmtree.replace <- function(node.name, tell = NULL, gen = NULL, 
@@ -2545,27 +2798,93 @@ edmtree.replace <- function(node.name, tell = NULL, gen = NULL,
   if (!is.null(gen)) node.val$gen <- gen
   if (!is.null(f.tell)) node.val$f.tell <- f.tell
   if (!is.null(f.gen)) node.val$f.gen <- f.gen
-  int <- node.name %in% integer
-  dat <- node.name %in% ALL.MODELS
+  int <- node.name %in% edmconst$INTEGER
+  dat <- node.name %in% edmconst$ALL.MODELS
   if (!is.null(integer)) int <- integer
   if (!is.null(data)) dat <- data
   assign(node.name, edmtree.check(node.name, node.val, int, dat), envir=STRUCTURE)
 }
 
 #' @export
+edmtree.replace.tell.whole <- function(node.name, tell = NULL, f.tell,
+                                       integer = NULL, data = NULL){
+  node.val <- edmtree.fetch(node.name)
+  if (!set.identical(node.val$tell, tell))
+    stop(paste0("tell and ",node.name,"$tell is not the same set"))
+  edmtree.replace(node.name, tell = tell, f.tell = f.tell,
+                  integer = integer, data = data)
+}
+
+#' @export
+edmtree.replace.tell <- function(node.name, tell, f.tell,
+                                      integer = NULL, data = NULL){
+  node.val <- edmtree.fetch(node.name)
+  if (set.identical(node.val$tell, tell)){
+    edmtree.replace.tell.whole(node.name, tell = tell, f.tell = f.tell,
+                         integer = integer, data = data)
+  } else { #inefficient
+    indexes = sapply(tell, function(x){
+     pos <- which(x == node.val$tell)
+     if (identical(pos, integer(0)))
+       stop(paste0(x," cannot be found in ",node.name,"$tell"))
+     return(pos)
+    })
+    new.f.tell <- func.replace(node.name, node.val$f.tell, f.tell, indexes)
+    edmtree.replace(node.name, f.tell = new.f.tell,
+                    integer = integer, data = data)
+  }
+}
+
+#' @export
+edmtree.replace.gen <- function(node.name, gen.method, f.gen.method,
+                                integer = NULL, data = NULL){
+  node.val <- edmtree.fetch(node.name)
+  if (set.in.list(gen.method, node.val$gen)) { 
+    index <- which(sapply(node.val$gen, function(x) {
+      set.identical(x, gen.method)
+    }))
+    node.val$gen[[index]] <- gen.method
+    node.val$f.gen[[index]] <- f.gen.method
+    edmtree.replace(node.name, gen = node.val$gen,
+                    f.gen = node.val$f.gen,
+                    integer = integer, data = data)
+  } else {
+    stop(paste0("method (", paste(gen.method, collapse=', '),
+                ") cannot be found in ", node.name,"$gen"))
+  }
+}
+
+#------------------------------+
+# whole structure manipulators |
+#------------------------------+
+
+#' @export
 edmtree.clear <- function(){
-  rm(list=names(STRUCTURE), envir=STRUCTURE)
+  rm(list = names(STRUCTURE), 
+     envir = STRUCTURE)
+  rm(list = names(edmconst),
+     envir = edmconst)
 }
 
 #' @export
 edmtree.dump <- function(){
-  return(STRUCTURE)
+  ret <- list(tree  = env.copy(STRUCTURE, new.env()),
+              const = env.copy(edmconst, new.env()))
+  return(ret)
 }
 
 #' @export
-edmtree.load <- function(tree = NULL){
-  if (is.null(tree)) new.tree <- STRUCTURE.ORIGINAL
+edmtree.load <- function(save = NULL){
+  if (is.null(save)) {
+    new.tree <- STRUCTURE.ORIGINAL
+    new.const <- edmconst.original
+  }
+  else {
+    new.tree <- save$tree
+    new.const <- save$const
+  }
   edmtree.clear()
-  for (i in names(new.tree))
-    assign(i, get(i, envir = new.tree), envir = STRUCTURE)
+  env.copy(new.tree, STRUCTURE)
+  env.copy(new.const, edmconst)
+  dummy <- TRUE
 }
