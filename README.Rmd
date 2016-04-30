@@ -7,7 +7,7 @@ output: pdf_document
 
 ## Reading pdf vignettes
 
-Please refer to the README.pdf for fully compiled codes. This vignette includes two parts, you can read them separately in `/vignettes`. 
+Please refer to [README.pdf](README.pdf) for fully compiled codes. This vignette includes two parts, you can read them separately in `/vignettes`. 
 
 ## Introduction
 
