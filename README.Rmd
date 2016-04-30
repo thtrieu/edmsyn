@@ -1,7 +1,8 @@
 ---
 title: "Educational Data Synthesizer"
 author: "Hoang-Trieu Trinh, Behzad Beheshti, Michel C. Desmarais"
-date: "`r Sys.Date()`"
+date: '`r Sys.Date()`'
+output: pdf_document
 ---
 
 ## Introduction

@@ -1397,7 +1397,7 @@ assemble.structure <- function(){
                        n.row.col, list(con.size.2.skspace))
 
   skill.space.size. <- list(c("concepts"), list(c("concepts")), skspsize.min.con,
-                            list(function(x){2^x[[1]]}))
+                            list(function(x){as.integer(2^x[[1]])}))
   skill.dist. <- list(c("skill.space.size"),list(c("skill.space.size")),
                       length.l, list(function(x){rep(1/x[[1]],x[[1]])}))
   concept.exp. <- list(c("concepts"),list(c("concepts")),length.l,list(rn))
@@ -1583,14 +1583,15 @@ down.stream <- function(pars){
       
       for (j in 1:length(child.names)){
         child.j.val <- pars[[child.names[j]]]
-        if (!is.null(child.j.val) &
+        if (!is.null(child.j.val) &&
             ((child.names[j] %in% edmconst$DEFINITE) |
              (class(child.val[[j]]) %in% BOUND.CLASSES))){
           if (!suppressWarnings(compat(child.j.val,child.val[[j]]))){
             if (class(child.val[[j]]) %in% BOUND.CLASSES)
               stop(paste0("'", child.names[j],"' violates bound suggested by '",var.name,"'"))
-            else
+            else {
               stop(paste0("'", child.names[j],"' receives different values at once"))
+            }
           }
         }
         else
@@ -1726,7 +1727,7 @@ up.stream <- function(target, pars, target.base = TRUE, progress = FALSE){
     }
     if (target %in% edmconst$ALL.MODELS)
       return(new.pars)
-    else 
+    else
       return(down.stream(new.pars))
   }
 }

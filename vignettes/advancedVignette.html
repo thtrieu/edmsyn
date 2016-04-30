@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
-<meta name="viewport" content="width=device-width, initial-scale=1">
+
 
 <meta name="author" content="Hoang-Trieu Trinh, Behzad Beheshti, Michel C. Desmarais" />
 
@@ -40,25 +40,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 
 
 
-
-</head>
-
-<body>
-
 <style type="text/css">
-.main-container {
-  max-width: 940px;
-  margin-left: auto;
-  margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
-}
-img {
-  max-width:100%;
-  height: auto;
-}
 h1 {
   font-size: 34px;
 }
@@ -79,6 +61,30 @@ h5 {
 }
 h6 {
   font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type="text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -109,7 +115,8 @@ $(document).ready(function () {
 <div class="fluid-row" id="header">
 
 
-<h1 class="title">Educational Data Synthesizer</h1>
+
+<h1 class="title toc-ignore">Educational Data Synthesizer</h1>
 <h4 class="author"><em>Hoang-Trieu Trinh, Behzad Beheshti, Michel C. Desmarais</em></h4>
 <h4 class="date"><em>2016-04-30</em></h4>
 
@@ -144,7 +151,7 @@ class(M.node)</code></pre>
 ## {
 ##     list(nrow(x), ncol(x), rowMeans(x))
 ## }
-## &lt;environment: 0x3c8c1d8&gt;</code></pre>
+## &lt;environment: 0x3a8bff0&gt;</code></pre>
 <p>The third component, <code>f.tell</code>, is the function to derive values for each parameter listed in <code>tell</code> from value of <code>M</code>. As can be seen, this function does exactly what we expected: taking the row dimension, column dimension and row means value of its input <code>M</code>, assemble these results into a list as its return value.</p>
 <p>The second component, <code>gen</code>, is a list of generating methods for <code>M</code>.</p>
 <pre class="r"><code>M.node$gen</code></pre>
@@ -163,7 +170,7 @@ class(M.node)</code></pre>
 ## {
 ##     round(x[[1]])
 ## }
-## &lt;environment: 0x3c8c1d8&gt;
+## &lt;environment: 0x3a8bff0&gt;
 ## 
 ## [[2]]
 ## function (x) 
@@ -171,7 +178,7 @@ class(M.node)</code></pre>
 ##     x[[2]][, sample(1:length(x[[3]]), size = x[[1]], prob = x[[3]], 
 ##         replace = TRUE)]
 ## }
-## &lt;environment: 0x3c8c1d8&gt;
+## &lt;environment: 0x3a8bff0&gt;
 ## 
 ## [[3]]
 ## function (x) 
@@ -183,7 +190,7 @@ class(M.node)</code></pre>
 ##         })
 ##     })
 ## }
-## &lt;environment: 0x3c8c1d8&gt;</code></pre>
+## &lt;environment: 0x3a8bff0&gt;</code></pre>
 <p>As can be seen, <code>f.gen</code> is a list of three functions correspond to three generating methods in <code>gen</code>, and the first one is somehow rounding its input for the return value. The details of these functions will be discussed in later part, at this point it is sufficient to just realise what is the representation of a parameter in <code>edmsyn</code> and which tasks it is trying to achieve.</p>
 <p>From this point on, the all <code>f.tell</code> functions will be referred to as type-1 connections. Similarly, the collections of functions in <code>f.gen</code> will be referred to as type-2 connections. These are the two types of connections along which all data flow. The main benefit <code>edmsyn</code> offers is a convenient interface that allow easy access and control to various data processes.</p>
 </div>
@@ -210,7 +217,7 @@ M.node$f.gen</code></pre>
 ## {
 ##     do.call(f.gen.copy[[l]], x)
 ## }
-## &lt;environment: 0x281a9f8&gt;
+## &lt;environment: 0x17670c8&gt;
 ## 
 ## [[2]]
 ## function (x) 
@@ -218,7 +225,7 @@ M.node$f.gen</code></pre>
 ##     x[[2]][, sample(1:length(x[[3]]), size = x[[1]], prob = x[[3]], 
 ##         replace = TRUE)]
 ## }
-## &lt;environment: 0x3c8c1d8&gt;
+## &lt;environment: 0x3a8bff0&gt;
 ## 
 ## [[3]]
 ## function (x) 
@@ -230,7 +237,7 @@ M.node$f.gen</code></pre>
 ##         })
 ##     })
 ## }
-## &lt;environment: 0x3c8c1d8&gt;</code></pre>
+## &lt;environment: 0x3a8bff0&gt;</code></pre>
 <p>Now that <code>f.gen[1]</code> is changed. But apparently it is not the original <code>new.gen.S.to.M</code> that has been designed by us, the reason is that <code>edmsyn</code> has wrapped this function inside one or more layers to make sure it fit in perfectly with the internal working environment. We can check if the replacement is carried out successfully by simply generating <code>M</code> from <code>S</code> many times, if the result is different each time, the probabilistic version has been installed successfully.</p>
 <pre class="r"><code>S &lt;- matrix(runif(15),3,5)
 p &lt;- pars(S = S)
@@ -349,7 +356,6 @@ M &lt;- get.par('M', p, progress = TRUE)</code></pre>
 ## Generate skill.space from c(&quot;concepts&quot;, &quot;skill.space.size&quot;)
 ## Generate skill.space.size from concepts
 ## Generate skill.dist from skill.space.size</code></pre>
-<pre><code>## Error in down.stream(new.pars): 'skill.space.size' receives different values at once</code></pre>
 <pre class="r"><code>edmtree.remove.gen('M',c('skill.dist','students','skill.space'))
 M &lt;- get.par('M', p, progress = TRUE)</code></pre>
 <pre><code>## Generate M from S
@@ -399,7 +405,7 @@ edmtree.fetch('M')</code></pre>
 ## {
 ##     list(nrow(x), ncol(x), rowMeans(x))
 ## }
-## &lt;environment: 0x3c8c1d8&gt;
+## &lt;environment: 0x3a8bff0&gt;
 ## 
 ## $f.gen
 ## list()</code></pre>
@@ -459,7 +465,7 @@ concept.exp.node &lt;- edmtree.remove(&quot;concept.exp&quot;)</code></pre>
             f.gen = concept.exp.node$f.gen)
 concept.exp &lt;- get.par('concept.exp', pars(concepts=3))$value
 print(concept.exp)</code></pre>
-<pre><code>## [1] 0.8711496 0.2329749 0.5060350</code></pre>
+<pre><code>## [1] 0.2227619 0.6042932 0.4290913</code></pre>
 </div>
 <div id="adding-type-2-connection" class="section level3">
 <h3>Adding type-2 connection</h3>
@@ -472,7 +478,6 @@ M &lt;- get.par('M', p, progress = TRUE)</code></pre>
 ## Generate skill.space from c(&quot;concepts&quot;, &quot;skill.space.size&quot;)
 ## Generate skill.space.size from concepts
 ## Generate skill.dist from skill.space.size</code></pre>
-<pre><code>## Error in down.stream(new.pars): 'skill.space.size' receives different values at once</code></pre>
 <pre class="r"><code># See what we have in M.node
 M.node$gen</code></pre>
 <pre><code>## [[1]]
@@ -624,7 +629,7 @@ p &lt;- pars(lower.foo = 3, foo = 3)</code></pre>
 p &lt;- pars(lower.foo = 3, upper.foo = 2)
 # But nevertheless, when p go into use, it immediately fails
 get.par('foo', p)</code></pre>
-<pre><code>## Error in down.stream(new.pars): 'upper.foo' violates bound suggested by 'foo'</code></pre>
+<pre><code>## Error in down.stream(new.pars): 'foo' violates bound suggested by 'lower.foo'</code></pre>
 <pre class="r"><code>p &lt;- pars(upper.foo = 5, concepts = 5)</code></pre>
 <pre><code>## Error in down.stream(new.pars): 'concepts' violates bound suggested by 'upper.foo'</code></pre>
 <pre class="r"><code># 2. Test foo$gen
@@ -633,7 +638,7 @@ get.par('foo', pars())</code></pre>
 <pre class="r"><code>p &lt;- pars(p, upper.foo = 15)
 get.par('foo', p)</code></pre>
 <pre><code>## $value
-## [1] 15
+## [1] 13
 ## 
 ## $context
 ## Activated information in the context:
@@ -644,7 +649,7 @@ get.par('foo', p, progress = TRUE)</code></pre>
 ## Generate lower.foo from default.vals
 ## Generate upper.foo from c(&quot;default.vals&quot;, &quot;concepts&quot;)</code></pre>
 <pre><code>## $value
-## [1] 5
+## [1] 2
 ## 
 ## $context
 ## Activated information in the context:
@@ -657,7 +662,7 @@ p &lt;- get.par('foo', p, progress = TRUE)</code></pre>
 ## Generate upper.foo from c(&quot;default.vals&quot;, &quot;concepts&quot;)</code></pre>
 <pre class="r"><code>print(p)</code></pre>
 <pre><code>## $value
-## [1] 2
+## [1] 4
 ## 
 ## $context
 ## Activated information in the context:
@@ -673,13 +678,13 @@ get.par('bar', pars())</code></pre>
 ## Generate foo from c(&quot;lower.foo&quot;, &quot;upper.foo&quot;)
 ## Generate upper.foo from c(&quot;default.vals&quot;, &quot;concepts&quot;)</code></pre>
 <pre><code>## $value
-##           [,1]      [,2]      [,3]      [,4]       [,5]
-## [1,] 0.6282887 0.7779178 0.6714696 0.3229385 0.76916700
-## [2,] 0.5192958 0.7603650 0.2174205 0.6788141 0.74903196
-## [3,] 0.7170311 0.8622969 0.4020691 0.3945912 0.65498293
-## [4,] 0.4508402 0.1674351 0.6865095 0.3377349 0.76673834
-## [5,] 0.4679614 0.5211551 0.9617552 0.7187510 0.03914347
-## [6,] 0.1311302 0.2383403 0.9979056 0.7740466 0.46798468
+##           [,1]        [,2]       [,3]      [,4]       [,5]
+## [1,] 0.6923484 0.115003064 0.42913564 0.5225845 0.06290246
+## [2,] 0.1015797 0.311084083 0.34146341 0.7048445 0.19388368
+## [3,] 0.5811640 0.009220061 0.15855200 0.4903354 0.51889945
+## [4,] 0.2907067 0.887810393 0.42673128 0.3357396 0.14064618
+## [5,] 0.1505283 0.637814235 0.97003579 0.7594429 0.66516775
+## [6,] 0.5402269 0.655229510 0.06585356 0.7083770 0.38395411
 ## 
 ## $context
 ## Activated information in the context:
@@ -691,10 +696,9 @@ get.par('bar', pars())</code></pre>
 ## Generate lower.foo from default.vals
 ## Generate upper.foo from c(&quot;default.vals&quot;, &quot;concepts&quot;)</code></pre>
 <pre><code>## $value
-##           [,1]      [,2]      [,3]
-## [1,] 0.8530865 0.3090032 0.6086614
-## [2,] 0.6550108 0.3790295 0.2563042
-## [3,] 0.4399682 0.9640085 0.9585594
+##           [,1]       [,2]       [,3]
+## [1,] 0.6236413 0.13680173 0.36176777
+## [2,] 0.5982411 0.09681887 0.09630746
 ## 
 ## $context
 ## Activated information in the context:
@@ -734,7 +738,7 @@ toys &lt;- gen('toy', pars(M = M, bar = matrix(0, 3, 5)))</code></pre>
 <div id="working-with-the-whole-structure" class="section level2">
 <h2>Working with the whole structure</h2>
 <p>Now that you have everything needed to fully manipulate the internal structure of <code>edmsyn</code>, it is time to move on working with the whole structure (as oppose to working with nodes and edges like before). The first thing to know is that, each time <code>library(edmsyn)</code> is executed, the original <code>edmsyn</code> graphical structure (without <code>foo</code>, <code>bar</code>, <code>toy</code>, etc) will be restored and everything we have built so far is lost. Thus, occasionally saving the modified structure is important.</p>
-<pre class="r"><code>toy.tree &lt;- edmtree.dump()</code></pre>
+<pre class="r"><code>toy.save &lt;- edmtree.dump()</code></pre>
 <p>Assume a different situation where no part of the current structure is needed, you will manually build a whole new structure from scratch. This case, the first thing to do is to clear out all nodes</p>
 <pre class="r"><code>edmtree.clear()
 edmtree.fetch('toy')</code></pre>
@@ -742,7 +746,7 @@ edmtree.fetch('toy')</code></pre>
 <pre class="r"><code>edmtree.fetch('M')</code></pre>
 <pre><code>## Error in edmtree.fetch(&quot;M&quot;): 'M' is not found in current tree</code></pre>
 <p>Lastly, you can always restore a saved structure</p>
-<pre class="r"><code>edmtree.load(toy.tree)
+<pre class="r"><code>edmtree.load(toy.save)
 gen('toy', pars(M = M))</code></pre>
 <pre><code>## Activated information in the context:
 ##  [1] &quot;M&quot;            &quot;default.vals&quot; &quot;concepts&quot;     &quot;concept.exp&quot; 
