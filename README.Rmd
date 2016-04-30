@@ -5,6 +5,10 @@ date: '`r Sys.Date()`'
 output: pdf_document
 ---
 
+## Reading pdf vignettes
+
+Please refer to the README.pdf for fully compiled codes. This vignette includes two parts, you can read them separately in `/vignettes`. 
+
 ## Introduction
 
 In general, generating data from a given set of parameters under a specified model's assumptions is straightforward, as long as the following two conditions are satisfied:
