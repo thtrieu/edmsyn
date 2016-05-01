@@ -5,7 +5,11 @@ date: '`r Sys.Date()`'
 output: html_document
 ---
 
-## Reading pdf vignettes
+## Intro
+
+For an informal introduction, read [Project debut - R - Educational Data Synthesizer](http://thtrieu.github.io/2015/09/21/project-debut-r-package-educational-data-synthesizer)
+
+## Full vignettes
 
 Please refer to [README.pdf](README.pdf) for fully compiled codes. This vignette includes two parts, you can read them separately in `/vignettes`. 
 
