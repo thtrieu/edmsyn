@@ -61,7 +61,7 @@ p$avg.success
 
 At some point in the future, if data need to be generated from `p` by a model that requires `avg.success`, in case this parameter had not been inputted by the user, the value of `0.5` would be used.
 
-We can change these default values by using the `init` function
+We can change these default values by using the `default` function
 ```{r change_init}
 p_ <- pars(default.vals = default(avg.success = 0.6))
 p_$default.vals$avg.success

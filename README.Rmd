@@ -1,3 +1,6 @@
+---
+output: pdf_document
+---
 # Educational Data Synthesizer
 
 ## Intro
@@ -64,7 +67,7 @@ p$avg.success
 
 At some point in the future, if data need to be generated from `p` by a model that requires `avg.success`, in case this parameter had not been inputted by the user, the value of `0.5` would be used.
 
-We can change these default values by using the `init` function
+We can change these default values by using the `default` function
 ```{r change_init}
 p_ <- pars(default.vals = default(avg.success = 0.6))
 p_$default.vals$avg.success
@@ -284,7 +287,7 @@ dina.syn <- syn("dina", data = dina.data, keep.pars = c("Q", "M"), students = 12
 
 The choice of built-in parameters, models, and learning algorithms is made independently at the time of development for `edmsyn` and thus, it may or may not satisfy users' need. That is why `edmsyn` also comes with a set of tools that allow its users to re-define all these components to the extent of building a whole new set of parameters and models, while still retaining all the original benefits that it offers. All possible changes on `edmsyn` will be made on a single graphical structure that `edmsyn` creates at the loading time, with vertices representing parameters and edges encoding the respective relationships. 
 
-Functions that allows these modifications have names starting with `edmtree.` There are just a few of such functions and they provide everything you need to work with `edmsyn` at its internal level. This tutorial will also walk you through the building blocks of them so that an in-depth understanding of `edmsyn` mechanism is provided. By the end of this section, you are expected to handle `edmtree.` functions properly and efficiently. 
+Functions that allow these modifications have names starting with `edmtree.` There are just a few of such functions and they provide everything you need to work with `edmsyn` at its internal level. This tutorial will also walk you through the building blocks of them so that an in-depth understanding of `edmsyn` mechanism is provided. By the end of this section, you are expected to handle `edmtree.` functions properly and efficiently. 
 
 If you do not feel going that deep, feel free to skip to __A toy model__ at your own risk. Reading __A toy model__ before going through the whole tutorial is also a good suggestion.
 
@@ -325,7 +328,7 @@ M.node$f.gen
 
 As can be seen, `f.gen` is a list of three functions correspond to three generating methods in `gen`, and the first one is somehow rounding its input for the return value. The details of these functions will be discussed in later part, at this point it is sufficient to just realise what is the representation of a parameter in `edmsyn` and which tasks it is trying to achieve.
 
-From this point on, the all `f.tell` functions will be referred to as type-1 connections. Similarly, the collections of functions in `f.gen` will be referred to as type-2 connections. These are the two types of connections along which all data flow. The main benefit `edmsyn` offers is a convenient interface that allow easy access and control to various data processes.
+From this point on, all `f.tell` functions will be referred to as type-1 connections. Similarly, the collections of functions in `f.gen` will be referred to as type-2 connections. These are the two types of connections along which all data flow. The main benefit `edmsyn` offers is a convenient interface that allow easy access and control to various data processes.
 
 ## Replacing using `edmtree.replace`
 ### Replacing type-2 connections
