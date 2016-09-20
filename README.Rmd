@@ -3,6 +3,13 @@ output: pdf_document
 ---
 # Educational Data Synthesizer
 
+## Installation
+
+```r
+library(devtools)
+install_github('thtrieu/edmsyn', 'thtrieu')
+```
+
 ## Intro
 
 For an informal introduction, read [Project debut - R - Educational Data Synthesizer](http://thtrieu.github.io/2015/09/21/project-debut-r-package-educational-data-synthesizer)
